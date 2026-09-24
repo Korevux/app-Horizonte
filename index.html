@@ -1,0 +1,2576 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Horizonte · Bienestar en cada pausa: pequeños descansos para una jornada más activa." />
+  <title>Horizonte · Bienestar en cada pausa</title>
+  <link rel="icon" id="appFavicon">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#171715">
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap');
+
+    :root {
+      --bg: #eee9e1;
+      --card: #ffffff;
+      --dark: #171715;
+      --dark-soft: #24231f;
+      --text: #20201d;
+      --muted: #77736b;
+      --border: #e7e2da;
+      --accent: #b8c9a4;
+      --accent-dark: #6d8158;
+      --success: #78965f;
+      --danger: #a96c63;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Jakarta Sans", Arial, sans-serif;
+      min-height: 100vh;
+    }
+
+    button,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app {
+      width: min(100% - 28px, 430px);
+      margin: 0 auto;
+      padding: 34px 0 40px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .eyebrow {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent-dark);
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: clamp(30px, 8vw, 40px);
+      line-height: 1.05;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      margin: 10px auto 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.55;
+      max-width: 330px;
+    }
+
+    .timer-card {
+      background: var(--dark);
+      color: #fff;
+      border-radius: 28px;
+      padding: 30px 22px 24px;
+      text-align: center;
+      box-shadow: 0 18px 45px rgba(0,0,0,.10);
+      transition: background .25s ease;
+    }
+
+    .timer-card.break-mode {
+      background: var(--dark-soft);
+    }
+
+    .timer-label {
+      color: #bcbab4;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+
+    .timer {
+      font-size: clamp(64px, 19vw, 88px);
+      line-height: 1;
+      font-weight: 800;
+      letter-spacing: -0.06em;
+      margin: 18px 0 12px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .timer-description {
+      color: #bcbab4;
+      font-size: 13px;
+      min-height: 20px;
+      line-height: 1.5;
+    }
+
+    .main-actions {
+      display: flex;
+      gap: 9px;
+      margin-top: 24px;
+    }
+
+    .btn {
+      min-height: 46px;
+      border: 0;
+      border-radius: 14px;
+      padding: 0 16px;
+      font-weight: 700;
+      transition: transform .15s ease, opacity .15s ease;
+    }
+
+    .btn:active {
+      transform: scale(.98);
+    }
+
+    .btn:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      flex: 1;
+      background: var(--accent);
+      color: #20241d;
+    }
+
+    .btn-secondary {
+      background: #302f2b;
+      color: #fff;
+    }
+
+    .btn-light {
+      background: #f2f0eb;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-danger {
+      background: #f3e8e6;
+      color: var(--danger);
+    }
+
+    .btn:focus-visible,
+    select:focus-visible {
+      outline: 3px solid rgba(184, 201, 164, .75);
+      outline-offset: 2px;
+    }
+
+    .cycle-card {
+      margin-top: 14px;
+      padding: 18px 14px 24px;
+      background: linear-gradient(165deg, rgba(255,255,255,.75), rgba(255,255,255,.4));
+      border: 1px solid rgba(255,255,255,.8);
+      border-radius: 22px;
+    }
+
+    .cycle-title {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .cycle-track {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .cycle-step {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      border-radius: 18px;
+      padding: 14px 4px 15px;
+      background: #ece7dc;
+      color: #77736b;
+      text-align: center;
+      transition: background .25s ease, color .25s ease, transform .2s ease;
+    }
+
+    .cycle-step-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 16px;
+      box-shadow: 0 4px 10px rgba(20, 24, 14, .1);
+      transition: background .25s ease, box-shadow .25s ease;
+    }
+
+    .cycle-step-label {
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .cycle-step-time {
+      font-size: 10px;
+      font-weight: 700;
+      color: #9a968c;
+    }
+
+    .cycle-step.active {
+      background: linear-gradient(160deg, #cddab4, var(--accent));
+      color: #26301f;
+      transform: translateY(-2px);
+    }
+
+    .cycle-step.active .cycle-step-icon {
+      background: var(--accent-dark);
+      box-shadow: 0 6px 14px rgba(109, 129, 88, .35);
+    }
+
+    .cycle-step.active .cycle-step-time {
+      color: #3b4a30;
+    }
+
+    .cycle-step.active::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: -8px;
+      transform: translateX(-50%);
+      border-left: 7px solid transparent;
+      border-right: 7px solid transparent;
+      border-top: 8px solid var(--accent);
+    }
+
+    .break-panel {
+      display: none;
+      margin-top: 16px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 23px 20px;
+      text-align: center;
+    }
+
+    .break-panel.visible {
+      display: block;
+      animation: appear .25s ease;
+    }
+
+    @keyframes appear {
+      from {
+        opacity: 0;
+        transform: translateY(5px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .break-icon {
+      width: 68px;
+      height: 68px;
+      margin: 0 auto 16px;
+      border-radius: 50%;
+      background: linear-gradient(160deg, #dbe6c8, var(--accent));
+      display: grid;
+      place-items: center;
+      font-size: 30px;
+      box-shadow:
+        0 0 0 8px rgba(184, 201, 164, .28),
+        0 0 0 16px rgba(184, 201, 164, .14),
+        0 10px 24px rgba(109, 129, 88, .22);
+    }
+
+    .break-type {
+      color: var(--accent-dark);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .break-title {
+      margin: 7px 0 6px;
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: 27px;
+    }
+
+    .break-description {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+      margin: 0 auto;
+      max-width: 330px;
+    }
+
+    .break-exercise {
+      margin: 17px 0;
+      padding: 13px;
+      border-radius: 14px;
+      background: #f7f5f1;
+      color: #48453f;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .break-countdown {
+      font-size: 46px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      margin: 13px 0;
+    }
+
+    .visual-note {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 8px;
+    }
+
+    .break-progress {
+      color: var(--accent-dark);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .break-actions {
+      display: flex;
+      gap: 9px;
+      justify-content: center;
+    }
+
+    .break-actions .btn {
+      flex: 1;
+    }
+
+    .next-break-hint {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 6px;
+    }
+
+    .exercise-select-wrap {
+      margin: 14px 0;
+      text-align: left;
+    }
+
+    .exercise-select-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .visual-mode .exercise-chip-row,
+    .visual-mode .exercise-select-label {
+      display: none;
+    }
+
+    /* --- Muñeco ilustrativo (SVG) --- */
+    .exercise-illustration {
+      background: radial-gradient(circle at 50% 32%, #fbfaf7, #f0ede4);
+      border-radius: 16px;
+      padding: 6px 0 2px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .sf-svg {
+      width: 92px;
+      height: 108px;
+      overflow: visible;
+      filter: drop-shadow(0 3px 3px rgba(20, 24, 14, .16));
+    }
+
+    .sf-svg line {
+      stroke: var(--accent-dark);
+      stroke-width: 5;
+      stroke-linecap: round;
+    }
+
+    .sf-svg .sf-torso-line {
+      stroke-width: 7;
+    }
+
+    .sf-svg .sf-joint {
+      fill: var(--accent-dark);
+    }
+
+    .sf-svg .sf-head {
+      fill: var(--accent-dark);
+    }
+
+    .sf-svg .sf-head-highlight {
+      fill: #fff;
+      opacity: .38;
+    }
+
+    .sf-svg .sf-ground {
+      fill: var(--border);
+      opacity: .65;
+    }
+
+    .sf-svg .sf-eye-outline {
+      stroke: var(--accent-dark);
+      stroke-width: 4;
+      fill: none;
+    }
+
+    .sf-svg .sf-eye-pupil {
+      transform-origin: 40px 30px;
+    }
+
+    .sf-svg .sf-eye-iris {
+      fill: var(--accent-dark);
+      opacity: .85;
+    }
+
+    .sf-svg .sf-eye-center {
+      fill: var(--dark);
+    }
+
+    .sf-svg .sf-eye-glint {
+      fill: #fff;
+      opacity: .8;
+    }
+
+    .sf-svg .sf-focus-dot {
+      fill: var(--accent-dark);
+      opacity: .55;
+    }
+
+    @keyframes sfNeckTilt { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(9deg); } }
+    @keyframes sfShoulderRoll { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-6deg); } }
+    .pose-neck .sf-head { animation: sfNeckTilt 2.2s ease-in-out infinite; transform-origin: 40px 27px; }
+    .pose-neck .sf-armL { animation: sfShoulderRoll 2.2s ease-in-out infinite; transform-origin: 40px 34px; }
+    .pose-neck .sf-armR { animation: sfShoulderRoll 2.2s ease-in-out infinite reverse; transform-origin: 40px 34px; }
+
+    @keyframes sfWristTurn { 0%, 100% { transform: rotate(-32deg); } 50% { transform: rotate(32deg); } }
+    .pose-wrists .sf-handL { animation: sfWristTurn 1.4s ease-in-out infinite; transform-origin: 22px 52px; }
+    .pose-wrists .sf-handR { animation: sfWristTurn 1.4s ease-in-out infinite reverse; transform-origin: 58px 52px; }
+
+    @keyframes sfTorsoTwist { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(8deg); } }
+    .pose-torso .sf-torso,
+    .pose-torso .sf-armL,
+    .pose-torso .sf-armR {
+      animation: sfTorsoTwist 2.4s ease-in-out infinite;
+      transform-origin: 40px 34px;
+    }
+
+    @keyframes sfLegExtend { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-24deg); } }
+    .pose-legs-seated .sf-legR { animation: sfLegExtend 2.2s ease-in-out infinite; transform-origin: 34px 55px; }
+
+    @keyframes sfWalkA { 0%, 100% { transform: rotate(22deg); } 50% { transform: rotate(-22deg); } }
+    @keyframes sfWalkB { 0%, 100% { transform: rotate(-22deg); } 50% { transform: rotate(22deg); } }
+    .pose-walk .sf-legL { animation: sfWalkA 0.9s ease-in-out infinite; transform-origin: 40px 62px; }
+    .pose-walk .sf-legR { animation: sfWalkB 0.9s ease-in-out infinite; transform-origin: 40px 62px; }
+    .pose-walk .sf-armR { animation: sfWalkA 0.9s ease-in-out infinite; transform-origin: 40px 34px; }
+    .pose-walk .sf-armL { animation: sfWalkB 0.9s ease-in-out infinite; transform-origin: 40px 34px; }
+
+    @keyframes sfSquat { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(.8); } }
+    @keyframes sfSquatHeadFix { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(1.25); } }
+    .pose-squat .sf-body-group { animation: sfSquat 1.7s ease-in-out infinite; transform-origin: 40px 96px; }
+    .pose-squat .sf-head { animation: sfSquatHeadFix 1.7s ease-in-out infinite; transform-origin: 40px 18px; }
+
+    @keyframes sfHeelRaise { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+    .pose-heels .sf-body-group { animation: sfHeelRaise 1.3s ease-in-out infinite; }
+
+    @keyframes sfStairL { 0%, 45%, 100% { transform: translateY(0) rotate(0deg); } 22% { transform: translateY(-9px) rotate(-22deg); } }
+    @keyframes sfStairR { 0%, 55%, 100% { transform: translateY(0) rotate(0deg); } 78% { transform: translateY(-9px) rotate(22deg); } }
+    .pose-stairs .sf-legL { animation: sfStairL 1.6s ease-in-out infinite; transform-origin: 40px 62px; }
+    .pose-stairs .sf-legR { animation: sfStairR 1.6s ease-in-out infinite; transform-origin: 40px 62px; }
+
+    @keyframes sfBlink { 0%, 88%, 100% { transform: scaleY(1); } 94% { transform: scaleY(.1); } }
+    @keyframes sfFocusShift { 0%, 100% { transform: translateX(0); opacity: .55; } 50% { transform: translateX(-22px); opacity: 1; } }
+    .pose-eye .sf-eye-pupil { animation: sfBlink 3.2s ease-in-out infinite; }
+    .pose-eye .sf-focus-dot { animation: sfFocusShift 3.2s ease-in-out infinite; }
+
+    /* --- Chips de selección de ejercicio --- */
+    .chip-scroller {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .chip-scroller .exercise-chip-row {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .chip-arrow {
+      display: none;
+      flex: 0 0 auto;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1;
+      padding: 0;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .chip-arrow:disabled {
+      opacity: .3;
+      cursor: default;
+    }
+
+    /* Solo en pantallas donde hay mouse/trackpad; en táctil se sigue deslizando con el dedo. */
+    @media (hover: hover) and (pointer: fine) {
+      .chip-arrow {
+        display: inline-flex;
+      }
+    }
+
+    .exercise-chip-row {
+      display: flex;
+      gap: 7px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      scrollbar-width: none;
+    }
+
+    .exercise-chip-row::-webkit-scrollbar {
+      display: none;
+    }
+
+    .exercise-chip {
+      flex: 0 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      background: #f2f0eb;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      padding: 6px 8px 7px;
+      min-width: 68px;
+    }
+
+    .exercise-chip .sf-svg {
+      width: 40px;
+      height: 46px;
+      pointer-events: none;
+    }
+
+    .exercise-chip-label {
+      font-size: 10px;
+      font-weight: 700;
+      line-height: 1.25;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .exercise-chip.selected {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .exercise-chip.selected .exercise-chip-label {
+      color: #26301f;
+    }
+
+    /* --- Guía rápida interactiva --- */
+    .guide-item {
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      overflow: hidden;
+    }
+
+    .guide-toggle {
+      width: 100%;
+      background: transparent;
+      border: 0;
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 9px;
+      text-align: left;
+    }
+
+    .guide-chevron {
+      color: var(--muted);
+      font-size: 15px;
+      font-weight: 700;
+      flex: 0 0 auto;
+      transition: transform .2s ease;
+    }
+
+    .guide-item[data-open="true"] .guide-chevron {
+      transform: rotate(45deg);
+    }
+
+    .guide-item .guide-text {
+      padding: 0 14px 14px;
+    }
+
+    .guide-panel {
+      padding: 0 14px 16px;
+      border-top: 1px solid var(--border);
+      margin-top: 2px;
+      padding-top: 14px;
+    }
+
+    .guide-panel .exercise-illustration {
+      margin-bottom: 9px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 9px;
+      margin-top: 16px;
+    }
+
+    .stat {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 17px;
+      padding: 15px 8px;
+      text-align: center;
+    }
+
+    .stat-value {
+      display: block;
+      font-size: 24px;
+      font-weight: 800;
+    }
+
+    .stat-label {
+      display: block;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 700;
+      margin-top: 3px;
+      line-height: 1.25;
+    }
+
+    .settings-card,
+    .guide-card,
+    .safety-card {
+      margin-top: 16px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 21px;
+      padding: 19px;
+    }
+
+    .section-title {
+      margin: 0 0 13px;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .sound-row {
+      display: flex;
+      gap: 9px;
+      align-items: center;
+    }
+
+    select {
+      min-height: 45px;
+      flex: 1;
+      border: 1px solid var(--border);
+      background: #faf9f6;
+      border-radius: 12px;
+      padding: 0 12px;
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    .sound-test {
+      min-height: 45px;
+      min-width: 75px;
+      border: 1px solid var(--border);
+      background: #f2f0eb;
+      color: var(--text);
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .time-settings {
+      display: grid;
+      gap: 12px;
+    }
+
+    .time-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .time-row-label {
+      font-size: 13px;
+      font-weight: 700;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .time-stepper {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .time-btn {
+      width: 34px;
+      height: 34px;
+      flex: 0 0 auto;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #f2f0eb;
+      color: var(--text);
+      font-size: 18px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+
+    .time-btn:active {
+      background: var(--accent);
+    }
+
+    .time-input {
+      width: 54px;
+      min-height: 34px;
+      text-align: center;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #faf9f6;
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 800;
+      -moz-appearance: textfield;
+    }
+
+    .time-input::-webkit-outer-spin-button,
+    .time-input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .time-unit {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      width: 26px;
+      text-align: right;
+    }
+
+    .time-row-static {
+      padding: 9px 0;
+      border-top: 1px dashed var(--border);
+    }
+
+    .time-row-static:first-of-type {
+      border-top: none;
+    }
+
+    .time-static-value {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--muted);
+      background: #f2f0eb;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 7px 12px;
+      white-space: nowrap;
+    }
+
+    .time-reset {
+      width: 100%;
+      margin-top: 15px;
+    }
+
+    .time-hint {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.5;
+      margin: -2px 0 13px;
+    }
+
+    .guide-grid {
+      display: grid;
+      gap: 9px;
+    }
+
+    .guide-item {
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      padding: 14px;
+    }
+
+    .guide-head {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 5px;
+    }
+
+    .guide-icon {
+      font-size: 19px;
+    }
+
+    .guide-name {
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .guide-text {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    .safety-card {
+      background: #f6f2ea;
+    }
+
+    .safety-title {
+      font-size: 12px;
+      font-weight: 800;
+      margin-bottom: 7px;
+    }
+
+    .safety-text,
+    footer {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.6;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px 8px 0;
+    }
+
+    .legal-disclaimer {
+      margin-top: 18px;
+      padding: 18px 16px 4px;
+      border-top: 1px solid var(--border);
+    }
+
+    .legal-title {
+      margin: 0 0 8px;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .legal-text {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.65;
+      margin: 0 0 9px;
+    }
+
+    .legal-text:last-child {
+      margin-bottom: 0;
+    }
+
+    .alarm-indicator {
+      display: none;
+      margin-top: 10px;
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .alarm-indicator.show {
+      display: block;
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      50% { opacity: .35; }
+    }
+
+    @media (max-width: 350px) {
+      .app {
+        width: min(100% - 20px, 430px);
+      }
+
+      .timer-card {
+        padding-left: 15px;
+        padding-right: 15px;
+      }
+
+      .main-actions {
+        flex-wrap: wrap;
+      }
+
+      .btn-primary {
+        flex-basis: 100%;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<main class="app" id="bienestarApp">
+
+  <header>
+    <div class="eyebrow">Bienestar en cada pausa</div>
+    <h1>Horizonte</h1>
+    <p class="subtitle">
+      Pequeños descansos para una jornada más activa.
+    </p>
+  </header>
+
+  <section class="timer-card" id="timerCard">
+
+    <div class="timer-label" id="timerLabel">Trabajando</div>
+
+    <div class="timer" id="timer" aria-live="polite">20:00</div>
+
+    <div class="timer-description" id="timerDescription">
+      Tu próxima pausa llegará automáticamente.
+    </div>
+
+    <div class="next-break-hint" id="nextBreakHint">
+      Próxima pausa: Visual
+    </div>
+
+    <div class="alarm-indicator" id="alarmIndicator">
+      Pausa en curso · haz tu ejercicio y toca «Continuar»
+    </div>
+
+    <div class="main-actions">
+      <button class="btn btn-primary" id="startBtn" type="button">
+        ▶ Iniciar
+      </button>
+
+      <button class="btn btn-secondary" id="pauseBtn" type="button" disabled>
+        Ⅱ Pausar
+      </button>
+
+      <button class="btn btn-secondary" id="resetBtn" type="button">
+        ↺
+      </button>
+    </div>
+
+  </section>
+
+  <section class="cycle-card">
+    <div class="cycle-title">Ciclo de pausas</div>
+
+    <div class="cycle-track">
+      <div class="cycle-step active" id="cycleVisual">
+        <span class="cycle-step-icon">👁️</span>
+        <span class="cycle-step-label">Visual</span>
+        <span class="cycle-step-time">20s</span>
+      </div>
+
+      <div class="cycle-step" id="cycleMobility">
+        <span class="cycle-step-icon">🧘</span>
+        <span class="cycle-step-label">Movilidad</span>
+        <span class="cycle-step-time">40s</span>
+      </div>
+
+      <div class="cycle-step" id="cycleActive">
+        <span class="cycle-step-icon">🚶</span>
+        <span class="cycle-step-label">Activa</span>
+        <span class="cycle-step-time">3 min</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="break-panel" id="breakPanel">
+
+    <div class="break-progress" id="breakProgress" hidden>
+      Pausa 1 de 2 de esta alarma
+    </div>
+
+    <div class="break-icon" id="breakIcon">👁️</div>
+
+    <div class="break-type" id="breakType">
+      Descanso visual
+    </div>
+
+    <h2 class="break-title" id="breakTitle">
+      Descansa la mirada
+    </h2>
+
+    <p class="break-description" id="breakDescription">
+      Mira un punto lejano y relaja la mirada.
+    </p>
+
+    <div class="exercise-select-wrap" id="exerciseSelectWrap">
+      <div class="exercise-illustration" id="exerciseIllustration"></div>
+      <span class="exercise-select-label">Elige tu ejercicio</span>
+      <div class="chip-scroller">
+        <button class="chip-arrow chip-arrow-left" type="button" aria-label="Ver opciones anteriores">‹</button>
+        <div class="exercise-chip-row" id="exerciseChipRow" role="group" aria-label="Elegir ejercicio de la pausa"></div>
+        <button class="chip-arrow chip-arrow-right" type="button" aria-label="Ver más opciones">›</button>
+      </div>
+    </div>
+
+    <div class="break-exercise" id="breakExercise">
+      Enfoca un objeto a 6 metros (20 pies) o más de distancia y parpadea por completo varias veces.
+    </div>
+
+    <div class="break-countdown" id="breakCountdown">
+      00:20
+    </div>
+
+    <div class="visual-note" id="visualNote">
+      Tiempo sugerido, no obligatorio. Avanza cuando estés listo.
+    </div>
+
+    <div class="break-actions">
+      <button class="btn btn-primary" id="startBreakBtn" type="button">
+        Continuar
+      </button>
+
+      <button class="btn btn-light" id="skipBreakBtn" type="button">
+        Omitir pausa
+      </button>
+    </div>
+
+  </section>
+
+  <section class="stats">
+    <div class="stat">
+      <span class="stat-value" id="statBreaks">0</span>
+      <span class="stat-label">Pausas completadas</span>
+    </div>
+
+    <div class="stat">
+      <span class="stat-value" id="statActive">0</span>
+      <span class="stat-label">Pausas activas</span>
+    </div>
+
+    <div class="stat">
+      <span class="stat-value" id="statMinutes">0</span>
+      <span class="stat-label">Minutos activos</span>
+    </div>
+  </section>
+
+  <section class="settings-card">
+    <h2 class="section-title">Sonido de aviso</h2>
+
+    <div class="sound-row">
+      <select id="soundSelect" aria-label="Seleccionar sonido">
+        <option value="bell">Campana suave</option>
+        <option value="chime">Chime</option>
+        <option value="digital">Digital</option>
+        <option value="soft">Suave</option>
+      </select>
+
+      <button class="sound-test" id="testSoundBtn" type="button">
+        ▶ Probar
+      </button>
+    </div>
+  </section>
+
+  <section class="settings-card">
+    <h2 class="section-title">Notificaciones del sistema</h2>
+
+    <div class="sound-row">
+      <label style="display:flex; align-items:center; gap:10px; flex:1; font-size:13px; font-weight:700; cursor:pointer;">
+        <input type="checkbox" id="notifyToggle" style="width:18px; height:18px; flex:0 0 auto;">
+        Avisarme aunque esté en otra pestaña
+      </label>
+    </div>
+
+    <p class="time-hint" id="notifyStatus" style="margin-top:10px; margin-bottom:0;"></p>
+    <p class="time-hint" style="margin-top:6px; margin-bottom:0;">El conteo se pone al día solo al volver a abrir la app, aunque el celular la haya cerrado de fondo. Pero el sonido de la alarma solo se escucha si tienes la app abierta en pantalla en ese momento — estando en otra app, la notificación del sistema (si la activaste) es el único aviso que puede llegarte.</p>
+  </section>
+
+  <section class="settings-card">
+    <h2 class="section-title">Duración personalizada</h2>
+    <p class="time-hint">
+      Ajusta el intervalo entre alarmas a tu gusto, o escribe el número
+      directamente. Empieza en 20 minutos cada vez que abres la app.
+    </p>
+
+    <div class="time-settings" id="timeSettings">
+      <div class="time-row">
+        <span class="time-row-label">Trabajo</span>
+        <div class="time-stepper">
+          <button class="time-btn" type="button" data-field="work" data-dir="-1" aria-label="Reducir minutos de trabajo">−</button>
+          <input class="time-input" type="number" inputmode="numeric" id="timeWork" aria-label="Minutos de trabajo">
+          <button class="time-btn" type="button" data-field="work" data-dir="1" aria-label="Aumentar minutos de trabajo">+</button>
+        </div>
+        <span class="time-unit">min</span>
+      </div>
+
+      <div class="time-row time-row-static">
+        <span class="time-row-label">👁️ Visual (cada alarma)</span>
+        <span class="time-static-value" id="timeVisualStatic">20 s sugeridos</span>
+      </div>
+
+      <div class="time-row time-row-static">
+        <span class="time-row-label">🧘 Movilidad (cada 2ª alarma)</span>
+        <span class="time-static-value" id="timeMobilityStatic">40 s sugeridos</span>
+      </div>
+
+      <div class="time-row time-row-static">
+        <span class="time-row-label">🚶 Activa (cada 3ª alarma)</span>
+        <span class="time-static-value" id="timeActiveStatic">3 min sugeridos</span>
+      </div>
+    </div>
+
+    <p class="time-hint" style="margin-top:12px;">
+      Los tiempos de ejercicio son solo una referencia: no cuentan
+      regresivamente ni afectan el conteo de la alarma. Tú avanzas
+      manualmente con «Continuar» cuando termines.
+    </p>
+
+    <button class="btn btn-light time-reset" id="timeResetBtn" type="button">
+      Restablecer valores
+    </button>
+  </section>
+
+  <section class="guide-card">
+    <h2 class="section-title">Guía rápida</h2>
+
+    <div class="guide-grid" id="guideGrid">
+
+      <article class="guide-item" data-type="visual">
+        <button class="guide-toggle" type="button" aria-expanded="false" aria-controls="guidePanel-visual">
+          <span class="guide-head">
+            <span class="guide-icon">👁️</span>
+            <span class="guide-name">Descanso visual · 20 s</span>
+          </span>
+          <span class="guide-chevron">＋</span>
+        </button>
+        <p class="guide-text">
+          Mira a distancia, relaja la mirada y parpadea con naturalidad.
+        </p>
+        <div class="guide-panel" id="guidePanel-visual" hidden></div>
+      </article>
+
+      <article class="guide-item" data-type="mobility">
+        <button class="guide-toggle" type="button" aria-expanded="false" aria-controls="guidePanel-mobility">
+          <span class="guide-head">
+            <span class="guide-icon">🧘</span>
+            <span class="guide-name">Movilidad · 40 s</span>
+          </span>
+          <span class="guide-chevron">＋</span>
+        </button>
+        <p class="guide-text">
+          Cambia de postura y realiza movimientos suaves de cuello,
+          hombros y brazos.
+        </p>
+        <div class="guide-panel" id="guidePanel-mobility" hidden></div>
+      </article>
+
+      <article class="guide-item" data-type="active">
+        <button class="guide-toggle" type="button" aria-expanded="false" aria-controls="guidePanel-active">
+          <span class="guide-head">
+            <span class="guide-icon">🚶</span>
+            <span class="guide-name">Pausa activa · 3 min</span>
+          </span>
+          <span class="guide-chevron">＋</span>
+        </button>
+        <p class="guide-text">
+          Ponte de pie, camina y reactiva la circulación con movimiento suave.
+        </p>
+        <div class="guide-panel" id="guidePanel-active" hidden></div>
+      </article>
+
+      <article class="guide-item guide-item-static" data-type="hydration">
+        <div class="guide-toggle">
+          <span class="guide-head">
+            <span class="guide-icon">💧</span>
+            <span class="guide-name">Hidratación</span>
+          </span>
+        </div>
+        <p class="guide-text">
+          Ten agua disponible durante la jornada y bebe según tu sed.
+        </p>
+      </article>
+
+    </div>
+  </section>
+
+  <section class="safety-card">
+    <div class="safety-title">Uso responsable</div>
+
+    <div class="safety-text">
+      Realiza los movimientos de forma suave y cómoda. Si algún movimiento
+      causa dolor o molestias, detente. Esta herramienta no sustituye el
+      consejo de un profesional sanitario.
+    </div>
+  </section>
+
+  <footer>
+    Diseñado para ayudarte a interrumpir períodos prolongados de sedentarismo,
+    descansar la vista y moverte durante tu jornada.
+  </footer>
+
+  <section class="legal-disclaimer" aria-label="Aviso legal y descargo de responsabilidad">
+    <div class="legal-title">Aviso legal y descargo de responsabilidad</div>
+
+    <p class="legal-text">
+      Horizonte es una herramienta informativa de bienestar que promueve pausas
+      visuales, de movilidad y activas durante jornadas frente a pantallas. No
+      constituye asesoramiento médico, diagnóstico ni tratamiento de ninguna
+      condición de salud, y no sustituye la consulta con un profesional
+      sanitario cualificado (oftalmólogo, fisioterapeuta, médico ocupacional
+      u otro especialista).
+    </p>
+
+    <p class="legal-text">
+      Realiza los ejercicios sugeridos de forma suave y dentro de tu rango de
+      comodidad. Si sientes dolor, mareo, molestia visual persistente o
+      cualquier síntoma inusual, detén la actividad de inmediato y consulta a
+      un profesional de la salud.
+    </p>
+
+    <p class="legal-text">
+      El uso de esta aplicación es voluntario y bajo tu propia responsabilidad.
+      No se garantiza que su uso prevenga, alivie o cure ninguna condición
+      médica, y no se asume responsabilidad por lesiones, molestias o daños
+      derivados del uso de esta herramienta o del incumplimiento de las
+      recomendaciones aquí sugeridas.
+    </p>
+  </section>
+
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  // Solo el intervalo "work" (la alarma) es configurable por la persona.
+  // Visual/Movilidad/Activa son tiempos sugeridos fijos, no editables:
+  // son solo una referencia y no afectan el conteo de la alarma.
+  const TIME_DEFAULTS = { work: 20 * 60, visual: 20, mobility: 40, active: 180 };
+  const TIME_LIMITS = {
+    work: { min: 5, max: 120 }
+  };
+
+  let WORK_SECONDS = TIME_DEFAULTS.work;
+  let VISUAL_SECONDS = TIME_DEFAULTS.visual;
+  let MOBILITY_SECONDS = TIME_DEFAULTS.mobility;
+  let ACTIVE_SECONDS = TIME_DEFAULTS.active;
+
+  // El tiempo de trabajo NO se guarda entre sesiones a propósito: cada vez
+  // que se abre la app debe partir en los 20 minutos por defecto
+  // (TIME_DEFAULTS.work). La persona puede modificarlo con los botones
+  // +/- o escribiendo el número, y ese cambio se mantiene mientras la
+  // pestaña siga abierta, pero no sobrevive a un recargo de la página.
+  const TIME_KEY = "horizonte_bienestar_times";
+
+  try {
+    window.localStorage.removeItem(TIME_KEY);
+  } catch (e) {}
+
+  const BREAK_DEFS = {
+    visual: {
+      icon: "👁️",
+      type: "Descanso visual",
+      title: "Descansa la mirada",
+      description: "Mira un punto lejano y relaja la mirada.",
+      exercise: "Enfoca un objeto a 6 metros (20 pies) o más de distancia. Parpadea por completo varias veces antes de volver a la pantalla.",
+      duration: VISUAL_SECONDS
+    },
+    mobility: {
+      icon: "🧘",
+      type: "Pausa de movilidad",
+      title: "Estira y cambia de postura",
+      description: "Suelta la tensión de cuello, hombros y muñecas.",
+      exercise: "Gira el cuello con suavidad, eleva y relaja los hombros, y estira muñecas y dedos.",
+      duration: MOBILITY_SECONDS
+    },
+    active: {
+      icon: "🚶",
+      type: "Pausa activa",
+      title: "Ponte de pie y muévete",
+      description: "Levántate y camina unos pasos para reactivar la circulación.",
+      exercise: "Camina por el espacio, sube y baja los talones o realiza unas sentadillas suaves.",
+      duration: ACTIVE_SECONDS
+    }
+  };
+
+  const BREAK_LABELS = { visual: "Visual", mobility: "Movilidad", active: "Activa" };
+
+  const EXERCISE_OPTIONS = {
+    mobility: [
+      { label: "Cuello y hombros", pose: "neck", text: "Gira el cuello con suavidad hacia ambos lados, luego eleva y relaja los hombros varias veces." },
+      { label: "Muñecas y dedos", pose: "wrists", text: "Extiende los brazos, gira las muñecas en ambos sentidos y abre y cierra los dedos." },
+      { label: "Espalda y torso", pose: "torso", text: "Entrelaza las manos por encima de la cabeza y estira suavemente hacia ambos lados; gira el torso con cuidado." },
+      { label: "Piernas (sentado)", pose: "legs-seated", text: "Estira una pierna a la vez, flexiona el pie hacia ti y suéltalo. Repite con la otra pierna." }
+    ],
+    active: [
+      { label: "Caminar en el sitio", pose: "walk", text: "Camina en el lugar o por el espacio disponible durante toda la pausa." },
+      { label: "Sentadillas suaves", pose: "squat", text: "Realiza sentadillas suaves y controladas, cuidando la postura de la espalda." },
+      { label: "Elevación de talones", pose: "heels", text: "Sube y baja los talones repetidamente para activar la circulación de las piernas." },
+      { label: "Subir escaleras", pose: "stairs", text: "Si tienes escaleras cerca, sube y baja un tramo un par de veces." }
+    ]
+  };
+
+  const VISUAL_POSE = "eye";
+
+  // --- Muñecos SVG (uno por "pose") ---
+  const STANDING_FIGURE =
+    '<g class="sf-body-group">' +
+      '<circle class="sf-head" cx="40" cy="18" r="9"/>' +
+      '<circle class="sf-head-highlight" cx="37" cy="15" r="2.4"/>' +
+      '<g class="sf-torso"><line class="sf-torso-line" x1="40" y1="27" x2="40" y2="62"/></g>' +
+      '<circle class="sf-joint" cx="40" cy="34" r="3.2"/>' +
+      '<g class="sf-armL"><line x1="40" y1="34" x2="22" y2="52"/><line class="sf-handL" x1="22" y1="52" x2="16" y2="57"/></g>' +
+      '<g class="sf-armR"><line x1="40" y1="34" x2="58" y2="52"/><line class="sf-handR" x1="58" y1="52" x2="64" y2="57"/></g>' +
+      '<circle class="sf-joint" cx="40" cy="62" r="3.2"/>' +
+      '<line class="sf-legL" x1="40" y1="62" x2="26" y2="96"/>' +
+      '<line class="sf-legR" x1="40" y1="62" x2="54" y2="96"/>' +
+    '</g>' +
+    '<ellipse class="sf-ground" cx="40" cy="98" rx="26" ry="4"/>';
+
+  const SEATED_FIGURE =
+    '<g class="sf-body-group">' +
+      '<circle class="sf-head" cx="34" cy="18" r="9"/>' +
+      '<circle class="sf-head-highlight" cx="31" cy="15" r="2.2"/>' +
+      '<line class="sf-torso-line" x1="34" y1="27" x2="34" y2="55"/>' +
+      '<circle class="sf-joint" cx="34" cy="32" r="2.8"/>' +
+      '<line class="sf-armL" x1="34" y1="32" x2="20" y2="46"/>' +
+      '<line class="sf-armR" x1="34" y1="32" x2="47" y2="45"/>' +
+      '<circle class="sf-joint" cx="34" cy="55" r="2.8"/>' +
+      '<line x1="34" y1="55" x2="55" y2="55"/>' +
+      '<line x1="55" y1="55" x2="55" y2="88"/>' +
+      '<g class="sf-legR"><line x1="34" y1="55" x2="18" y2="55"/><line x1="18" y1="55" x2="10" y2="80"/></g>' +
+    '</g>' +
+    '<ellipse class="sf-ground" cx="38" cy="90" rx="30" ry="3.5"/>';
+
+  const EYE_FIGURE =
+    '<ellipse class="sf-eye-outline" cx="40" cy="30" rx="26" ry="16"/>' +
+    '<g class="sf-eye-pupil">' +
+      '<circle class="sf-eye-iris" cx="40" cy="30" r="10"/>' +
+      '<circle class="sf-eye-center" cx="40" cy="30" r="4.5"/>' +
+      '<circle class="sf-eye-glint" cx="37" cy="27" r="2"/>' +
+    '</g>' +
+    '<circle class="sf-focus-dot" cx="70" cy="30" r="3"/>';
+
+  function stickFigureSVG(pose) {
+    if (pose === "eye") {
+      return '<svg class="sf-svg pose-eye" viewBox="0 0 80 60" aria-hidden="true">' + EYE_FIGURE + '</svg>';
+    }
+
+    if (pose === "legs-seated") {
+      return '<svg class="sf-svg pose-legs-seated" viewBox="0 0 80 100" aria-hidden="true">' + SEATED_FIGURE + '</svg>';
+    }
+
+    return '<svg class="sf-svg pose-' + pose + '" viewBox="0 0 80 100" aria-hidden="true">' + STANDING_FIGURE + '</svg>';
+  }
+
+  let workTime = WORK_SECONDS;
+  let workEndAt = 0;
+  let breakTime = 0;
+
+  let workTimer = null;
+  let breakTimer = null;
+  let alarmTimer = null;
+  let alarmAudio = null;
+  let titleBlinkTimer = null;
+  let titleBlinkOn = false;
+
+  let running = false;
+  let paused = false;
+  let inBreak = false;
+  let breakStarted = false;
+  let alarmActive = false;
+
+  let cycle = 0;
+  let mobilityOccurrences = 0;
+  let activeOccurrences = 0;
+
+  let breakQueue = [];
+  let breakQueueIndex = 0;
+
+  let breaksCompleted = 0;
+  let activeBreaks = 0;
+  let activeMinutes = 0;
+
+  let currentBreakType = null;
+  let updateExercisePickerArrows = null;
+
+  const $ = (id) => document.getElementById(id);
+
+  const timer = $("timer");
+  const timerCard = $("timerCard");
+  const timerLabel = $("timerLabel");
+  const timerDescription = $("timerDescription");
+
+  const startBtn = $("startBtn");
+  const pauseBtn = $("pauseBtn");
+  const resetBtn = $("resetBtn");
+
+  const breakPanel = $("breakPanel");
+  const breakProgress = $("breakProgress");
+  const breakIcon = $("breakIcon");
+  const breakType = $("breakType");
+  const breakTitle = $("breakTitle");
+  const breakDescription = $("breakDescription");
+  const breakExercise = $("breakExercise");
+  const breakCountdown = $("breakCountdown");
+  const exerciseSelectWrap = $("exerciseSelectWrap");
+  const exerciseChipRow = $("exerciseChipRow");
+  const exerciseIllustration = $("exerciseIllustration");
+  const guideGrid = $("guideGrid");
+  const startBreakBtn = $("startBreakBtn");
+  const skipBreakBtn = $("skipBreakBtn");
+
+  const alarmIndicator = $("alarmIndicator");
+  const appFavicon = $("appFavicon");
+
+  const statBreaks = $("statBreaks");
+  const statActive = $("statActive");
+  const statMinutes = $("statMinutes");
+
+  const soundSelect = $("soundSelect");
+  const testSoundBtn = $("testSoundBtn");
+
+  const notifyToggle = $("notifyToggle");
+  const notifyStatus = $("notifyStatus");
+
+  const timeWork = $("timeWork");
+  const timeVisualStatic = $("timeVisualStatic");
+  const timeMobilityStatic = $("timeMobilityStatic");
+  const timeActiveStatic = $("timeActiveStatic");
+  const timeResetBtn = $("timeResetBtn");
+  const nextBreakHint = $("nextBreakHint");
+
+  const cycleVisual = $("cycleVisual");
+  const cycleMobility = $("cycleMobility");
+  const cycleActive = $("cycleActive");
+
+  const SOUND_KEY = "horizonte_bienestar_sound";
+  const NOTIFY_KEY = "horizonte_bienestar_notify";
+  const TIMER_STATE_KEY = "horizonte_bienestar_timerstate";
+  const PUSH_SUBSCRIBED_KEY = "horizonte_bienestar_pushsubscribed";
+  // Clave pública VAPID: no es secreta, así es como funciona el estándar
+  // Web Push (el navegador la usa para verificar que el push viene de
+  // este servidor). La clave privada vive solo en el servidor (variable
+  // de entorno de Netlify), nunca aquí.
+  const VAPID_PUBLIC_KEY = "BOwaNxos2KHMWmbrJkFDL5FVeJrnDFW8hHhCrxC7xDcrx7Dy9w5rnphmmnUCy-yDWCkW8gTQWeFlKY2Obdn1BGw";
+
+  function loadNotifySetting() {
+    try {
+      return window.localStorage.getItem(NOTIFY_KEY) === "1";
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function saveNotifySetting(enabled) {
+    try {
+      window.localStorage.setItem(NOTIFY_KEY, enabled ? "1" : "0");
+    } catch (e) {}
+  }
+
+  function refreshNotifyStatus() {
+    if (!("Notification" in window)) {
+      notifyStatus.textContent = "Tu navegador no soporta notificaciones del sistema.";
+      notifyToggle.disabled = true;
+      return;
+    }
+
+    if (Notification.permission === "denied") {
+      notifyStatus.textContent = "Notificaciones bloqueadas. Actívalas desde los ajustes del navegador si las quieres.";
+    } else if (Notification.permission === "granted" && notifyToggle.checked) {
+      notifyStatus.textContent = "Te avisaremos con una notificación cuando llegue tu pausa.";
+    } else {
+      notifyStatus.textContent = "Actívalo para recibir un aviso aunque estés en otra pestaña o app.";
+    }
+  }
+
+  // Un <input type="checkbox"> se marca solo al hacer clic, ANTES de que
+  // Notification.requestPermission() (asíncrono) resuelva. Si esa promesa
+  // nunca se completa como se esperaba, o el permiso cambia después por
+  // otra vía (el candado de la barra de direcciones), el checkbox se
+  // queda mostrando un estado que ya no es real. Esta función siempre
+  // fuerza el checkbox a coincidir con Notification.permission de verdad,
+  // nunca al revés.
+  function syncNotifyUI() {
+    if (!("Notification" in window)) return;
+
+    notifyToggle.checked = Notification.permission === "granted" && loadNotifySetting();
+    refreshNotifyStatus();
+  }
+
+  function notifyBreakStart(def) {
+    if (!("Notification" in window)) return;
+    if (Notification.permission !== "granted") return;
+    if (!loadNotifySetting()) return;
+
+    try {
+      const note = new Notification("Horizonte · " + def.type, {
+        body: def.title + " — " + def.description,
+        tag: "horizonte-break",
+        renotify: true,
+        requireInteraction: true
+      });
+
+      note.onclick = function () {
+        window.focus();
+        note.close();
+      };
+    } catch (e) {}
+  }
+
+  function formatTime(seconds) {
+    const safe = Math.max(0, Math.floor(Number(seconds) || 0));
+    const minutes = Math.floor(safe / 60);
+    const secs = safe % 60;
+
+    return (
+      String(minutes).padStart(2, "0") +
+      ":" +
+      String(secs).padStart(2, "0")
+    );
+  }
+
+  function clamp(value, min, max) {
+    return Math.min(max, Math.max(min, value));
+  }
+
+  const TIME_FIELDS = {
+    work: {
+      input: timeWork,
+      limits: TIME_LIMITS.work,
+      step: 1,
+      get: function () { return Math.round(WORK_SECONDS / 60); },
+      set: function (minutes) { WORK_SECONDS = minutes * 60; }
+    }
+  };
+
+  function syncBreakDurations() {
+    BREAK_DEFS.visual.duration = VISUAL_SECONDS;
+    BREAK_DEFS.mobility.duration = MOBILITY_SECONDS;
+    BREAK_DEFS.active.duration = ACTIVE_SECONDS;
+  }
+
+  function refreshStaticTimeLabels() {
+    timeVisualStatic.textContent = VISUAL_SECONDS + " s sugeridos";
+    timeMobilityStatic.textContent = MOBILITY_SECONDS + " s sugeridos";
+    timeActiveStatic.textContent = Math.round(ACTIVE_SECONDS / 60) + " min sugeridos";
+  }
+
+  function refreshTimeInputs() {
+    Object.keys(TIME_FIELDS).forEach(function (key) {
+      const field = TIME_FIELDS[key];
+      field.input.value = field.get();
+    });
+    refreshStaticTimeLabels();
+  }
+
+  function applyTimeField(key, rawValue) {
+    const field = TIME_FIELDS[key];
+    if (!field) return;
+
+    let value = parseInt(rawValue, 10);
+    if (isNaN(value)) {
+      value = field.get();
+    }
+
+    value = clamp(value, field.limits.min, field.limits.max);
+    field.set(value);
+    field.input.value = value;
+
+    syncBreakDurations();
+
+    if (!running && !inBreak) {
+      workTime = WORK_SECONDS;
+      updateTimerDisplay();
+    }
+  }
+
+  function updateStats() {
+    statBreaks.textContent = breaksCompleted;
+    statActive.textContent = activeBreaks;
+    statMinutes.textContent = activeMinutes;
+  }
+
+  function updateTimerDisplay() {
+    if (inBreak) {
+      timer.textContent = formatTime(breakTime);
+    } else {
+      timer.textContent = formatTime(workTime);
+    }
+
+    updateDocumentTitle();
+  }
+
+  const BASE_TITLE = document.title;
+
+  function updateDocumentTitle() {
+    if (inBreak) {
+      document.title = "⏸ Pausa · Horizonte";
+    } else if (running && paused) {
+      document.title = "⏸ " + formatTime(workTime) + " · Horizonte";
+    } else if (running) {
+      document.title = formatTime(workTime) + " · Horizonte";
+    } else {
+      document.title = BASE_TITLE;
+    }
+  }
+
+  // La visual suena en TODAS las alarmas. Además, cada 2ª alarma se suma
+  // movilidad y cada 3ª alarma se suma activa (y el patrón se reinicia).
+  // Alarma 1 -> Visual · Alarma 2 -> Visual + Movilidad · Alarma 3 -> Visual + Activa · Alarma 4 -> Visual · ...
+  function getBreakQueue(cycleCount) {
+    const position = cycleCount % 3;
+    if (position === 1) return ["visual"];
+    if (position === 2) return ["visual", "mobility"];
+    return ["visual", "active"];
+  }
+
+  function highlightCycleTypes(types) {
+    cycleVisual.classList.toggle("active", types.indexOf("visual") !== -1);
+    cycleMobility.classList.toggle("active", types.indexOf("mobility") !== -1);
+    cycleActive.classList.toggle("active", types.indexOf("active") !== -1);
+  }
+
+  function updateNextBreakHint() {
+    const upcoming = getBreakQueue(cycle + 1);
+    highlightCycleTypes(upcoming);
+
+    const label = upcoming.map(function (type) { return BREAK_LABELS[type]; }).join(" + ");
+    nextBreakHint.textContent = "Próxima pausa: " + label;
+  }
+
+  function resetCycleIndicator() {
+    updateNextBreakHint();
+  }
+
+  function attachChipArrows(scroller) {
+    const row = scroller.querySelector(".exercise-chip-row");
+    const leftBtn = scroller.querySelector(".chip-arrow-left");
+    const rightBtn = scroller.querySelector(".chip-arrow-right");
+    if (!row || !leftBtn || !rightBtn) return null;
+
+    function updateArrows() {
+      leftBtn.disabled = row.scrollLeft <= 2;
+      rightBtn.disabled = row.scrollLeft >= row.scrollWidth - row.clientWidth - 2;
+    }
+
+    leftBtn.addEventListener("click", function () {
+      row.scrollBy({ left: -140, behavior: "smooth" });
+    });
+
+    rightBtn.addEventListener("click", function () {
+      row.scrollBy({ left: 140, behavior: "smooth" });
+    });
+
+    row.addEventListener("scroll", updateArrows);
+    window.addEventListener("resize", updateArrows);
+
+    // requestAnimationFrame en vez de una llamada directa: si el contenedor
+    // acaba de pasar de display:none a visible, el navegador todavía no
+    // calculó el layout y scrollWidth/clientWidth darían 0.
+    requestAnimationFrame(updateArrows);
+
+    return updateArrows;
+  }
+
+  function selectChip(row, options, index, onPick) {
+    Array.prototype.forEach.call(row.children, function (chip, i) {
+      chip.classList.toggle("selected", i === index);
+      chip.setAttribute("aria-pressed", i === index ? "true" : "false");
+    });
+    onPick(options[index]);
+  }
+
+  function buildChipRow(row, options, defaultIndex, onPick) {
+    row.innerHTML = "";
+
+    options.forEach(function (opt, index) {
+      const chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "exercise-chip";
+      chip.setAttribute("aria-pressed", index === defaultIndex ? "true" : "false");
+      chip.innerHTML = stickFigureSVG(opt.pose) +
+        '<span class="exercise-chip-label">' + opt.label + '</span>';
+
+      chip.addEventListener("click", function () {
+        selectChip(row, options, index, onPick);
+      });
+
+      row.appendChild(chip);
+    });
+
+    selectChip(row, options, defaultIndex, onPick);
+  }
+
+  function populateExercisePicker(type) {
+    const options = EXERCISE_OPTIONS[type];
+    if (!options) return;
+
+    const occurrences = type === "mobility" ? mobilityOccurrences : activeOccurrences;
+    const defaultIndex = Math.max(0, occurrences - 1) % options.length;
+
+    buildChipRow(exerciseChipRow, options, defaultIndex, function (opt) {
+      breakExercise.textContent = opt.text;
+      exerciseIllustration.innerHTML = stickFigureSVG(opt.pose);
+    });
+
+    if (updateExercisePickerArrows) {
+      updateExercisePickerArrows();
+    }
+  }
+
+  function toggleGuidePanel(item) {
+    const type = item.getAttribute("data-type");
+    const panel = item.querySelector(".guide-panel");
+    const toggleBtn = item.querySelector(".guide-toggle");
+    if (!panel || !toggleBtn) return;
+
+    const isOpen = item.getAttribute("data-open") === "true";
+
+    Array.prototype.forEach.call(guideGrid.querySelectorAll(".guide-item[data-open=\"true\"]"), function (openItem) {
+      if (openItem !== item) {
+        openItem.setAttribute("data-open", "false");
+        openItem.querySelector(".guide-toggle").setAttribute("aria-expanded", "false");
+        openItem.querySelector(".guide-panel").hidden = true;
+      }
+    });
+
+    if (isOpen) {
+      item.setAttribute("data-open", "false");
+      toggleBtn.setAttribute("aria-expanded", "false");
+      panel.hidden = true;
+      return;
+    }
+
+    item.setAttribute("data-open", "true");
+    toggleBtn.setAttribute("aria-expanded", "true");
+    panel.hidden = false;
+
+    if (!panel.dataset.built) {
+      panel.dataset.built = "true";
+
+      if (type === "visual") {
+        panel.innerHTML =
+          '<div class="exercise-illustration">' + stickFigureSVG(VISUAL_POSE) + '</div>' +
+          '<div class="break-exercise">' + BREAK_DEFS.visual.exercise + '</div>';
+      } else {
+        const options = EXERCISE_OPTIONS[type];
+        panel.innerHTML =
+          '<div class="exercise-illustration" id="guideIllustration-' + type + '"></div>' +
+          '<div class="chip-scroller">' +
+            '<button class="chip-arrow chip-arrow-left" type="button" aria-label="Ver opciones anteriores">‹</button>' +
+            '<div class="exercise-chip-row" id="guideChipRow-' + type + '" role="group" aria-label="Ver opciones de ' + type + '"></div>' +
+            '<button class="chip-arrow chip-arrow-right" type="button" aria-label="Ver más opciones">›</button>' +
+          '</div>';
+
+        const illustration = panel.querySelector("#guideIllustration-" + type);
+        const row = panel.querySelector("#guideChipRow-" + type);
+
+        buildChipRow(row, options, 0, function (opt) {
+          illustration.innerHTML = stickFigureSVG(opt.pose);
+        });
+
+        attachChipArrows(panel.querySelector(".chip-scroller"));
+      }
+    }
+  }
+
+  function updateWorkUI() {
+    timerCard.classList.remove("break-mode");
+    timerLabel.textContent = "Trabajando";
+    timerDescription.textContent = "Tu próxima pausa llegará automáticamente.";
+    nextBreakHint.hidden = false;
+    updateNextBreakHint();
+    updateTimerDisplay();
+
+    if (!running) {
+      startBtn.textContent = "▶ Iniciar";
+      startBtn.disabled = false;
+    } else if (paused) {
+      startBtn.textContent = "⏸ Pausado";
+      startBtn.disabled = true;
+    } else {
+      startBtn.textContent = "▶ Trabajando";
+      startBtn.disabled = true;
+    }
+
+    pauseBtn.textContent = paused ? "▶ Continuar" : "Ⅱ Pausar";
+    pauseBtn.disabled = !running;
+
+    alarmIndicator.classList.remove("show");
+  }
+
+  function updateBreakUI(def) {
+    timerCard.classList.add("break-mode");
+    timerLabel.textContent = def.type;
+    timerDescription.textContent = "Pausa en curso.";
+
+    startBtn.disabled = true;
+    pauseBtn.disabled = true;
+
+    const total = breakQueue.length;
+    const isLast = breakQueueIndex >= total - 1;
+
+    if (total > 1) {
+      breakProgress.hidden = false;
+      breakProgress.textContent = "Pausa " + (breakQueueIndex + 1) + " de " + total + " de esta alarma";
+    } else {
+      breakProgress.hidden = true;
+    }
+
+    breakIcon.textContent = def.icon;
+    breakType.textContent = def.type;
+    breakTitle.textContent = def.title;
+    breakDescription.textContent = def.description;
+    breakExercise.textContent = def.exercise;
+
+    // El número mostrado es solo el tiempo sugerido: no cuenta
+    // regresivamente ni controla el avance de la alarma.
+    breakCountdown.textContent = formatTime(def.duration);
+
+    if (currentBreakType === "visual") {
+      exerciseSelectWrap.hidden = true;
+      exerciseIllustration.innerHTML = stickFigureSVG(VISUAL_POSE);
+    } else {
+      exerciseSelectWrap.hidden = false;
+      populateExercisePicker(currentBreakType);
+    }
+
+    startBreakBtn.disabled = false;
+    startBreakBtn.textContent = isLast ? "Continuar" : "Siguiente ejercicio →";
+    skipBreakBtn.textContent = total > 1 ? "Omitir esta alarma" : "Omitir pausa";
+
+    updateTimerDisplay();
+  }
+
+  function stopAllTimers() {
+    if (workTimer) {
+      clearInterval(workTimer);
+      workTimer = null;
+    }
+
+    if (breakTimer) {
+      clearInterval(breakTimer);
+      breakTimer = null;
+    }
+
+    if (alarmTimer) {
+      clearTimeout(alarmTimer);
+      alarmTimer = null;
+    }
+  }
+
+  // Un punto de color en la pestaña/barra de tareas se nota por el rabillo
+  // del ojo sin tener que leer nada. Generado con <canvas>, sin archivos
+  // de imagen adicionales.
+  function makeDotFavicon(color) {
+    try {
+      const canvas = document.createElement("canvas");
+      canvas.width = 32;
+      canvas.height = 32;
+
+      const ctx = canvas.getContext("2d");
+      ctx.beginPath();
+      ctx.arc(16, 16, 14, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.fill();
+
+      return canvas.toDataURL("image/png");
+    } catch (e) {
+      return "";
+    }
+  }
+
+  const FAVICON_NORMAL = makeDotFavicon("#6d8158");
+  const FAVICON_ALARM = makeDotFavicon("#c0392b");
+
+  if (appFavicon && FAVICON_NORMAL) {
+    appFavicon.href = FAVICON_NORMAL;
+  }
+
+  // Mientras suena la alarma: título parpadeante + favicon rojo, para que
+  // el aviso se note aunque la pestaña esté de fondo o minimizada. Un sitio
+  // web no puede robarle el foco a otras ventanas (los navegadores lo
+  // bloquean), así que esto —junto con la notificación del sistema— es el
+  // máximo que se puede lograr desde el navegador.
+  function startAttentionEffects() {
+    stopAttentionEffects();
+
+    if (appFavicon && FAVICON_ALARM) {
+      appFavicon.href = FAVICON_ALARM;
+    }
+
+    titleBlinkOn = false;
+    titleBlinkTimer = setInterval(function () {
+      titleBlinkOn = !titleBlinkOn;
+      document.title = titleBlinkOn ? "🔔 ¡PAUSA! · Horizonte" : "⏸ Pausa · Horizonte";
+    }, 900);
+  }
+
+  function stopAttentionEffects() {
+    if (titleBlinkTimer) {
+      clearInterval(titleBlinkTimer);
+      titleBlinkTimer = null;
+    }
+
+    if (appFavicon && FAVICON_NORMAL) {
+      appFavicon.href = FAVICON_NORMAL;
+    }
+
+    updateDocumentTitle();
+  }
+
+  function stopAlarm() {
+    alarmActive = false;
+    stopAttentionEffects();
+
+    if (alarmTimer) {
+      clearTimeout(alarmTimer);
+      alarmTimer = null;
+    }
+
+    if (alarmAudio) {
+      try {
+        if (typeof alarmAudio.stop === "function") {
+          alarmAudio.stop();
+        }
+      } catch (e) {}
+
+      alarmAudio = null;
+    }
+
+    alarmIndicator.classList.remove("show");
+  }
+
+  function createTone(frequency, duration, volume, type) {
+    try {
+      const AudioContextClass =
+        window.AudioContext || window.webkitAudioContext;
+
+      if (!AudioContextClass) {
+        return;
+      }
+
+      const ctx = new AudioContextClass();
+
+      const oscillator = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      oscillator.type = type || "sine";
+      oscillator.frequency.value = frequency;
+
+      gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(
+        Math.max(0.001, volume),
+        ctx.currentTime + 0.04
+      );
+
+      gain.gain.exponentialRampToValueAtTime(
+        0.0001,
+        ctx.currentTime + duration
+      );
+
+      oscillator.connect(gain);
+      gain.connect(ctx.destination);
+
+      oscillator.start();
+      oscillator.stop(ctx.currentTime + duration + 0.05);
+
+      setTimeout(function () {
+        try {
+          ctx.close();
+        } catch (e) {}
+      }, (duration + 0.3) * 1000);
+
+      alarmAudio = oscillator;
+
+    } catch (error) {
+      // Audio puede estar bloqueado por el navegador.
+    }
+  }
+
+  function playSelectedSound() {
+    const selected = soundSelect.value;
+
+    if (selected === "bell") {
+      createTone(660, 1.15, 0.12, "sine");
+
+      setTimeout(function () {
+        createTone(880, 1.2, 0.09, "sine");
+      }, 180);
+
+    } else if (selected === "chime") {
+      createTone(740, 0.75, 0.10, "sine");
+
+      setTimeout(function () {
+        createTone(988, 0.9, 0.08, "sine");
+      }, 120);
+
+    } else if (selected === "digital") {
+      createTone(520, 0.18, 0.10, "square");
+
+      setTimeout(function () {
+        createTone(740, 0.22, 0.08, "square");
+      }, 180);
+
+      setTimeout(function () {
+        createTone(980, 0.28, 0.07, "square");
+      }, 390);
+
+    } else {
+      createTone(440, 1.4, 0.07, "sine");
+    }
+  }
+
+  function startAlarm() {
+    stopAlarm();
+    alarmActive = true;
+    alarmIndicator.classList.add("show");
+    startAttentionEffects();
+
+    try {
+      if (navigator.vibrate) {
+        navigator.vibrate([200, 100, 200]);
+      }
+    } catch (e) {}
+
+    // Suena sin límite de repeticiones hasta que la persona toque
+    // "Continuar" u "Omitir pausa" (lo que llama a stopAlarm() y pone
+    // alarmActive en false). No se detiene sola.
+    function tick() {
+      if (!alarmActive) return;
+
+      createTone(880, 0.3, 0.07, "sine");
+      alarmTimer = setTimeout(tick, 4000);
+    }
+
+    tick();
+  }
+
+  // Se guarda el timestamp de fin y se recalcula contra Date.now() en cada
+  // tick, en vez de restar de a uno: así el conteo no se atrasa cuando el
+  // navegador limita los setInterval de pestañas en segundo plano.
+  function startWorkTimer(targetEndAt) {
+    if (workTimer) {
+      clearInterval(workTimer);
+    }
+
+    workEndAt = targetEndAt || (Date.now() + workTime * 1000);
+
+    workTimer = setInterval(function () {
+      const remaining = Math.round((workEndAt - Date.now()) / 1000);
+      workTime = Math.max(0, remaining);
+      updateTimerDisplay();
+
+      if (remaining <= 0) {
+        clearInterval(workTimer);
+        workTimer = null;
+        enterBreak();
+      }
+    }, 1000);
+  }
+
+  function showCurrentBreakItem() {
+    currentBreakType = breakQueue[breakQueueIndex];
+
+    if (currentBreakType === "mobility") {
+      mobilityOccurrences += 1;
+    } else if (currentBreakType === "active") {
+      activeOccurrences += 1;
+    }
+
+    const def = BREAK_DEFS[currentBreakType];
+    updateBreakUI(def);
+  }
+
+  function enterBreak() {
+    stopAllTimers();
+
+    cycle += 1;
+    breakQueue = getBreakQueue(cycle);
+    breakQueueIndex = 0;
+    inBreak = true;
+
+    highlightCycleTypes(breakQueue);
+
+    // El panel debe quedar visible ANTES de construir los chips de
+    // ejercicio: si se miden con el panel en display:none, scrollWidth y
+    // clientWidth dan 0 y las flechitas de desplazamiento quedan
+    // deshabilitadas de por vida (el bug que reportaste).
+    breakPanel.classList.add("visible");
+    showCurrentBreakItem();
+
+    playSelectedSound();
+    startAlarm();
+    notifyBreakStart(BREAK_DEFS[currentBreakType]);
+    saveTimerState();
+    pushScheduleUpdate(null, null);
+  }
+
+  // Se llama al presionar "Continuar" (o "Siguiente ejercicio").
+  // El tiempo sugerido del ejercicio es solo informativo: quien decide
+  // cuándo avanzar es la persona, no un conteo automático.
+  function advanceBreakQueue() {
+    stopAlarm();
+    createTone(720, 0.5, 0.08, "sine");
+
+    breaksCompleted += 1;
+
+    if (currentBreakType !== "visual") {
+      activeBreaks += 1;
+      activeMinutes += Math.round(BREAK_DEFS[currentBreakType].duration / 60);
+    }
+
+    updateStats();
+
+    const isLast = breakQueueIndex >= breakQueue.length - 1;
+
+    if (!isLast) {
+      breakQueueIndex += 1;
+      showCurrentBreakItem();
+      saveTimerState();
+      return;
+    }
+
+    breakPanel.classList.remove("visible");
+    inBreak = false;
+    currentBreakType = null;
+    breakQueue = [];
+    breakQueueIndex = 0;
+
+    workTime = WORK_SECONDS;
+    running = true;
+    paused = false;
+
+    updateWorkUI();
+    startWorkTimer();
+    saveTimerState();
+    pushScheduleUpdate(workEndAt, "break");
+  }
+
+  function skipBreak() {
+    stopAllTimers();
+    stopAlarm();
+
+    breakPanel.classList.remove("visible");
+    inBreak = false;
+    currentBreakType = null;
+    breakQueue = [];
+    breakQueueIndex = 0;
+
+    workTime = WORK_SECONDS;
+    running = true;
+    paused = false;
+
+    updateWorkUI();
+    startWorkTimer();
+    saveTimerState();
+    pushScheduleUpdate(workEndAt, "break");
+  }
+
+  function handleStart() {
+    if (running) return;
+
+    running = true;
+    paused = false;
+    workTime = workTime > 0 ? workTime : WORK_SECONDS;
+
+    updateWorkUI();
+    startWorkTimer();
+    saveTimerState();
+    pushScheduleUpdate(workEndAt, "break");
+  }
+
+  function handlePauseToggle() {
+    if (!running) return;
+
+    if (!paused) {
+      paused = true;
+      workTime = Math.max(0, Math.round((workEndAt - Date.now()) / 1000));
+
+      if (workTimer) {
+        clearInterval(workTimer);
+        workTimer = null;
+      }
+    } else {
+      paused = false;
+      startWorkTimer();
+    }
+
+    updateWorkUI();
+    saveTimerState();
+    pushScheduleUpdate(paused ? null : workEndAt, paused ? null : "break");
+  }
+
+  function handleReset() {
+    stopAllTimers();
+    stopAlarm();
+
+    running = false;
+    paused = false;
+    inBreak = false;
+    currentBreakType = null;
+    breakQueue = [];
+    breakQueueIndex = 0;
+
+    cycle = 0;
+    mobilityOccurrences = 0;
+    activeOccurrences = 0;
+    workTime = WORK_SECONDS;
+    breakTime = 0;
+
+    breakPanel.classList.remove("visible");
+
+    resetCycleIndicator();
+    updateWorkUI();
+    saveTimerState();
+    pushScheduleUpdate(null, null);
+  }
+
+  // Guarda un snapshot del estado del temporizador para poder recuperarlo
+  // si Android mata el proceso de la app instalada mientras está en
+  // segundo plano (al volver, el sistema recarga index.html desde cero y
+  // sin esto se perdería todo el progreso, reiniciando a WORK_SECONDS).
+  function saveTimerState() {
+    try {
+      window.localStorage.setItem(TIMER_STATE_KEY, JSON.stringify({
+        running: running,
+        paused: paused,
+        workEndAt: workEndAt,
+        workTime: workTime,
+        inBreak: inBreak,
+        currentBreakType: currentBreakType,
+        breakQueue: breakQueue,
+        breakQueueIndex: breakQueueIndex,
+        cycle: cycle
+      }));
+    } catch (e) {}
+  }
+
+  // Se llama una sola vez al cargar la página. Si hay un snapshot
+  // guardado, retoma el temporizador o la pausa donde iban en vez de
+  // arrancar siempre desde WORK_SECONDS.
+  function restoreTimerState() {
+    let saved = null;
+    try {
+      const raw = window.localStorage.getItem(TIMER_STATE_KEY);
+      if (raw) saved = JSON.parse(raw);
+    } catch (e) {}
+
+    if (!saved) return;
+
+    if (saved.inBreak) {
+      cycle = saved.cycle || 0;
+      breakQueue = Array.isArray(saved.breakQueue) ? saved.breakQueue : [];
+      breakQueueIndex = saved.breakQueueIndex || 0;
+      currentBreakType = saved.currentBreakType;
+      inBreak = true;
+      running = false;
+      paused = false;
+
+      if (!currentBreakType || !BREAK_DEFS[currentBreakType]) {
+        // Snapshot incompleto/corrupto: no forzar una pausa inválida.
+        inBreak = false;
+        breakQueue = [];
+        breakQueueIndex = 0;
+        currentBreakType = null;
+        return;
+      }
+
+      highlightCycleTypes(breakQueue);
+      breakPanel.classList.add("visible");
+      updateBreakUI(BREAK_DEFS[currentBreakType]);
+      startAlarm();
+      notifyBreakStart(BREAK_DEFS[currentBreakType]);
+      pushScheduleUpdate(null, null);
+      return;
+    }
+
+    if (saved.running && !saved.paused) {
+      const remaining = Math.round((saved.workEndAt - Date.now()) / 1000);
+
+      if (remaining <= 0) {
+        running = true;
+        paused = false;
+        enterBreak();
+        return;
+      }
+
+      running = true;
+      paused = false;
+      workTime = remaining;
+      startWorkTimer(saved.workEndAt);
+      pushScheduleUpdate(saved.workEndAt, "break");
+      return;
+    }
+
+    if (saved.running && saved.paused) {
+      running = true;
+      paused = true;
+      workTime = Math.max(0, saved.workTime || 0);
+    }
+  }
+
+  // ------------------------------------------------------------------
+  // Notificaciones push reales (avisan aunque el celular haya cerrado
+  // la app por completo en segundo plano). Requieren estar servidas por
+  // HTTPS (Netlify), no funcionan abriendo el archivo local.
+  // ------------------------------------------------------------------
+
+  function urlBase64ToUint8Array(base64String) {
+    const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+  }
+
+  // Manda al servidor la hora en que debería llegar el próximo aviso.
+  // Best-effort: si falla (sin conexión, sin suscripción todavía), no
+  // rompe nada — localStorage sigue siendo la fuente de verdad local.
+  function pushScheduleUpdate(nextFireAt, fireKind) {
+    let subscribed = false;
+    try {
+      subscribed = window.localStorage.getItem(PUSH_SUBSCRIBED_KEY) === "1";
+    } catch (e) {}
+
+    if (!subscribed) return;
+    if (!("serviceWorker" in navigator)) return;
+
+    navigator.serviceWorker.ready.then(function (registration) {
+      return registration.pushManager.getSubscription();
+    }).then(function (subscription) {
+      if (!subscription) return;
+
+      fetch("/.netlify/functions/save-schedule", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          subscription: subscription.toJSON(),
+          nextFireAt: nextFireAt,
+          fireKind: fireKind
+        })
+      }).catch(function () {});
+    }).catch(function () {});
+  }
+
+  // Se llama cuando la persona activa el check de notificaciones y ya
+  // se le concedió el permiso del navegador. Crea la suscripción push
+  // (una sola vez por dispositivo) y la manda al servidor.
+  function subscribeToPush() {
+    if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+
+    navigator.serviceWorker.ready.then(function (registration) {
+      return registration.pushManager.getSubscription().then(function (existing) {
+        if (existing) return existing;
+
+        return registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+        });
+      });
+    }).then(function (subscription) {
+      if (!subscription) return;
+
+      try {
+        window.localStorage.setItem(PUSH_SUBSCRIBED_KEY, "1");
+      } catch (e) {}
+
+      fetch("/.netlify/functions/save-schedule", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          subscription: subscription.toJSON(),
+          nextFireAt: running && !paused ? workEndAt : null,
+          fireKind: running && !paused ? "break" : null
+        })
+      }).catch(function () {});
+    }).catch(function (err) {
+      console.warn("No se pudo suscribir a notificaciones push.", err);
+    });
+  }
+
+  startBtn.addEventListener("click", handleStart);
+  pauseBtn.addEventListener("click", handlePauseToggle);
+  resetBtn.addEventListener("click", handleReset);
+
+  // Si la pestaña estuvo en segundo plano y el navegador retrasó los
+  // ticks del setInterval, esto refresca el conteo de inmediato al volver
+  // en vez de esperar al próximo tick (que puede tardar hasta 1 minuto).
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden || !running || paused || inBreak) return;
+
+    const remaining = Math.round((workEndAt - Date.now()) / 1000);
+    workTime = Math.max(0, remaining);
+    updateTimerDisplay();
+
+    if (remaining <= 0) {
+      if (workTimer) {
+        clearInterval(workTimer);
+        workTimer = null;
+      }
+      enterBreak();
+    }
+  });
+
+  startBreakBtn.addEventListener("click", advanceBreakQueue);
+
+  skipBreakBtn.addEventListener("click", skipBreak);
+
+  Array.prototype.forEach.call(guideGrid.querySelectorAll(".guide-item:not(.guide-item-static) .guide-toggle"), function (btn) {
+    btn.addEventListener("click", function () {
+      toggleGuidePanel(btn.closest(".guide-item"));
+    });
+  });
+
+  testSoundBtn.addEventListener("click", playSelectedSound);
+
+  soundSelect.addEventListener("change", function () {
+    try {
+      window.localStorage.setItem(SOUND_KEY, soundSelect.value);
+    } catch (e) {}
+  });
+
+  try {
+    const savedSound = window.localStorage.getItem(SOUND_KEY);
+    if (savedSound) {
+      soundSelect.value = savedSound;
+    }
+  } catch (e) {}
+
+  syncNotifyUI();
+
+  notifyToggle.addEventListener("change", function () {
+    if (!("Notification" in window)) {
+      notifyToggle.checked = false;
+      return;
+    }
+
+    if (notifyToggle.checked) {
+      Notification.requestPermission().then(function (permission) {
+        const granted = permission === "granted";
+        notifyToggle.checked = granted;
+        saveNotifySetting(granted);
+        refreshNotifyStatus();
+        if (granted) subscribeToPush();
+      });
+    } else {
+      saveNotifySetting(false);
+      refreshNotifyStatus();
+    }
+  });
+
+  // Si ya había dado el permiso en una sesión anterior, suscribirse a
+  // push también al cargar (por si nunca llegó a completarse antes).
+  if (typeof Notification !== "undefined" && Notification.permission === "granted" && loadNotifySetting()) {
+    subscribeToPush();
+  }
+
+  Object.keys(TIME_FIELDS).forEach(function (key) {
+    const field = TIME_FIELDS[key];
+
+    field.input.min = field.limits.min;
+    field.input.max = field.limits.max;
+    field.input.step = field.step;
+
+    field.input.addEventListener("change", function () {
+      applyTimeField(key, field.input.value);
+    });
+
+    field.input.addEventListener("blur", function () {
+      applyTimeField(key, field.input.value);
+    });
+  });
+
+  Array.prototype.forEach.call($("timeSettings").querySelectorAll(".time-btn"), function (btn) {
+    btn.addEventListener("click", function () {
+      const key = btn.getAttribute("data-field");
+      const dir = parseInt(btn.getAttribute("data-dir"), 10);
+      const field = TIME_FIELDS[key];
+      if (!field) return;
+
+      applyTimeField(key, field.get() + dir * field.step);
+    });
+  });
+
+  timeResetBtn.addEventListener("click", function () {
+    WORK_SECONDS = TIME_DEFAULTS.work;
+    VISUAL_SECONDS = TIME_DEFAULTS.visual;
+    MOBILITY_SECONDS = TIME_DEFAULTS.mobility;
+    ACTIVE_SECONDS = TIME_DEFAULTS.active;
+
+    syncBreakDurations();
+    refreshTimeInputs();
+
+    if (!running && !inBreak) {
+      workTime = WORK_SECONDS;
+      updateTimerDisplay();
+    }
+  });
+
+  refreshTimeInputs();
+
+  resetCycleIndicator();
+  restoreTimerState();
+  updateWorkUI();
+  updateStats();
+  updateExercisePickerArrows = attachChipArrows($("exerciseSelectWrap").querySelector(".chip-scroller"));
+
+  // Necesario para que Chrome/Edge ofrezcan el botón de "Instalar" (junto
+  // con el manifest.webmanifest). No cachea nada, solo cumple el
+  // requisito técnico.
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js").catch(function () {});
+  }
+
+})();
+</script>
+
+</body>
+</html>

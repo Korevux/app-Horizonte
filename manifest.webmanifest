@@ -1,0 +1,13 @@
+{
+  "name": "Horizonte · Bienestar en cada pausa",
+  "short_name": "Horizonte",
+  "description": "Pequeños descansos para una jornada más activa.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#eee9e1",
+  "theme_color": "#171715",
+  "icons": [
+    { "src": "horizonte-icon-palabra.png", "sizes": "1024x1024", "type": "image/png", "purpose": "any" }
+  ]
+}
