@@ -5666,6 +5666,33 @@
     window.matchMedia("(display-mode: standalone)").matches ||
     window.navigator.standalone === true;
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+
+  // Primera vez como app instalada en el computador: ventana compacta,
+  // tipo teléfono, en el borde derecho de la pantalla, para tenerla a la
+  // vista sin tapar el trabajo. Solo una vez: si la persona después la
+  // agranda o la mueve, Chrome/Edge recuerdan lo que eligió.
+  const WINDOW_SIZED_KEY = "horizonte-window-sized";
+  const isDesktop = !/android|iphone|ipad|ipod|mobile/i.test(navigator.userAgent);
+
+  if (isStandalone && isDesktop) {
+    let windowSized = false;
+    try {
+      windowSized = localStorage.getItem(WINDOW_SIZED_KEY) === "1";
+    } catch (e) {}
+
+    if (!windowSized) {
+      try {
+        const width = Math.min(420, screen.availWidth);
+        const height = Math.min(820, screen.availHeight - 40);
+        window.resizeTo(width, height);
+        window.moveTo(
+          (screen.availLeft || 0) + screen.availWidth - width - 16,
+          (screen.availTop || 0) + Math.max(0, Math.round((screen.availHeight - height) / 2))
+        );
+        localStorage.setItem(WINDOW_SIZED_KEY, "1");
+      } catch (e) {}
+    }
+  }
   let deferredInstall = null;
   let installDismissed = false;
 
