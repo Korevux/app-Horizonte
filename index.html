@@ -703,6 +703,11 @@
 
     /* --- Ejercicios añadidos (basados en INSST, NHS, CCOHS y AOA) --- */
 
+    /* Palmeado: las palmas cubren los ojos y "respiran" suavemente. */
+    @keyframes sfPalmBreathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+    .pose-palming .sf-palms { animation: sfPalmBreathe 3.4s ease-in-out infinite; transform-origin: 40px 30px; }
+    .sf-svg .sf-palm { fill: var(--card); stroke: var(--accent-dark); stroke-width: 3; }
+
     /* Juntar omóplatos: manos tras la cabeza, los codos se abren atrás. */
     @keyframes sfElbowsBack { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(1.25); } }
     .pose-scapula .sf-elbows { animation: sfElbowsBack 2.4s ease-in-out infinite; transform-origin: 40px 24px; }
@@ -2060,7 +2065,8 @@
     #cycleVisual,
     .guide-item[data-type="visual"],
     .guide-item[data-type="hydration"],
-    .break-panel[data-type="visual"] {
+    .break-panel[data-type="visual"],
+    .break-panel[data-type="palming"] {
       --tone-bg: color-mix(in srgb, var(--accent) 14%, var(--card));
       --tone: color-mix(in srgb, var(--accent) 60%, var(--card));
       --tone-ink: var(--accent-dark);
@@ -2984,7 +2990,8 @@
         </button>
         <p class="guide-text">
           Regla 20-20-20: cada 20 minutos, mira algo a unos 6 metros durante
-          20 segundos mientras parpadeas despacio.
+          20 segundos mientras parpadeas despacio. Una vez por hora, además:
+          palmeado.
         </p>
         <div class="guide-panel" id="guidePanel-visual" hidden></div>
       </article>
@@ -3041,7 +3048,7 @@
       <ul>
         <li>
           <a href="https://www.insst.es/documents/94886/96076/InstruccionBasicaParaTrabajadorUsuarioPantallas.pdf" target="_blank" rel="noopener">INSST (España) ↗</a>
-          — Instrucción básica para el trabajador usuario de pantallas: pausas y mirar a lo lejos.
+          — Instrucción básica para el trabajador usuario de pantallas: pausas, mirar a lo lejos y palmeado.
         </li>
         <li>
           <a href="https://www.aoa.org/healthy-eyes/eye-and-vision-conditions/computer-vision-syndrome" target="_blank" rel="noopener">Asociación Americana de Optometría ↗</a>
@@ -3176,6 +3183,16 @@
       exercise: "Regla 20-20-20: enfoca un objeto a unos 6 metros durante 20 segundos. Después parpadea lento 10 veces: frente a la pantalla parpadeamos mucho menos y los ojos se resecan.",
       duration: VISUAL_SECONDS
     },
+    // Palmeado (INSST): complemento del 1.er aviso de cada ciclo, después
+    // de la regla 20-20-20; no la reemplaza.
+    palming: {
+      icon: "eye",
+      type: "Descanso visual",
+      title: "Relaja la vista",
+      description: "Palmeado: ejercicio de relajación visual recomendado por el INSST para las pausas.",
+      exercise: "",
+      duration: 20
+    },
     mobility: {
       icon: "stretch",
       type: "Pausa de movilidad",
@@ -3194,11 +3211,12 @@
     }
   };
 
-  const BREAK_LABELS = { visual: "Visual", mobility: "Movilidad", active: "Activa" };
+  const BREAK_LABELS = { visual: "Visual", palming: "Palmeado", mobility: "Movilidad", active: "Activa" };
 
   // El botón dice qué se va a hacer: "pausa" a secas no se entendía.
   const BREAK_START_LABELS = {
     visual: "Empezar descanso visual",
+    palming: "Empezar palmeado",
     mobility: "Empezar estiramiento",
     active: "Empezar pausa activa"
   };
@@ -3212,6 +3230,9 @@
     // se hace a la vez, así que no alarga el descanso.
     visual: [
       { label: "Mirar lejos (20-20-20)", pose: "eye", text: "Aparta la vista de la pantalla y mira algo a unos 6 metros: por una ventana o al fondo de la oficina. Mientras miras lejos, parpadea despacio y por completo varias veces." }
+    ],
+    palming: [
+      { label: "Palmeado", pose: "palming", text: "Cubre los ojos con las palmas de las manos, sin tocar los párpados y con los ojos abiertos, de modo que no veas ninguna luz. Quédate así 20 segundos, respirando tranquilo. Si usas lentes de contacto o tienes alguna molestia en los ojos, omítelo." }
     ],
     mobility: [
       { label: "Cuello", pose: "neck", text: "Inclina la cabeza hacia un hombro y sostén 10 segundos; repite al otro lado. Luego lleva el mentón hacia atrás, como haciendo doble mentón, 5 veces. Sin forzar." },
@@ -3296,6 +3317,17 @@
     '<ellipse class="sf-ground" cx="40" cy="96" rx="32" ry="3.5"/>';
 
   // --- Dibujos de los ejercicios añadidos ---
+  // Cabeza con las dos palmas cubriendo los ojos.
+  const PALMING_FIGURE =
+    '<circle class="sf-head" cx="40" cy="32" r="22"/>' +
+    '<circle class="sf-head-highlight" cx="32" cy="20" r="3"/>' +
+    '<g class="sf-palms">' +
+      '<line x1="10" y1="60" x2="24" y2="36"/>' +
+      '<line x1="70" y1="60" x2="56" y2="36"/>' +
+      '<ellipse class="sf-palm" cx="29" cy="29" rx="12" ry="10"/>' +
+      '<ellipse class="sf-palm" cx="51" cy="29" rx="12" ry="10"/>' +
+    '</g>';
+
   // De pie, manos detrás de la cabeza y codos abiertos.
   const SCAPULA_FIGURE =
     '<g class="sf-body-group">' +
@@ -3369,6 +3401,7 @@
     '<ellipse class="sf-ground" cx="40" cy="97" rx="32" ry="3.5"/>';
 
   const CUSTOM_FIGURES = {
+    "palming": { box: "0 0 80 60", svg: PALMING_FIGURE },
     "scapula": { box: "0 0 80 100", svg: SCAPULA_FIGURE },
     "prayer": { box: "0 0 80 100", svg: PRAYER_FIGURE },
     "wall-pushup": { box: "0 0 80 100", svg: WALL_PUSHUP_FIGURE },
@@ -3801,10 +3834,10 @@
 
   // La visual suena en TODAS las alarmas. Además, cada 2ª alarma se suma
   // movilidad y cada 3ª alarma se suma activa (y el patrón se reinicia).
-  // Alarma 1 -> Visual · Alarma 2 -> Visual + Movilidad · Alarma 3 -> Visual + Activa · Alarma 4 -> Visual · ...
+  // Alarma 1 -> Visual + Palmeado · Alarma 2 -> Visual + Movilidad · Alarma 3 -> Visual + Activa · Alarma 4 -> Visual + Palmeado · ...
   function getBreakQueue(cycleCount) {
     const position = cycleCount % 3;
-    if (position === 1) return ["visual"];
+    if (position === 1) return ["visual", "palming"];
     if (position === 2) return ["visual", "mobility"];
     return ["visual", "active"];
   }
@@ -4057,7 +4090,9 @@
     breakContinueLabel = isLast ? "Continuar trabajando" : "Siguiente ejercicio →";
     startBreakBtn.disabled = false;
     startBreakBtn.textContent = "▶ " + BREAK_START_LABELS[currentBreakType];
-    skipBreakBtn.textContent = total > 1 ? "Omitir esta alarma" : "Omitir pausa";
+    skipBreakBtn.textContent = currentBreakType === "palming"
+      ? "Omitir palmeado"
+      : (total > 1 ? "Omitir esta alarma" : "Omitir pausa");
 
     updateTimerDisplay();
   }
@@ -4619,7 +4654,7 @@
   function countFinishedBreak(outcome) {
     breaksCompleted += 1;
 
-    if (currentBreakType !== "visual") {
+    if (currentBreakType === "mobility" || currentBreakType === "active") {
       activeBreaks += 1;
       activeMinutes += Math.round(BREAK_DEFS[currentBreakType].duration / 60);
     }
@@ -4665,7 +4700,9 @@
     stopAllTimers();
     stopAlarm();
     silenceOtherCopies();
-    logBreakOutcome(breakAway ? "away" : "skipped");
+    if (currentBreakType !== "palming") {
+      logBreakOutcome(breakAway ? "away" : "skipped");
+    }
     resumeWorkAfterBreak();
   }
 
