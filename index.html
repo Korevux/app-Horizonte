@@ -3,27 +3,78 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Horizonte · Bienestar en cada pausa: pequeños descansos para una jornada más activa." />
-  <title>Horizonte · Bienestar en cada pausa</title>
-  <link rel="icon" id="appFavicon">
+  <meta name="description" content="Horizonte · Pausas activas, ergonomía y salud visual para tu jornada." />
+  <title>Horizonte · Pausas activas</title>
+  <link rel="icon" id="appFavicon" href="icons/icon-32.png" type="image/png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
-  <meta name="theme-color" content="#171715">
+  <!-- Estadísticas anónimas sin cookies (GoatCounter, cuenta Korevux). -->
+  <script data-goatcounter="https://korevux.goatcounter.com/count"
+          async src="https://gc.zgo.at/count.js"></script>
+  <meta name="theme-color" content="#12907e">
+  <script>
+    // Aplica el tema de color guardado antes de pintar, para evitar un
+    // destello con los colores por defecto.
+    try {
+      var savedPalette = localStorage.getItem("horizonte-palette");
+      if (savedPalette === "salvia" || savedPalette === "amanecer" || savedPalette === "mar") {
+        document.documentElement.setAttribute("data-palette", savedPalette);
+      }
+    } catch (e) {}
+  </script>
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap');
 
+    /* Paleta "aguamarina + coral": luminosa y fresca, con buen contraste
+       para todas las edades. Aguamarina = trabajo y calma; coral = pausa
+       y logros. */
     :root {
-      --bg: #eee9e1;
+      --bg: #f3f8f7;
       --card: #ffffff;
-      --dark: #171715;
-      --dark-soft: #24231f;
-      --text: #20201d;
-      --muted: #77736b;
-      --border: #e7e2da;
-      --accent: #b8c9a4;
-      --accent-dark: #6d8158;
-      --success: #78965f;
-      --danger: #a96c63;
+      --dark: #16302d;
+      --dark-soft: #1f3d39;
+      --timer-bg: linear-gradient(155deg, #33ccb1 0%, #12907e 100%);
+      --timer-break-bg: linear-gradient(155deg, #ff9b7b 0%, #ee5f3c 100%);
+      --timer-border: transparent;
+      --timer-shadow: 0 18px 40px color-mix(in srgb, var(--accent-dark) 25%, transparent);
+      --text: #16302d;
+      --muted: #4d6562;
+      --border: #dbe9e6;
+      --accent: #2cc2a8;
+      --accent-dark: #0f7c6b;
+      --on-accent: #05332c;
+      --success: #0f7c6b;
+      --danger: #c0543a;
+
+      /* Coral ("el sol" del logo): pausas y logros —
+         racha encendida y "¡Listo!". */
+      --sun: #ff7a59;
+      --sun-text: #d4502c;
+
+      --surface-2: #eaf4f2;
+      --surface-3: #f7fbfa;
+      --surface-4: #fff3ee;
+      --surface-5: #e8f3f0;
+      --danger-soft: #fde9e3;
+      --text-soft: #2c4642;
+      --muted-2: #6c8480;
+      --illus-1: #ffffff;
+      --illus-2: #e2f4f0;
+      --glass-1: rgba(255,255,255,.85);
+      --glass-2: rgba(255,255,255,.55);
+      --glass-border: rgba(255,255,255,.9);
+      --on-accent-strong: #fff;
+
+      color-scheme: light;
+    }
+
+    /* Ícono de línea: mide 1em y toma el color del texto. */
+    .ic {
+      width: 1em;
+      height: 1em;
+      flex: none;
+      vertical-align: -0.15em;
     }
 
     * {
@@ -34,7 +85,7 @@
       margin: 0;
       background: var(--bg);
       color: var(--text);
-      font-family: "Jakarta Sans", Arial, sans-serif;
+      font-family: "Plus Jakarta Sans", system-ui, Arial, sans-serif;
       min-height: 100vh;
     }
 
@@ -59,7 +110,7 @@
     }
 
     .eyebrow {
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 800;
       letter-spacing: 0.14em;
       text-transform: uppercase;
@@ -84,17 +135,50 @@
     }
 
     .timer-card {
-      background: var(--dark);
+      background: var(--timer-bg);
       color: #fff;
       border-radius: 28px;
       padding: 30px 22px 24px;
       text-align: center;
-      box-shadow: 0 18px 45px rgba(0,0,0,.10);
+      border: 1px solid var(--timer-border);
+      box-shadow: var(--timer-shadow);
       transition: background .25s ease;
     }
 
     .timer-card.break-mode {
-      background: var(--dark-soft);
+      background: var(--timer-break-bg);
+      box-shadow: 0 18px 40px rgba(238, 95, 60, .25);
+    }
+
+    /* Todo lo de adentro va en blanco para leerse bien sobre el color. */
+    .timer-card .timer-label,
+    .timer-card .timer-description,
+    .timer-card .next-break-hint,
+    .timer-card .alarm-indicator {
+      color: rgba(255, 255, 255, .92);
+    }
+
+    .timer-card .timer-ring-track {
+      stroke: rgba(255, 255, 255, .25);
+    }
+
+    .timer-card .timer-ring-progress {
+      stroke: #fff;
+    }
+
+    .timer-card .btn-primary {
+      background: #fff;
+      color: var(--accent-dark);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, .10);
+    }
+
+    .timer-card.break-mode .btn-primary {
+      color: var(--sun-text);
+    }
+
+    .timer-card .btn-secondary {
+      background: rgba(255, 255, 255, .2);
+      color: #fff;
     }
 
     .timer-label {
@@ -114,9 +198,75 @@
       font-variant-numeric: tabular-nums;
     }
 
+    /* Anillo de progreso: se va cerrando mientras corre el intervalo de
+       trabajo; en la pausa queda completo y "respira" suavemente. */
+    .timer-ring {
+      position: relative;
+      width: min(250px, 100%);
+      aspect-ratio: 1;
+      margin: 18px auto 14px;
+      display: grid;
+      place-items: center;
+    }
+
+    .timer-ring-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+
+    .timer-ring-track,
+    .timer-ring-progress {
+      fill: none;
+      stroke-width: 3.5;
+    }
+
+    .timer-ring-track {
+      stroke: rgba(255, 255, 255, .08);
+    }
+
+    .timer-ring-progress {
+      stroke: var(--accent);
+      stroke-linecap: round;
+      stroke-dasharray: 100;
+      stroke-dashoffset: 100;
+      transition: stroke-dashoffset 1s linear, opacity .3s ease;
+    }
+
+    .timer-ring-progress.is-empty {
+      opacity: 0;
+    }
+
+    .timer-card.break-mode .timer-ring-progress {
+      animation: ringBreathe 4s ease-in-out infinite;
+    }
+
+    @keyframes ringBreathe {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .45; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .timer-ring-progress {
+        transition: none;
+      }
+
+      .timer-card.break-mode .timer-ring-progress {
+        animation: none;
+      }
+    }
+
+    .timer-ring .timer {
+      position: relative;
+      margin: 0;
+      font-size: clamp(50px, 15vw, 66px);
+    }
+
     .timer-description {
       color: #bcbab4;
-      font-size: 13px;
+      font-size: 14px;
       min-height: 20px;
       line-height: 1.5;
     }
@@ -148,36 +298,36 @@
     .btn-primary {
       flex: 1;
       background: var(--accent);
-      color: #20241d;
+      color: var(--on-accent);
     }
 
     .btn-secondary {
-      background: #302f2b;
+      background: var(--dark);
       color: #fff;
     }
 
     .btn-light {
-      background: #f2f0eb;
+      background: var(--surface-2);
       color: var(--text);
       border: 1px solid var(--border);
     }
 
     .btn-danger {
-      background: #f3e8e6;
+      background: var(--danger-soft);
       color: var(--danger);
     }
 
     .btn:focus-visible,
     select:focus-visible {
-      outline: 3px solid rgba(184, 201, 164, .75);
+      outline: 3px solid color-mix(in srgb, var(--accent) 75%, transparent);
       outline-offset: 2px;
     }
 
     .cycle-card {
       margin-top: 14px;
       padding: 18px 14px 24px;
-      background: linear-gradient(165deg, rgba(255,255,255,.75), rgba(255,255,255,.4));
-      border: 1px solid rgba(255,255,255,.8);
+      background: linear-gradient(165deg, var(--glass-1), var(--glass-2));
+      border: 1px solid var(--glass-border);
       border-radius: 22px;
     }
 
@@ -204,48 +354,50 @@
       gap: 5px;
       border-radius: 18px;
       padding: 14px 4px 15px;
-      background: #ece7dc;
-      color: #77736b;
+      background: var(--surface-5);
+      color: var(--muted);
       text-align: center;
       transition: background .25s ease, color .25s ease, transform .2s ease;
     }
 
     .cycle-step-icon {
-      width: 36px;
-      height: 36px;
+      width: 50px;
+      height: 50px;
       border-radius: 50%;
-      background: #fff;
+      background: var(--card);
       display: grid;
       place-items: center;
-      font-size: 16px;
+      font-size: 26px;
+      color: var(--accent-dark);
       box-shadow: 0 4px 10px rgba(20, 24, 14, .1);
       transition: background .25s ease, box-shadow .25s ease;
     }
 
     .cycle-step-label {
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 800;
     }
 
     .cycle-step-time {
-      font-size: 10px;
+      font-size: 12px;
       font-weight: 700;
-      color: #9a968c;
+      color: var(--muted-2);
     }
 
     .cycle-step.active {
-      background: linear-gradient(160deg, #cddab4, var(--accent));
-      color: #26301f;
+      background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 45%, white), var(--accent));
+      color: var(--on-accent);
       transform: translateY(-2px);
     }
 
     .cycle-step.active .cycle-step-icon {
       background: var(--accent-dark);
-      box-shadow: 0 6px 14px rgba(109, 129, 88, .35);
+      color: #fff;
+      box-shadow: 0 6px 14px color-mix(in srgb, var(--accent-dark) 35%, transparent);
     }
 
     .cycle-step.active .cycle-step-time {
-      color: #3b4a30;
+      color: var(--on-accent);
     }
 
     .cycle-step.active::after {
@@ -286,23 +438,24 @@
     }
 
     .break-icon {
-      width: 68px;
-      height: 68px;
+      width: 92px;
+      height: 92px;
       margin: 0 auto 16px;
       border-radius: 50%;
-      background: linear-gradient(160deg, #dbe6c8, var(--accent));
+      background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 30%, white), var(--accent));
       display: grid;
       place-items: center;
-      font-size: 30px;
+      font-size: 46px;
+      color: var(--on-accent);
       box-shadow:
-        0 0 0 8px rgba(184, 201, 164, .28),
-        0 0 0 16px rgba(184, 201, 164, .14),
-        0 10px 24px rgba(109, 129, 88, .22);
+        0 0 0 8px color-mix(in srgb, var(--accent) 28%, transparent),
+        0 0 0 16px color-mix(in srgb, var(--accent) 14%, transparent),
+        0 10px 24px color-mix(in srgb, var(--accent-dark) 22%, transparent);
     }
 
     .break-type {
       color: var(--accent-dark);
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 800;
       letter-spacing: .12em;
       text-transform: uppercase;
@@ -316,7 +469,7 @@
 
     .break-description {
       color: var(--muted);
-      font-size: 13px;
+      font-size: 14px;
       line-height: 1.55;
       margin: 0 auto;
       max-width: 330px;
@@ -326,29 +479,55 @@
       margin: 17px 0;
       padding: 13px;
       border-radius: 14px;
-      background: #f7f5f1;
-      color: #48453f;
-      font-size: 13px;
+      background: var(--surface-3);
+      color: var(--text-soft);
+      font-size: 14px;
       line-height: 1.5;
     }
 
     .break-countdown {
-      font-size: 46px;
+      font-size: 56px;
       font-weight: 800;
       font-variant-numeric: tabular-nums;
       margin: 13px 0;
+      transition: color .3s ease;
+    }
+
+    /* Al terminar el conteo: "¡Listo! ✓" en ámbar (color de logros) y el botón resaltado. */
+    .break-done .break-countdown {
+      color: var(--sun-text);
+      animation: breakDonePop .4s ease;
+    }
+
+    .break-done #startBreakBtn {
+      background: var(--accent-dark);
+      color: var(--on-accent-strong);
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 45%, transparent);
+    }
+
+    @keyframes breakDonePop {
+      0% { transform: scale(.9); }
+      60% { transform: scale(1.06); }
+      100% { transform: scale(1); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .break-done .break-countdown {
+        animation: none;
+      }
     }
 
     .visual-note {
       display: block;
       color: var(--muted);
       font-size: 12px;
-      margin-top: 8px;
+      line-height: 1.45;
+      margin: 8px 0 14px;
     }
 
     .break-progress {
       color: var(--accent-dark);
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 800;
       letter-spacing: .06em;
       text-transform: uppercase;
@@ -378,7 +557,7 @@
 
     .exercise-select-label {
       display: block;
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: .06em;
@@ -393,7 +572,7 @@
 
     /* --- Muñeco ilustrativo (SVG) --- */
     .exercise-illustration {
-      background: radial-gradient(circle at 50% 32%, #fbfaf7, #f0ede4);
+      background: radial-gradient(circle at 50% 32%, var(--illus-1), var(--illus-2));
       border-radius: 16px;
       padding: 6px 0 2px;
       margin-bottom: 10px;
@@ -402,8 +581,8 @@
     }
 
     .sf-svg {
-      width: 92px;
-      height: 108px;
+      width: 132px;
+      height: 156px;
       overflow: visible;
       filter: drop-shadow(0 3px 3px rgba(20, 24, 14, .16));
     }
@@ -530,7 +709,7 @@
       height: 26px;
       border-radius: 50%;
       border: 1px solid var(--border);
-      background: #fff;
+      background: var(--card);
       color: var(--text);
       font-size: 15px;
       line-height: 1;
@@ -569,21 +748,21 @@
       flex-direction: column;
       align-items: center;
       gap: 4px;
-      background: #f2f0eb;
+      background: var(--surface-2);
       border: 1px solid var(--border);
       border-radius: 13px;
-      padding: 6px 8px 7px;
-      min-width: 68px;
+      padding: 8px 10px 9px;
+      min-width: 86px;
     }
 
     .exercise-chip .sf-svg {
-      width: 40px;
-      height: 46px;
+      width: 54px;
+      height: 62px;
       pointer-events: none;
     }
 
     .exercise-chip-label {
-      font-size: 10px;
+      font-size: 12px;
       font-weight: 700;
       line-height: 1.25;
       text-align: center;
@@ -596,7 +775,7 @@
     }
 
     .exercise-chip.selected .exercise-chip-label {
-      color: #26301f;
+      color: var(--on-accent);
     }
 
     /* --- Guía rápida interactiva --- */
@@ -641,6 +820,10 @@
       padding-top: 14px;
     }
 
+    .guide-exercise-text {
+      margin-top: 10px;
+    }
+
     .guide-panel .exercise-illustration {
       margin-bottom: 9px;
     }
@@ -669,7 +852,7 @@
     .stat-label {
       display: block;
       color: var(--muted);
-      font-size: 10px;
+      font-size: 12px;
       font-weight: 700;
       margin-top: 3px;
       line-height: 1.25;
@@ -701,18 +884,18 @@
       min-height: 45px;
       flex: 1;
       border: 1px solid var(--border);
-      background: #faf9f6;
+      background: var(--surface-3);
       border-radius: 12px;
       padding: 0 12px;
       color: var(--text);
-      font-size: 13px;
+      font-size: 14px;
     }
 
     .sound-test {
       min-height: 45px;
       min-width: 75px;
       border: 1px solid var(--border);
-      background: #f2f0eb;
+      background: var(--surface-2);
       color: var(--text);
       border-radius: 12px;
       font-size: 12px;
@@ -732,7 +915,7 @@
     }
 
     .time-row-label {
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 700;
       flex: 1;
       min-width: 0;
@@ -750,7 +933,7 @@
       flex: 0 0 auto;
       border-radius: 10px;
       border: 1px solid var(--border);
-      background: #f2f0eb;
+      background: var(--surface-2);
       color: var(--text);
       font-size: 18px;
       font-weight: 700;
@@ -770,7 +953,7 @@
       text-align: center;
       border: 1px solid var(--border);
       border-radius: 10px;
-      background: #faf9f6;
+      background: var(--surface-3);
       color: var(--text);
       font-size: 14px;
       font-weight: 800;
@@ -784,7 +967,7 @@
     }
 
     .time-unit {
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 700;
       color: var(--muted);
       width: 26px;
@@ -801,10 +984,10 @@
     }
 
     .time-static-value {
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 800;
       color: var(--muted);
-      background: #f2f0eb;
+      background: var(--surface-2);
       border: 1px solid var(--border);
       border-radius: 10px;
       padding: 7px 12px;
@@ -818,7 +1001,7 @@
 
     .time-hint {
       color: var(--muted);
-      font-size: 11px;
+      font-size: 12px;
       line-height: 1.5;
       margin: -2px 0 13px;
     }
@@ -842,11 +1025,13 @@
     }
 
     .guide-icon {
-      font-size: 19px;
+      font-size: 28px;
+      color: var(--accent-dark);
+      display: inline-grid;
     }
 
     .guide-name {
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 800;
     }
 
@@ -858,7 +1043,7 @@
     }
 
     .safety-card {
-      background: #f6f2ea;
+      background: var(--surface-4);
     }
 
     .safety-title {
@@ -870,13 +1055,88 @@
     .safety-text,
     footer {
       color: var(--muted);
-      font-size: 11px;
+      font-size: 12px;
       line-height: 1.6;
     }
 
     footer {
       text-align: center;
       padding: 20px 8px 0;
+    }
+
+    .install-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      margin-top: 14px;
+    }
+
+    .install-wrap[hidden] {
+      display: none;
+    }
+
+    .install-btn {
+      min-height: 34px;
+      padding: 0 14px;
+      border: 1px solid rgba(119, 115, 107, .35);
+      border-radius: 999px;
+      background: transparent;
+      color: var(--muted);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      transition: transform .15s ease, color .15s ease;
+    }
+
+    .install-btn:hover {
+      color: var(--text);
+    }
+
+    .install-close {
+      width: 30px;
+      height: 30px;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1;
+      opacity: .7;
+    }
+
+    .install-close:hover {
+      opacity: 1;
+    }
+
+    .install-btn:active {
+      transform: scale(.97);
+    }
+
+    .install-help {
+      margin: 10px auto 0;
+      max-width: 300px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .credit {
+      margin: 22px 0 0;
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      opacity: .8;
+    }
+
+    .credit a {
+      color: var(--accent-dark);
+      font-weight: 700;
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+    }
+
+    .credit a:hover {
+      text-decoration-thickness: 2px;
     }
 
     .legal-disclaimer {
@@ -887,17 +1147,450 @@
 
     .legal-title {
       margin: 0 0 8px;
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: .08em;
       color: var(--muted);
       text-align: center;
+      cursor: pointer;
+      list-style: none;
+    }
+
+    .legal-title::-webkit-details-marker {
+      display: none;
+    }
+
+    .legal-title::after {
+      content: " ＋";
+    }
+
+    .legal-disclaimer[open] .legal-title::after {
+      content: " −";
+    }
+
+    .legal-disclaimer:not([open]) {
+      padding-bottom: 0;
+    }
+
+    /* Ajustes plegables: la pantalla principal queda limpia y las
+       opciones aparecen solo cuando la persona las busca. */
+    .settings-panel {
+      margin-top: 16px;
+    }
+
+    .settings-summary {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 15px 18px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 21px;
+      cursor: pointer;
+      list-style: none;
+    }
+
+    .settings-summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .settings-summary-icon {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 11px;
+      background: var(--surface-2);
+      font-size: 23px;
+      color: var(--accent-dark);
+    }
+
+    .settings-summary-text {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      font-size: 14px;
+    }
+
+    .settings-summary-text span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .settings-summary-chevron {
+      color: var(--muted);
+      font-size: 22px;
+      line-height: 1;
+      transition: transform .2s ease;
+    }
+
+    .settings-panel[open] .settings-summary-chevron {
+      transform: rotate(90deg);
+    }
+
+    .settings-panel .settings-card {
+      margin-top: 10px;
+    }
+
+    .settings-intro-btn {
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    /* Introducción de 3 pasos (pantalla completa). */
+    .onboarding {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      padding: 22px max(16px, calc((100% - 430px) / 2)) 28px;
+      overflow-y: auto;
+    }
+
+    .onboarding[hidden] {
+      display: none;
+    }
+
+    body.onboarding-open {
+      overflow: hidden;
+    }
+
+    .onboarding-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .onboarding-step {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .onboarding-skip {
+      border: 0;
+      background: transparent;
+      color: var(--accent-dark);
+      font-size: 14px;
+      font-weight: 700;
+      padding: 8px 0 8px 12px;
+    }
+
+    .onboarding-slides {
+      flex: 1;
+      display: flex;
+      align-items: center;
+    }
+
+    .onboarding-slide {
+      width: 100%;
+      text-align: center;
+      animation: onboardingIn .35s ease;
+    }
+
+    @keyframes onboardingIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .onboarding-slide {
+        animation: none;
+      }
+    }
+
+    .onboarding-art {
+      display: grid;
+      place-items: center;
+      min-height: 170px;
+      margin-bottom: 22px;
+    }
+
+    .onboarding-art-emoji {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      font-size: 40px;
+    }
+
+    .onboarding-art-emoji span {
+      display: grid;
+      place-items: center;
+      width: 84px;
+      height: 84px;
+      border-radius: 26px;
+      background: var(--card);
+      border: 1px solid var(--border);
+    }
+
+    .onboarding-bell {
+      color: var(--accent-dark);
+    }
+
+    .onboarding-flame {
+      color: var(--sun-text);
+    }
+
+    .onboarding-ring {
+      position: relative;
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      background: var(--timer-bg);
+      display: grid;
+      place-items: center;
+      box-shadow: var(--timer-shadow);
+    }
+
+    .onboarding-ring svg {
+      position: absolute;
+      inset: 10px;
+      transform: rotate(-90deg);
+    }
+
+    .onboarding-ring circle {
+      fill: none;
+      stroke-width: 4;
+    }
+
+    .onboarding-ring-track {
+      stroke: rgba(255,255,255,.25);
+    }
+
+    .onboarding-ring-progress {
+      stroke: #fff;
+      stroke-linecap: round;
+      stroke-dasharray: 100;
+      stroke-dashoffset: 35;
+    }
+
+    .onboarding-ring span {
+      position: relative;
+      color: #fff;
+      font-size: 34px;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+    }
+
+    .onboarding-cycle {
+      display: flex;
+      gap: 14px;
+    }
+
+    .onboarding-cycle span {
+      display: grid;
+      place-items: center;
+      width: 88px;
+      height: 88px;
+      border-radius: 22px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      font-size: 42px;
+      color: var(--accent-dark);
+    }
+
+    .onboarding-cycle span:first-child {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--on-accent);
+    }
+
+    .onboarding-title {
+      margin: 0 0 12px;
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: 27px;
+      line-height: 1.15;
+    }
+
+    .onboarding-text {
+      margin: 0 auto;
+      max-width: 330px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .onboarding-text strong {
+      color: var(--text);
+    }
+
+    .onboarding-text-small {
+      margin-top: 14px;
+      font-size: 14px;
+    }
+
+    .onboarding-list {
+      margin: 0 auto;
+      padding: 0;
+      max-width: 320px;
+      list-style: none;
+      text-align: left;
+      display: grid;
+      gap: 8px;
+    }
+
+    .onboarding-list li {
+      padding: 11px 14px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .onboarding-list strong {
+      color: var(--text);
+    }
+
+    .onboarding-notify-status {
+      margin: 18px 0 0;
+      color: var(--accent-dark);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .onboarding-later {
+      margin-top: -8px;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+      padding: 8px 16px;
+    }
+
+    .onboarding-later[hidden] {
+      display: none;
+    }
+
+    .onboarding-bottom {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .onboarding-dots {
+      display: flex;
+      gap: 7px;
+    }
+
+    .onboarding-dots span {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--border);
+      transition: width .25s ease, background .25s ease;
+    }
+
+    .onboarding-dots span.active {
+      width: 24px;
+      background: var(--accent-dark);
+    }
+
+    .onboarding-next {
+      width: 100%;
+      max-width: 360px;
+      flex: none;
+    }
+
+    /* Racha: días seguidos con al menos una pausa completada. Sábado y
+       domingo no la rompen, para quien solo usa la app entre semana. */
+    .streak-card {
+      margin-top: 16px;
+      padding: 16px 18px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 21px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .streak-main {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .streak-flame {
+      display: grid;
+      place-items: center;
+      width: 54px;
+      height: 54px;
+      border-radius: 14px;
+      background: var(--surface-2);
+      color: var(--muted-2);
+      font-size: 30px;
+      transition: color .3s ease, background .3s ease;
+    }
+
+    .streak-card.is-active .streak-flame {
+      color: var(--sun-text);
+      background: color-mix(in srgb, var(--sun) 18%, transparent);
+    }
+
+    .streak-count {
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .streak-count #streakCount {
+      font-size: 22px;
+    }
+
+    .streak-hint {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+      margin-top: 2px;
+    }
+
+    .streak-week {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+    }
+
+    .streak-day {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .streak-dot {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+    }
+
+    .streak-day.done .streak-dot {
+      background: var(--accent);
+      border-color: var(--accent-dark);
+    }
+
+    .streak-day.today {
+      color: var(--text);
+    }
+
+    .streak-day.today .streak-dot {
+      box-shadow: 0 0 0 2px var(--bg), 0 0 0 3.5px var(--accent-dark);
     }
 
     .legal-text {
       color: var(--muted);
-      font-size: 11px;
+      font-size: 12px;
       line-height: 1.65;
       margin: 0 0 9px;
     }
@@ -910,7 +1603,7 @@
       display: none;
       margin-top: 10px;
       color: var(--accent);
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 800;
       letter-spacing: .08em;
       text-transform: uppercase;
@@ -953,18 +1646,480 @@
         transition: none !important;
       }
     }
+    /* ---------- Acabado profesional ----------
+       Un solo sistema de profundidad para toda la app: borde muy fino +
+       sombra suave en dos capas (cercana y difusa). Así todas las
+       tarjetas "flotan" igual y nada se ve plano ni recargado. */
+    :root {
+      --card-border: rgba(22, 48, 45, .07);
+      --shadow-card: 0 1px 2px rgba(22, 48, 45, .04), 0 10px 28px rgba(22, 48, 45, .07);
+      --shadow-pop: 0 2px 4px rgba(22, 48, 45, .06), 0 16px 36px rgba(22, 48, 45, .12);
+      --sky: #dff4ef;
+    }
+
+    /* Fondo de "amanecer" en toda la pantalla: aguamarina arriba que baja
+       a un durazno cálido. Da color sin oscurecer, y es el guiño al
+       nombre. */
+    :root {
+      --page-bg: linear-gradient(180deg, #c6ece3 0%, #e2f4ef 32%, #f6efe6 70%, #ffe6da 100%);
+      --tint-aqua: #e0f5f0;
+      --tint-coral: #ffe9e1;
+      --tint-amber: #fff1d9;
+      --amber-text: #b26b0b;
+    }
+
+    body {
+      background: var(--page-bg) fixed, var(--bg);
+    }
+
+    /* La racha con un leve tono coral (es un logro). */
+    .streak-card {
+      background: linear-gradient(135deg, var(--card) 40%, var(--tint-coral));
+    }
+
+    .settings-card,
+    .guide-card,
+    .safety-card,
+    .stat,
+    .streak-card,
+    .break-panel,
+    .settings-summary,
+    .cycle-card {
+      border-color: var(--card-border);
+      box-shadow: var(--shadow-card);
+    }
+
+    .cycle-card {
+      background: var(--card);
+    }
+
+    /* El temporizador: brillo interno arriba, como una pieza de vidrio. */
+    .timer-card {
+      box-shadow: var(--timer-shadow), inset 0 1px 0 rgba(255, 255, 255, .28);
+    }
+
+    /* Botones: respuesta táctil clara (se hunden un poco al tocarlos) y
+       anillo de foco visible para teclado. */
+    .btn,
+    .settings-summary,
+    .exercise-chip,
+    .install-btn {
+      transition: transform .15s ease, box-shadow .2s ease, background .2s ease, opacity .15s ease;
+    }
+
+    .btn:not(:disabled):active,
+    .exercise-chip:active,
+    .settings-summary:active {
+      transform: scale(.97);
+    }
+
+    @media (hover: hover) {
+      .btn:not(:disabled):hover {
+        box-shadow: var(--shadow-pop);
+      }
+
+      .settings-summary:hover {
+        box-shadow: var(--shadow-pop);
+      }
+    }
+
+    .btn:focus-visible,
+    .settings-summary:focus-visible,
+    .exercise-chip:focus-visible,
+    .palette-switch button:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--accent) 55%, transparent);
+      outline-offset: 2px;
+    }
+
+    .btn-primary {
+      box-shadow: 0 6px 16px color-mix(in srgb, var(--accent) 28%, transparent);
+    }
+
+    .exercise-chip[aria-pressed="true"] {
+      background: var(--card);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 25%, transparent), var(--shadow-card);
+    }
+
+    /* Logo D: símbolo del amanecer + "Horizonte" + descriptor. */
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      text-align: left;
+    }
+
+    .brand-mark {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      box-shadow: 0 6px 16px color-mix(in srgb, var(--accent-dark) 25%, transparent);
+    }
+
+    .brand-text h1 {
+      line-height: 1;
+    }
+
+    .brand-tag {
+      display: block;
+      margin-top: 5px;
+      color: var(--accent-dark);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+    }
+
+    /* Números de estadísticas en el color de marca: se leen como logros. */
+    .stat-value {
+      color: var(--accent-dark);
+    }
+
+    /* ---------- Temas de color ----------
+       "Aguamarina + coral" es el tema por defecto (sin atributo). Los
+       demás se activan con data-palette en <html>. */
+    :root[data-palette="salvia"] {
+      --accent: #8fc46f;
+      --accent-dark: #3f7d32;
+      --on-accent: #12240d;
+      --success: #3f7d32;
+      --sun: #e08a2e;
+      --sun-text: #b8650f;
+      --timer-bg: linear-gradient(155deg, #6fb34f 0%, #3a7a2e 100%);
+      --timer-break-bg: linear-gradient(155deg, #f4a24c 0%, #d9701c 100%);
+    }
+
+    :root[data-palette="salvia"] {
+      --bg: #f5f3ea;
+      --page-bg: linear-gradient(180deg, #ddeecd 0%, #eef3e2 32%, #f7f1e4 70%, #fde6cf 100%);
+      --tint-aqua: #e6f2da;
+      --tint-coral: #fde9d6;
+      --tint-amber: #fff1d6;
+      --surface-2: #eef3e6;
+      --surface-5: #ebf1e2;
+      --illus-2: #e6f2da;
+      --timer-shadow: 0 18px 40px rgba(58, 122, 46, .25);
+    }
+
+    :root[data-palette="amanecer"] {
+      --accent: #f08a5d;
+      --accent-dark: #c4562c;
+      --on-accent: #2a1208;
+      --success: #c4562c;
+      --sun: #e9a23b;
+      --sun-text: #b8701a;
+      --timer-bg: linear-gradient(155deg, #34507a 0%, #1f2f4d 100%);
+      --timer-break-bg: linear-gradient(155deg, #f7a35c 0%, #e8693f 100%);
+    }
+
+    :root[data-palette="amanecer"] {
+      --bg: #fbf4ee;
+      --text: #1f2430;
+      --muted: #555b6b;
+      --page-bg: linear-gradient(180deg, #d9e2f2 0%, #ece9f0 32%, #fbefe5 70%, #ffdcc8 100%);
+      --tint-aqua: #fde5d9;
+      --tint-coral: #e2e8f4;
+      --tint-amber: #fff0d6;
+      --surface-2: #f6ece4;
+      --surface-5: #f3e8df;
+      --illus-2: #fde5d9;
+      --timer-shadow: 0 18px 40px rgba(31, 47, 77, .3);
+    }
+
+    :root[data-palette="mar"] {
+      --accent: #5cc8a8;
+      --accent-dark: #1f8a6e;
+      --on-accent: #062a20;
+      --success: #1f8a6e;
+      --sun: #f39a3d;
+      --sun-text: #c06a12;
+      --timer-bg: linear-gradient(155deg, #1f6463 0%, #12393a 100%);
+      --timer-break-bg: linear-gradient(155deg, #f7b552 0%, #e0801c 100%);
+    }
+
+    :root[data-palette="mar"] {
+      --bg: #eef6f4;
+      --text: #142425;
+      --page-bg: linear-gradient(180deg, #c8ebe2 0%, #e4f4f0 40%, #eef6f2 75%, #fdeedb 100%);
+      --tint-aqua: #dcf3ec;
+      --tint-coral: #fdecd9;
+      --tint-amber: #fff0d9;
+      --surface-2: #e5f3ef;
+      --surface-5: #e2f1ed;
+      --illus-2: #dcf3ec;
+      --timer-shadow: 0 18px 40px rgba(18, 57, 58, .28);
+    }
+
+    /* ---------- Tonalidades por tipo de pausa ----------
+       Un solo color (el acento del tema) en tres intensidades, para que
+       los tipos se distingan sin parecer un carnaval:
+       Visual = claro, Movilidad = medio, Activa = profundo.
+       --tone-bg: fondo suave · --tone: color principal · --tone-ink:
+       ícono/texto sobre fondo claro · --tone-on: texto sobre --tone. */
+    #cycleVisual,
+    .guide-item[data-type="visual"],
+    .guide-item[data-type="hydration"],
+    .break-panel[data-type="visual"] {
+      --tone-bg: color-mix(in srgb, var(--accent) 14%, var(--card));
+      --tone: color-mix(in srgb, var(--accent) 60%, var(--card));
+      --tone-ink: var(--accent-dark);
+      --tone-on: var(--on-accent);
+    }
+
+    #cycleMobility,
+    .guide-item[data-type="mobility"],
+    .break-panel[data-type="mobility"] {
+      --tone-bg: color-mix(in srgb, var(--accent) 24%, var(--card));
+      --tone: var(--accent);
+      --tone-ink: var(--accent-dark);
+      --tone-on: var(--on-accent);
+    }
+
+    #cycleActive,
+    .guide-item[data-type="active"],
+    .break-panel[data-type="active"] {
+      --tone-bg: color-mix(in srgb, var(--accent-dark) 18%, var(--card));
+      --tone: var(--accent-dark);
+      --tone-ink: color-mix(in srgb, var(--accent-dark) 85%, black);
+      --tone-on: #fff;
+    }
+
+    /* Ciclo de pausas */
+    .cycle-step {
+      background: var(--tone-bg);
+    }
+
+    .cycle-step .cycle-step-icon {
+      background: var(--card);
+      color: var(--tone-ink);
+    }
+
+    .cycle-step.active {
+      background: linear-gradient(160deg, color-mix(in srgb, var(--tone) 55%, var(--card)), var(--tone));
+      color: var(--tone-on);
+    }
+
+    .cycle-step.active .cycle-step-time {
+      color: var(--tone-on);
+      opacity: .85;
+    }
+
+    .cycle-step.active .cycle-step-icon {
+      background: var(--card);
+      color: var(--tone-ink);
+      box-shadow: 0 6px 14px color-mix(in srgb, var(--tone) 40%, transparent);
+    }
+
+    /* Guía rápida: todos los íconos en la misma ficha sólida del tono
+       profundo, para que la lista se vea uniforme. */
+    .guide-item[data-type] .guide-icon {
+      display: inline-grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 13px;
+      background: var(--accent-dark);
+      color: #fff;
+      font-size: 26px;
+    }
+
+    /* Pantalla de pausa: el círculo del ícono toma el tono del tipo. */
+    .break-panel[data-type] .break-icon {
+      background: linear-gradient(160deg, color-mix(in srgb, var(--tone) 45%, var(--card)), var(--tone));
+      color: var(--tone-on);
+      box-shadow:
+        0 0 0 8px color-mix(in srgb, var(--tone) 22%, transparent),
+        0 0 0 16px color-mix(in srgb, var(--tone) 10%, transparent),
+        0 10px 24px color-mix(in srgb, var(--tone) 30%, transparent);
+    }
+
+    /* Estadísticas: la misma familia de color en tres intensidades. */
+    .stats .stat:nth-child(1) {
+      background: color-mix(in srgb, var(--accent) 10%, var(--card));
+    }
+
+    .stats .stat:nth-child(2) {
+      background: color-mix(in srgb, var(--accent) 20%, var(--card));
+    }
+
+    .stats .stat:nth-child(3) {
+      background: color-mix(in srgb, var(--accent-dark) 16%, var(--card));
+    }
+
+    /* Selector de tema en Ajustes: muestras redondas con los dos colores. */
+    .palette-switch {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .palette-switch button {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 4px 8px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--surface-3);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .palette-switch button[aria-checked="true"] {
+      border-color: var(--accent);
+      background: var(--card);
+      color: var(--text);
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 35%, transparent);
+    }
+
+    .palette-switch-solo {
+      margin-top: 0;
+    }
+
+    .palette-dot {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--c1) 50%, var(--c2) 50%);
+      box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .6), 0 2px 6px rgba(0, 0, 0, .12);
+    }
   </style>
 </head>
 
 <body>
 
+<!-- Íconos de línea propios (reemplazan a los emojis, que se ven distinto
+     en cada celular). Se usan con <svg class="ic"><use href="#i-..."/></svg>
+     y toman el color del texto que los rodea. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/>
+      <circle cx="12" cy="12" r="3"/>
+    </symbol>
+    <symbol id="i-stretch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="4.5" r="2"/>
+      <path d="M5 4.5 8 9h8l3-4.5"/>
+      <path d="M12 9v6"/>
+      <path d="m8.5 21 3.5-6 3.5 6"/>
+    </symbol>
+    <symbol id="i-walk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="13.5" cy="4" r="2"/>
+      <path d="m12.5 8-2 6 3 2.5V21"/>
+      <path d="m10.5 14-2 7"/>
+      <path d="m12.5 8 3 3 3 .5"/>
+      <path d="m12.5 8-3.5 1.5-1.5 3"/>
+    </symbol>
+    <symbol id="i-drop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3s6 6.4 6 11a6 6 0 0 1-12 0c0-4.6 6-11 6-11Z"/>
+    </symbol>
+    <symbol id="i-flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 21a6 6 0 0 0 6-6c0-4-3-6.5-4.5-10-1 2.5-2 3.5-3.5 4.5C8.5 8 8 7 7.7 6 6.6 7.6 6 9.4 6 15a6 6 0 0 0 6 6Z"/>
+      <path d="M12 21a2.5 2.5 0 0 1-2.5-2.5c0-1.6 1.2-2.6 2.5-4 1.3 1.4 2.5 2.4 2.5 4A2.5 2.5 0 0 1 12 21Z"/>
+    </symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15L6 16Z"/>
+      <path d="M10 20.5a2 2 0 0 0 4 0"/>
+    </symbol>
+    <symbol id="i-sliders" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 7h9M17 7h3M4 17h3M11 17h9"/>
+      <circle cx="15" cy="7" r="2"/>
+      <circle cx="9" cy="17" r="2"/>
+    </symbol>
+  </defs>
+</svg>
+
 <main class="app" id="bienestarApp">
 
+  <!-- Introducción de 3 pasos: se muestra sola la primera vez y se puede
+       volver a ver desde Ajustes. -->
+  <div class="onboarding" id="onboarding" role="dialog" aria-modal="true" aria-labelledby="onboardingTitle" hidden>
+    <div class="onboarding-top">
+      <span class="onboarding-step" id="onboardingStep">Paso 1 de 3</span>
+      <button type="button" class="onboarding-skip" id="onboardingSkip">Saltar</button>
+    </div>
+
+    <div class="onboarding-slides">
+      <section class="onboarding-slide" data-slide="0">
+        <div class="onboarding-art">
+          <div class="onboarding-ring">
+            <svg viewBox="0 0 100 100" aria-hidden="true">
+              <circle cx="50" cy="50" r="44" class="onboarding-ring-track" />
+              <circle cx="50" cy="50" r="44" class="onboarding-ring-progress" pathLength="100" />
+            </svg>
+            <span>20:00</span>
+          </div>
+        </div>
+        <h2 class="onboarding-title" id="onboardingTitle">Trabaja tranquilo</h2>
+        <p class="onboarding-text">
+          Toca <strong>Iniciar</strong> y concéntrate en lo tuyo. Cada 20 minutos
+          Horizonte te avisa que es hora de una pausa.
+        </p>
+      </section>
+
+      <section class="onboarding-slide" data-slide="1" hidden>
+        <div class="onboarding-art">
+          <div class="onboarding-cycle">
+            <span><svg class="ic"><use href="#i-eye"/></svg></span><span><svg class="ic"><use href="#i-stretch"/></svg></span><span><svg class="ic"><use href="#i-walk"/></svg></span>
+          </div>
+        </div>
+        <h2 class="onboarding-title">Pausas para tu vista y tu cuerpo</h2>
+        <ul class="onboarding-list">
+          <li><strong><svg class="ic"><use href="#i-eye"/></svg> Visual</strong> en cada aviso: 20 segundos.</li>
+          <li><strong><svg class="ic"><use href="#i-stretch"/></svg> Movilidad</strong> cada 2.º aviso: estiramientos suaves.</li>
+          <li><strong><svg class="ic"><use href="#i-walk"/></svg> Activa</strong> cada 3.º aviso: ponte de pie y camina.</li>
+        </ul>
+        <p class="onboarding-text onboarding-text-small">
+          Cuando estés listo toca <strong>Empezar pausa</strong>. Te avisamos con
+          un tono al terminar.
+        </p>
+      </section>
+
+      <section class="onboarding-slide" data-slide="2" hidden>
+        <div class="onboarding-art onboarding-art-emoji" aria-hidden="true"><span class="onboarding-bell"><svg class="ic"><use href="#i-bell"/></svg></span><span class="onboarding-flame"><svg class="ic"><use href="#i-flame"/></svg></span></div>
+        <h2 class="onboarding-title">No te pierdas ninguna pausa</h2>
+        <p class="onboarding-text">
+          Activa los avisos para enterarte de cada pausa aunque estés en otra
+          app. Y completa una pausa cada día para mantener tu racha.
+        </p>
+        <p class="onboarding-notify-status" id="onboardingNotifyStatus" hidden></p>
+      </section>
+    </div>
+
+    <div class="onboarding-bottom">
+      <div class="onboarding-dots" aria-hidden="true">
+        <span class="active"></span><span></span><span></span>
+      </div>
+      <button type="button" class="btn btn-primary onboarding-next" id="onboardingNext">Siguiente</button>
+      <button type="button" class="onboarding-later" id="onboardingLater" hidden>Ahora no</button>
+    </div>
+  </div>
+
   <header>
-    <div class="eyebrow">Bienestar en cada pausa</div>
-    <h1>Horizonte</h1>
+    <div class="brand">
+      <img class="brand-mark" src="icons/horizonte-icon.svg" alt="" width="52" height="52">
+      <div class="brand-text">
+        <h1>Horizonte</h1>
+        <span class="brand-tag">Pausas activas</span>
+      </div>
+    </div>
     <p class="subtitle">
-      Pequeños descansos para una jornada más activa.
+      Ergonomía, movimiento y salud visual para tu jornada.
+    </p>
+
+    <div class="install-wrap" id="installWrap" hidden>
+      <button type="button" class="install-btn" id="installBtn">
+        ⬇ Instalar app
+      </button>
+      <button type="button" class="install-close" id="installClose" aria-label="No mostrar más">×</button>
+    </div>
+    <p class="install-help" id="installHelp" hidden>
+      En iPhone: toca <strong>Compartir</strong> y luego
+      <strong>“Agregar a pantalla de inicio”</strong>.
     </p>
   </header>
 
@@ -972,7 +2127,13 @@
 
     <div class="timer-label" id="timerLabel">Trabajando</div>
 
-    <div class="timer" id="timer" aria-live="polite">20:00</div>
+    <div class="timer-ring">
+      <svg class="timer-ring-svg" viewBox="0 0 100 100" aria-hidden="true">
+        <circle class="timer-ring-track" cx="50" cy="50" r="46" />
+        <circle class="timer-ring-progress" id="timerRing" cx="50" cy="50" r="46" pathLength="100" />
+      </svg>
+      <div class="timer" id="timer" aria-live="polite">20:00</div>
+    </div>
 
     <div class="timer-description" id="timerDescription">
       Tu próxima pausa llegará automáticamente.
@@ -983,7 +2144,7 @@
     </div>
 
     <div class="alarm-indicator" id="alarmIndicator">
-      Pausa en curso · haz tu ejercicio y toca «Continuar»
+      Es hora de tu pausa · toca «Empezar pausa» cuando estés listo
     </div>
 
     <div class="main-actions">
@@ -1007,21 +2168,21 @@
 
     <div class="cycle-track">
       <div class="cycle-step active" id="cycleVisual">
-        <span class="cycle-step-icon">👁️</span>
+        <span class="cycle-step-icon"><svg class="ic"><use href="#i-eye"/></svg></span>
         <span class="cycle-step-label">Visual</span>
         <span class="cycle-step-time">20s</span>
       </div>
 
       <div class="cycle-step" id="cycleMobility">
-        <span class="cycle-step-icon">🧘</span>
+        <span class="cycle-step-icon"><svg class="ic"><use href="#i-stretch"/></svg></span>
         <span class="cycle-step-label">Movilidad</span>
         <span class="cycle-step-time">40s</span>
       </div>
 
       <div class="cycle-step" id="cycleActive">
-        <span class="cycle-step-icon">🚶</span>
+        <span class="cycle-step-icon"><svg class="ic"><use href="#i-walk"/></svg></span>
         <span class="cycle-step-label">Activa</span>
-        <span class="cycle-step-time">3 min</span>
+        <span class="cycle-step-time">5 min</span>
       </div>
     </div>
   </section>
@@ -1032,7 +2193,7 @@
       Pausa 1 de 2 de esta alarma
     </div>
 
-    <div class="break-icon" id="breakIcon">👁️</div>
+    <div class="break-icon" id="breakIcon"><svg class="ic"><use href="#i-eye"/></svg></div>
 
     <div class="break-type" id="breakType">
       Descanso visual
@@ -1065,7 +2226,7 @@
     </div>
 
     <div class="visual-note" id="visualNote">
-      Tiempo sugerido, no obligatorio. Avanza cuando estés listo.
+      Te avisamos con un tono al terminar. Puedes continuar antes si quieres.
     </div>
 
     <div class="break-actions">
@@ -1078,6 +2239,17 @@
       </button>
     </div>
 
+  </section>
+
+  <section class="streak-card" aria-label="Tu racha">
+    <div class="streak-main">
+      <span class="streak-flame" aria-hidden="true"><svg class="ic"><use href="#i-flame"/></svg></span>
+      <div>
+        <div class="streak-count"><span id="streakCount">0</span> <span id="streakUnit">días seguidos</span></div>
+        <div class="streak-hint" id="streakHint">Completa una pausa hoy para empezar tu racha.</div>
+      </div>
+    </div>
+    <div class="streak-week" id="streakWeek" aria-label="Días con pausas esta semana"></div>
   </section>
 
   <section class="stats">
@@ -1094,6 +2266,35 @@
     <div class="stat">
       <span class="stat-value" id="statMinutes">0</span>
       <span class="stat-label">Minutos activos</span>
+    </div>
+  </section>
+
+  <details class="settings-panel">
+  <summary class="settings-summary">
+    <span class="settings-summary-icon" aria-hidden="true"><svg class="ic"><use href="#i-sliders"/></svg></span>
+    <span class="settings-summary-text">
+      <strong>Ajustes</strong>
+      <span>Sonido, notificaciones y duración</span>
+    </span>
+    <span class="settings-summary-chevron" aria-hidden="true">›</span>
+  </summary>
+
+  <section class="settings-card">
+    <h2 class="section-title">Colores</h2>
+
+    <div class="palette-switch palette-switch-solo" id="paletteSwitch" role="radiogroup" aria-label="Tema de color">
+      <button type="button" role="radio" data-palette-value="aqua">
+        <span class="palette-dot" style="--c1:#2cc2a8; --c2:#ff7a59"></span>Aguamarina
+      </button>
+      <button type="button" role="radio" data-palette-value="salvia">
+        <span class="palette-dot" style="--c1:#8fc46f; --c2:#e08a2e"></span>Salvia
+      </button>
+      <button type="button" role="radio" data-palette-value="amanecer">
+        <span class="palette-dot" style="--c1:#2a3d5f; --c2:#f08a5d"></span>Amanecer
+      </button>
+      <button type="button" role="radio" data-palette-value="mar">
+        <span class="palette-dot" style="--c1:#12393a; --c2:#5cc8a8"></span>Mar y menta
+      </button>
     </div>
   </section>
 
@@ -1118,21 +2319,21 @@
     <h2 class="section-title">Notificaciones del sistema</h2>
 
     <div class="sound-row">
-      <label style="display:flex; align-items:center; gap:10px; flex:1; font-size:13px; font-weight:700; cursor:pointer;">
+      <label style="display:flex; align-items:center; gap:10px; flex:1; font-size:14px; font-weight:700; cursor:pointer;">
         <input type="checkbox" id="notifyToggle" style="width:18px; height:18px; flex:0 0 auto;">
         Avisarme aunque esté en otra pestaña
       </label>
     </div>
 
     <p class="time-hint" id="notifyStatus" style="margin-top:10px; margin-bottom:0;"></p>
-    <p class="time-hint" style="margin-top:6px; margin-bottom:0;">El conteo se pone al día solo al volver a abrir la app, aunque el celular la haya cerrado de fondo. Pero el sonido de la alarma solo se escucha si tienes la app abierta en pantalla en ese momento — estando en otra app, la notificación del sistema (si la activaste) es el único aviso que puede llegarte.</p>
+    <p class="time-hint" style="margin-top:6px; margin-bottom:0;">El sonido solo se escucha con la app abierta en pantalla. Si estás en otra app, te avisa la notificación.</p>
   </section>
 
   <section class="settings-card">
     <h2 class="section-title">Duración personalizada</h2>
     <p class="time-hint">
-      Ajusta el intervalo entre alarmas a tu gusto, o escribe el número
-      directamente. Empieza en 20 minutos cada vez que abres la app.
+      Elige cada cuántos minutos quieres una pausa. Vuelve a 20 min cada
+      vez que abres la app.
     </p>
 
     <div class="time-settings" id="timeSettings">
@@ -1147,31 +2348,35 @@
       </div>
 
       <div class="time-row time-row-static">
-        <span class="time-row-label">👁️ Visual (cada alarma)</span>
+        <span class="time-row-label"><svg class="ic"><use href="#i-eye"/></svg> Visual (cada alarma)</span>
         <span class="time-static-value" id="timeVisualStatic">20 s sugeridos</span>
       </div>
 
       <div class="time-row time-row-static">
-        <span class="time-row-label">🧘 Movilidad (cada 2ª alarma)</span>
+        <span class="time-row-label"><svg class="ic"><use href="#i-stretch"/></svg> Movilidad (cada 2ª alarma)</span>
         <span class="time-static-value" id="timeMobilityStatic">40 s sugeridos</span>
       </div>
 
       <div class="time-row time-row-static">
-        <span class="time-row-label">🚶 Activa (cada 3ª alarma)</span>
-        <span class="time-static-value" id="timeActiveStatic">3 min sugeridos</span>
+        <span class="time-row-label"><svg class="ic"><use href="#i-walk"/></svg> Activa (cada 3ª alarma)</span>
+        <span class="time-static-value" id="timeActiveStatic">5 min sugeridos</span>
       </div>
     </div>
 
     <p class="time-hint" style="margin-top:12px;">
-      Los tiempos de ejercicio son solo una referencia: no cuentan
-      regresivamente ni afectan el conteo de la alarma. Tú avanzas
-      manualmente con «Continuar» cuando termines.
+      El conteo de cada ejercicio empieza cuando tocas «Empezar pausa».
+      Al terminar suena un tono; tú decides cuándo continuar.
     </p>
 
     <button class="btn btn-light time-reset" id="timeResetBtn" type="button">
       Restablecer valores
     </button>
   </section>
+
+  <button class="btn btn-light settings-intro-btn" id="showIntroBtn" type="button">
+    ▶ Ver cómo funciona
+  </button>
+  </details>
 
   <section class="guide-card">
     <h2 class="section-title">Guía rápida</h2>
@@ -1181,13 +2386,13 @@
       <article class="guide-item" data-type="visual">
         <button class="guide-toggle" type="button" aria-expanded="false" aria-controls="guidePanel-visual">
           <span class="guide-head">
-            <span class="guide-icon">👁️</span>
+            <span class="guide-icon"><svg class="ic"><use href="#i-eye"/></svg></span>
             <span class="guide-name">Descanso visual · 20 s</span>
           </span>
           <span class="guide-chevron">＋</span>
         </button>
         <p class="guide-text">
-          Mira a distancia, relaja la mirada y parpadea con naturalidad.
+          Mira algo a unos 6 metros durante 20 segundos y luego parpadea lento.
         </p>
         <div class="guide-panel" id="guidePanel-visual" hidden></div>
       </article>
@@ -1195,14 +2400,14 @@
       <article class="guide-item" data-type="mobility">
         <button class="guide-toggle" type="button" aria-expanded="false" aria-controls="guidePanel-mobility">
           <span class="guide-head">
-            <span class="guide-icon">🧘</span>
+            <span class="guide-icon"><svg class="ic"><use href="#i-stretch"/></svg></span>
             <span class="guide-name">Movilidad · 40 s</span>
           </span>
           <span class="guide-chevron">＋</span>
         </button>
         <p class="guide-text">
-          Cambia de postura y realiza movimientos suaves de cuello,
-          hombros y brazos.
+          Cambia de postura y mueve con suavidad cuello, hombros, muñecas
+          y espalda baja.
         </p>
         <div class="guide-panel" id="guidePanel-mobility" hidden></div>
       </article>
@@ -1210,8 +2415,8 @@
       <article class="guide-item" data-type="active">
         <button class="guide-toggle" type="button" aria-expanded="false" aria-controls="guidePanel-active">
           <span class="guide-head">
-            <span class="guide-icon">🚶</span>
-            <span class="guide-name">Pausa activa · 3 min</span>
+            <span class="guide-icon"><svg class="ic"><use href="#i-walk"/></svg></span>
+            <span class="guide-name">Pausa activa · 5 min</span>
           </span>
           <span class="guide-chevron">＋</span>
         </button>
@@ -1224,7 +2429,7 @@
       <article class="guide-item guide-item-static" data-type="hydration">
         <div class="guide-toggle">
           <span class="guide-head">
-            <span class="guide-icon">💧</span>
+            <span class="guide-icon"><svg class="ic"><use href="#i-drop"/></svg></span>
             <span class="guide-name">Hidratación</span>
           </span>
         </div>
@@ -1251,8 +2456,8 @@
     descansar la vista y moverte durante tu jornada.
   </footer>
 
-  <section class="legal-disclaimer" aria-label="Aviso legal y descargo de responsabilidad">
-    <div class="legal-title">Aviso legal y descargo de responsabilidad</div>
+  <details class="legal-disclaimer">
+    <summary class="legal-title">Aviso legal y descargo de responsabilidad</summary>
 
     <p class="legal-text">
       Horizonte es una herramienta informativa de bienestar que promueve pausas
@@ -1277,7 +2482,18 @@
       derivados del uso de esta herramienta o del incumplimiento de las
       recomendaciones aquí sugeridas.
     </p>
-  </section>
+
+    <p class="legal-text">
+      Privacidad: tus pausas, tu racha y tus ajustes se guardan solo en tu
+      dispositivo. Para mejorar la app se registran estadísticas anónimas de
+      uso (por ejemplo, cuántas pausas se completan), sin cookies y sin datos
+      personales.
+    </p>
+  </details>
+
+  <p class="credit">
+    Hecho por <a href="https://korevux.netlify.app/" target="_blank" rel="noopener" id="creditLink">Korevux ↗</a>
+  </p>
 
 </main>
 
@@ -1288,7 +2504,7 @@
   // Solo el intervalo "work" (la alarma) es configurable por la persona.
   // Visual/Movilidad/Activa son tiempos sugeridos fijos, no editables:
   // son solo una referencia y no afectan el conteo de la alarma.
-  const TIME_DEFAULTS = { work: 20 * 60, visual: 20, mobility: 40, active: 180 };
+  const TIME_DEFAULTS = { work: 20 * 60, visual: 20, mobility: 40, active: 300 };
   const TIME_LIMITS = {
     work: { min: 5, max: 120 }
   };
@@ -1309,29 +2525,33 @@
     window.localStorage.removeItem(TIME_KEY);
   } catch (e) {}
 
+  function iconSVG(name) {
+    return '<svg class="ic" aria-hidden="true"><use href="#i-' + name + '"/></svg>';
+  }
+
   const BREAK_DEFS = {
     visual: {
-      icon: "👁️",
+      icon: "eye",
       type: "Descanso visual",
       title: "Descansa la mirada",
       description: "Mira un punto lejano y relaja la mirada.",
-      exercise: "Enfoca un objeto a 6 metros (20 pies) o más de distancia. Parpadea por completo varias veces antes de volver a la pantalla.",
+      exercise: "Regla 20-20-20: enfoca un objeto a unos 6 metros durante 20 segundos. Después parpadea lento 10 veces: frente a la pantalla parpadeamos mucho menos y los ojos se resecan.",
       duration: VISUAL_SECONDS
     },
     mobility: {
-      icon: "🧘",
+      icon: "stretch",
       type: "Pausa de movilidad",
       title: "Estira y cambia de postura",
-      description: "Suelta la tensión de cuello, hombros y muñecas.",
-      exercise: "Gira el cuello con suavidad, eleva y relaja los hombros, y estira muñecas y dedos.",
+      description: "Suelta la tensión de cuello, hombros y muñecas. Lento y sin dolor.",
+      exercise: "Inclina la cabeza hacia cada hombro, sube y suelta los hombros, y estira muñecas y dedos. Movimientos lentos y sin dolor.",
       duration: MOBILITY_SECONDS
     },
     active: {
-      icon: "🚶",
+      icon: "walk",
       type: "Pausa activa",
       title: "Ponte de pie y muévete",
       description: "Levántate y camina unos pasos para reactivar la circulación.",
-      exercise: "Camina por el espacio, sube y baja los talones o realiza unas sentadillas suaves.",
+      exercise: "Camina por el espacio, sube y baja los talones apoyado en el escritorio, o siéntate y párate de la silla despacio.",
       duration: ACTIVE_SECONDS
     }
   };
@@ -1339,17 +2559,22 @@
   const BREAK_LABELS = { visual: "Visual", mobility: "Movilidad", active: "Activa" };
 
   const EXERCISE_OPTIONS = {
+    // Pautas comunes a todos: movimientos lentos, sin rebotes, sin dolor y
+    // respirando con normalidad. Los estiramientos se sostienen 10-15 s.
+    // Sin círculos completos de cuello (comprimen las cervicales).
     mobility: [
-      { label: "Cuello y hombros", pose: "neck", text: "Gira el cuello con suavidad hacia ambos lados, luego eleva y relaja los hombros varias veces." },
-      { label: "Muñecas y dedos", pose: "wrists", text: "Extiende los brazos, gira las muñecas en ambos sentidos y abre y cierra los dedos." },
-      { label: "Espalda y torso", pose: "torso", text: "Entrelaza las manos por encima de la cabeza y estira suavemente hacia ambos lados; gira el torso con cuidado." },
-      { label: "Piernas (sentado)", pose: "legs-seated", text: "Estira una pierna a la vez, flexiona el pie hacia ti y suéltalo. Repite con la otra pierna." }
+      { label: "Cuello", pose: "neck", text: "Inclina la cabeza hacia un hombro y sostén 10 segundos; repite al otro lado. Luego lleva el mentón hacia atrás, como haciendo doble mentón, 5 veces. Sin forzar." },
+      { label: "Hombros y pecho", pose: "torso", text: "Sube los hombros hacia las orejas y suéltalos 5 veces; luego gíralos hacia atrás. Entrelaza las manos detrás de la espalda y abre el pecho 10 segundos." },
+      { label: "Muñecas y dedos", pose: "wrists", text: "Brazo al frente con la palma hacia arriba: con la otra mano lleva los dedos suavemente hacia ti 10 segundos. Repite con la palma hacia abajo y cambia de mano. Ideal si usas mucho el mouse y el teclado." },
+      { label: "Espalda y torso", pose: "torso", text: "Entrelaza las manos sobre la cabeza y inclínate suavemente a cada lado. Luego, sentado, gira el tronco hacia un lado sin mover la cadera y vuelve al centro." },
+      { label: "Espalda baja", pose: "torso", text: "Sentado al borde de la silla, con las manos en la cintura, arquea y redondea la espalda baja con suavidad 5 veces." },
+      { label: "Piernas (sentado)", pose: "legs-seated", text: "Estira una pierna a la vez y lleva la punta del pie hacia ti 5 segundos. Repite con la otra pierna." }
     ],
     active: [
-      { label: "Caminar en el sitio", pose: "walk", text: "Camina en el lugar o por el espacio disponible durante toda la pausa." },
-      { label: "Sentadillas suaves", pose: "squat", text: "Realiza sentadillas suaves y controladas, cuidando la postura de la espalda." },
-      { label: "Elevación de talones", pose: "heels", text: "Sube y baja los talones repetidamente para activar la circulación de las piernas." },
-      { label: "Subir escaleras", pose: "stairs", text: "Si tienes escaleras cerca, sube y baja un tramo un par de veces." }
+      { label: "Caminar", pose: "walk", text: "Camina por el espacio disponible durante toda la pausa. Si puedes, ve por agua o a mirar por una ventana." },
+      { label: "Sentarse y pararse", pose: "squat", text: "Párate y siéntate de la silla despacio, sin usar las manos si puedes, 8 a 10 veces. La silla te da seguridad." },
+      { label: "Elevación de talones", pose: "heels", text: "De pie y apoyado en el escritorio, sube y baja los talones despacio 15 veces para activar la circulación." },
+      { label: "Subir escaleras", pose: "stairs", text: "Si tienes escaleras cerca, sube y baja un tramo a ritmo cómodo, sujetándote del pasamanos." }
     ]
   };
 
@@ -1438,6 +2663,25 @@
   let updateExercisePickerArrows = null;
 
   const $ = (id) => document.getElementById(id);
+
+  // Registra un evento anónimo en GoatCounter (sin cookies ni datos
+  // personales): solo el nombre del evento. El script carga en paralelo,
+  // así que si aún no está listo se reintenta unos segundos; si está
+  // bloqueado o sin conexión, se descarta sin afectar a la app.
+  function track(name, title, tries) {
+    tries = tries || 0;
+    try {
+      if (window.goatcounter && typeof window.goatcounter.count === "function") {
+        window.goatcounter.count({ path: name, title: title || name, event: true });
+        return;
+      }
+    } catch (e) {
+      return;
+    }
+    if (tries < 10) {
+      setTimeout(function () { track(name, title, tries + 1); }, 1000);
+    }
+  }
 
   const timer = $("timer");
   const timerCard = $("timerCard");
@@ -1634,6 +2878,118 @@
     statMinutes.textContent = activeMinutes;
   }
 
+  // Racha: se guarda la lista de días (fecha local) en que la persona
+  // completó al menos una pausa. Sábado y domingo sin pausas no rompen
+  // la racha, pero si hay pausas ese día sí suman.
+  const STREAK_KEY = "horizonte-streak-days";
+  const STREAK_MAX_DAYS = 120;
+  const WEEK_LABELS = ["L", "M", "X", "J", "V", "S", "D"];
+
+  function dateKey(date) {
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return date.getFullYear() + "-" + m + "-" + d;
+  }
+
+  function loadStreakDays() {
+    try {
+      const raw = window.localStorage.getItem(STREAK_KEY);
+      const days = raw ? JSON.parse(raw) : [];
+      return Array.isArray(days) ? days : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function recordStreakDay() {
+    const days = loadStreakDays();
+    const today = dateKey(new Date());
+
+    if (days.indexOf(today) === -1) {
+      days.push(today);
+      days.sort();
+      try {
+        window.localStorage.setItem(STREAK_KEY, JSON.stringify(days.slice(-STREAK_MAX_DAYS)));
+      } catch (e) {}
+    }
+
+    updateStreak();
+  }
+
+  function countStreak(daySet) {
+    const cursor = new Date();
+    let count = 0;
+
+    // Hoy todavía no cuenta en contra: si aún no hay pausa, la racha de
+    // días anteriores sigue viva hasta que termine el día.
+    if (daySet.has(dateKey(cursor))) count += 1;
+    cursor.setDate(cursor.getDate() - 1);
+
+    for (let i = 0; i < STREAK_MAX_DAYS; i++) {
+      const isWeekend = cursor.getDay() === 0 || cursor.getDay() === 6;
+
+      if (daySet.has(dateKey(cursor))) {
+        count += 1;
+      } else if (!isWeekend) {
+        break;
+      }
+
+      cursor.setDate(cursor.getDate() - 1);
+    }
+
+    return count;
+  }
+
+  function updateStreak() {
+    const card = document.querySelector(".streak-card");
+    if (!card) return;
+
+    const daySet = new Set(loadStreakDays());
+    const now = new Date();
+    const doneToday = daySet.has(dateKey(now));
+    const streak = countStreak(daySet);
+
+    $("streakCount").textContent = streak;
+    $("streakUnit").textContent = streak === 1 ? "día seguido" : "días seguidos";
+    card.classList.toggle("is-active", doneToday);
+
+    let hint;
+    if (doneToday) {
+      hint = streak > 1 ? "¡Bien! Hoy ya sumaste a tu racha." : "¡Empezaste tu racha! Vuelve mañana.";
+    } else if (streak > 0) {
+      hint = "Completa una pausa hoy para mantenerla.";
+    } else {
+      hint = "Completa una pausa hoy para empezar tu racha.";
+    }
+    $("streakHint").textContent = hint;
+
+    // Semana actual, de lunes a domingo.
+    const monday = new Date(now);
+    monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+
+    const week = $("streakWeek");
+    week.innerHTML = "";
+
+    for (let i = 0; i < 7; i++) {
+      const day = new Date(monday);
+      day.setDate(monday.getDate() + i);
+      const key = dateKey(day);
+
+      const el = document.createElement("div");
+      el.className = "streak-day";
+      if (daySet.has(key)) el.classList.add("done");
+      if (key === dateKey(now)) el.classList.add("today");
+      el.innerHTML = '<span class="streak-dot"></span>' + WEEK_LABELS[i];
+      week.appendChild(el);
+    }
+  }
+
+  // Si la app queda abierta de un día para otro, refresca la racha al
+  // volver a ella.
+  document.addEventListener("visibilitychange", function () {
+    if (!document.hidden) updateStreak();
+  });
+
   function updateTimerDisplay() {
     if (inBreak) {
       timer.textContent = formatTime(breakTime);
@@ -1641,7 +2997,27 @@
       timer.textContent = formatTime(workTime);
     }
 
+    updateTimerRing();
     updateDocumentTitle();
+  }
+
+  const timerRing = $("timerRing");
+
+  function updateTimerRing() {
+    if (!timerRing) return;
+
+    // En pausa: lleno mientras espera "Empezar"; durante el conteo se va
+    // vaciando con el tiempo que queda.
+    let progress;
+    if (inBreak) {
+      const duration = currentBreakType ? BREAK_DEFS[currentBreakType].duration : 0;
+      progress = breakCounting && duration ? breakTime / duration : (breakDone ? 0 : 1);
+    } else {
+      progress = Math.min(1, Math.max(0, 1 - workTime / WORK_SECONDS));
+    }
+
+    timerRing.style.strokeDashoffset = String(100 - progress * 100);
+    timerRing.classList.toggle("is-empty", progress === 0);
   }
 
   const BASE_TITLE = document.title;
@@ -1804,13 +3180,16 @@
             '<button class="chip-arrow chip-arrow-left" type="button" aria-label="Ver opciones anteriores">‹</button>' +
             '<div class="exercise-chip-row" id="guideChipRow-' + type + '" role="group" aria-label="Ver opciones de ' + type + '"></div>' +
             '<button class="chip-arrow chip-arrow-right" type="button" aria-label="Ver más opciones">›</button>' +
-          '</div>';
+          '</div>' +
+          '<div class="break-exercise guide-exercise-text" id="guideText-' + type + '"></div>';
 
         const illustration = panel.querySelector("#guideIllustration-" + type);
         const row = panel.querySelector("#guideChipRow-" + type);
+        const text = panel.querySelector("#guideText-" + type);
 
         buildChipRow(row, options, 0, function (opt) {
           illustration.innerHTML = stickFigureSVG(opt.pose);
+          text.textContent = opt.text;
         });
 
         attachChipArrows(panel.querySelector(".chip-scroller"));
@@ -1861,14 +3240,19 @@
       breakProgress.hidden = true;
     }
 
-    breakIcon.textContent = def.icon;
+    breakIcon.innerHTML = iconSVG(def.icon);
+    breakPanel.dataset.type = currentBreakType;
     breakType.textContent = def.type;
     breakTitle.textContent = def.title;
     breakDescription.textContent = def.description;
     breakExercise.textContent = def.exercise;
 
-    // El número mostrado es solo el tiempo sugerido: no cuenta
-    // regresivamente ni controla el avance de la alarma.
+    // La cuenta regresiva NO arranca sola: espera a que la persona toque
+    // "Empezar pausa" (puede estar ocupada cuando suena la alarma).
+    clearBreakCountdown();
+    breakTime = def.duration;
+    breakDone = false;
+    breakPanel.classList.remove("break-done");
     breakCountdown.textContent = formatTime(def.duration);
 
     if (currentBreakType === "visual") {
@@ -1879,14 +3263,185 @@
       populateExercisePicker(currentBreakType);
     }
 
+    breakContinueLabel = isLast ? "Continuar" : "Siguiente ejercicio →";
     startBreakBtn.disabled = false;
-    startBreakBtn.textContent = isLast ? "Continuar" : "Siguiente ejercicio →";
+    startBreakBtn.textContent = "▶ Empezar pausa";
     skipBreakBtn.textContent = total > 1 ? "Omitir esta alarma" : "Omitir pausa";
 
     updateTimerDisplay();
   }
 
+  // --- Cuenta regresiva del ejercicio ---
+  // Un solo botón cambia de texto: "Empezar pausa" → "Continuar".
+  // Al llegar a 0 avisa con un tono suave, pero no avanza sola: la
+  // persona decide cuándo seguir.
+  const BREAK_AUTO_RESUME_MS = 2 * 60 * 1000;
+
+  let breakCountdownTimer = null;
+  let breakCountdownEndAt = 0;
+  let breakCounting = false;
+  let breakDone = false;
+  let breakDoneAt = 0;
+  let breakAutoResumeTimer = null;
+  let breakContinueLabel = "Continuar";
+  let wakeLock = null;
+
+  function clearBreakCountdown() {
+    if (breakCountdownTimer) {
+      clearInterval(breakCountdownTimer);
+      breakCountdownTimer = null;
+    }
+    if (breakAutoResumeTimer) {
+      clearTimeout(breakAutoResumeTimer);
+      breakAutoResumeTimer = null;
+    }
+    breakCounting = false;
+    releaseWakeLock();
+  }
+
+  // Mantiene la pantalla encendida SOLO mientras corre el conteo: si se
+  // apaga, el navegador congela la app y el tono final no sonaría (por
+  // ejemplo, a mitad de una pausa activa de 5 minutos caminando).
+  function requestWakeLock() {
+    try {
+      if (!("wakeLock" in navigator) || wakeLock) return;
+      navigator.wakeLock.request("screen").then(function (lock) {
+        if (!breakCounting) {
+          lock.release();
+          return;
+        }
+        wakeLock = lock;
+        lock.addEventListener("release", function () {
+          if (wakeLock === lock) wakeLock = null;
+        });
+      }).catch(function () {});
+    } catch (e) {}
+  }
+
+  function releaseWakeLock() {
+    if (!wakeLock) return;
+    try {
+      wakeLock.release();
+    } catch (e) {}
+    wakeLock = null;
+  }
+
+  function startBreakCountdown() {
+    stopAlarm();
+    clearBreakCountdown();
+
+    const duration = BREAK_DEFS[currentBreakType].duration;
+    breakCountdownEndAt = Date.now() + duration * 1000;
+
+    breakCounting = true;
+    breakDone = false;
+    breakTime = duration;
+    timerDescription.textContent = "Pausa en curso.";
+    startBreakBtn.textContent = breakContinueLabel;
+    breakCountdown.textContent = formatTime(breakTime);
+    updateTimerDisplay();
+    requestWakeLock();
+
+    breakCountdownTimer = setInterval(tickBreakCountdown, 250);
+  }
+
+  function tickBreakCountdown() {
+    const left = Math.max(0, Math.ceil((breakCountdownEndAt - Date.now()) / 1000));
+    if (left === breakTime) return;
+
+    breakTime = left;
+    breakCountdown.textContent = formatTime(breakTime);
+    updateTimerDisplay();
+
+    if (breakTime <= 0) finishBreakCountdown();
+  }
+
+  function finishBreakCountdown() {
+    clearBreakCountdown();
+    breakDone = true;
+    breakDoneAt = Date.now();
+
+    breakCountdown.textContent = "¡Listo! ✓";
+    breakPanel.classList.add("break-done");
+    startBreakBtn.textContent = breakContinueLabel + " ✓";
+    updateTimerDisplay();
+
+    // Tono de fin: dos notas ascendentes, distinto de la alarma, para
+    // saberlo sin mirar la pantalla (en la pausa visual se mira lejos).
+    createTone(660, 0.3, 0.09, "sine");
+    setTimeout(function () {
+      createTone(880, 0.45, 0.09, "sine");
+    }, 260);
+
+    try {
+      if (navigator.vibrate) navigator.vibrate([300, 120, 300]);
+    } catch (e) {}
+
+    breakAutoResumeTimer = setTimeout(autoResumeAfterDone, BREAK_AUTO_RESUME_MS);
+  }
+
+  // Al volver a la app: retomar el conteo (y la pantalla encendida) o, si
+  // ya pasaron los 2 minutos tras "¡Listo!", reanudar el trabajo.
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden || !inBreak) return;
+
+    if (breakCounting) {
+      requestWakeLock();
+      tickBreakCountdown();
+    } else if (breakDone && Date.now() - breakDoneAt >= BREAK_AUTO_RESUME_MS) {
+      autoResumeAfterDone();
+    }
+  });
+
+  // --- "Hola de nuevo" ---
+  // Si la pausa lleva más de 10 minutos esperando sin que nadie la
+  // empiece, la persona probablemente no estaba (almuerzo, reunión). En
+  // vez de insistir, la app la recibe con amabilidad, deja de sonar y, si
+  // elige seguir trabajando, se registra como "ausente" (no "omitida").
+  const BREAK_AWAY_MS = 10 * 60 * 1000;
+  const ALARM_INDICATOR_TEXT = alarmIndicator.textContent.trim();
+  let breakStartedAt = 0;
+  let breakAway = false;
+
+  function setBreakAway(away) {
+    breakAway = away;
+
+    if (away) {
+      stopAlarm();
+      alarmIndicator.textContent = "¡Hola de nuevo! ¿Hacemos una pausa rápida o sigues trabajando?";
+      alarmIndicator.classList.add("show");
+      timerDescription.textContent = "Tu pausa te estaba esperando.";
+      skipBreakBtn.textContent = "Seguir trabajando";
+    } else {
+      alarmIndicator.textContent = ALARM_INDICATOR_TEXT;
+    }
+  }
+
+  function checkBreakAway() {
+    if (!inBreak || breakAway || breakCounting || breakDone) return;
+    if (breakQueueIndex !== 0 || !breakStartedAt) return;
+    if (Date.now() - breakStartedAt < BREAK_AWAY_MS) return;
+
+    setBreakAway(true);
+  }
+
+  setInterval(checkBreakAway, 15000);
+
+  document.addEventListener("visibilitychange", function () {
+    if (!document.hidden) checkBreakAway();
+  });
+
+  function handleBreakButton() {
+    if (!breakCounting && !breakDone) {
+      startBreakCountdown();
+    } else {
+      advanceBreakQueue();
+    }
+  }
+
   function stopAllTimers() {
+    clearBreakCountdown();
+
     if (workTimer) {
       clearInterval(workTimer);
       workTimer = null;
@@ -1924,8 +3479,9 @@
     }
   }
 
-  const FAVICON_NORMAL = makeDotFavicon("#6d8158");
-  const FAVICON_ALARM = makeDotFavicon("#c0392b");
+  // Normal: el logo. En alarma: un punto coral que se nota de reojo.
+  const FAVICON_NORMAL = "icons/icon-32.png";
+  const FAVICON_ALARM = makeDotFavicon("#ee5f3c");
 
   if (appFavicon && FAVICON_NORMAL) {
     appFavicon.href = FAVICON_NORMAL;
@@ -2065,6 +3621,8 @@
     }
   }
 
+  const ALARM_SOUND_MS = 60 * 1000;
+
   function startAlarm() {
     stopAlarm();
     alarmActive = true;
@@ -2077,11 +3635,15 @@
       }
     } catch (e) {}
 
-    // Suena sin límite de repeticiones hasta que la persona toque
-    // "Continuar" u "Omitir pausa" (lo que llama a stopAlarm() y pone
-    // alarmActive en false). No se detiene sola.
+    // Suena durante 1 minuto (suficiente para llamar la atención de quien
+    // está en su puesto). Después sigue avisando en silencio: título
+    // parpadeante, punto rojo y el panel de pausa esperando. Se detiene al
+    // tocar "Empezar pausa" u "Omitir pausa" (stopAlarm()).
+    const alarmStartedAt = Date.now();
+
     function tick() {
       if (!alarmActive) return;
+      if (Date.now() - alarmStartedAt > ALARM_SOUND_MS) return;
 
       createTone(880, 0.3, 0.07, "sine");
       alarmTimer = setTimeout(tick, 4000);
@@ -2129,6 +3691,11 @@
   function enterBreak() {
     stopAllTimers();
 
+    // La pausa empezó cuando terminó el intervalo de trabajo (puede ser
+    // antes de ahora si la app estaba cerrada o en segundo plano).
+    breakStartedAt = workEndAt && workEndAt < Date.now() ? workEndAt : Date.now();
+    setBreakAway(false);
+
     cycle += 1;
     breakQueue = getBreakQueue(cycle);
     breakQueueIndex = 0;
@@ -2151,12 +3718,36 @@
   }
 
   // Se llama al presionar "Continuar" (o "Siguiente ejercicio").
-  // El tiempo sugerido del ejercicio es solo informativo: quien decide
-  // cuándo avanzar es la persona, no un conteo automático.
+  // La cuenta regresiva solo avisa: quien decide cuándo avanzar es la
+  // persona, incluso antes de que llegue a 0.
   function advanceBreakQueue() {
+    // "completed" si la cuenta llegó a 0; "cut" si continuó antes.
+    const outcome = breakDone ? "completed" : "cut";
+
+    clearBreakCountdown();
+    breakDone = false;
+    breakPanel.classList.remove("break-done");
     stopAlarm();
     createTone(720, 0.5, 0.08, "sine");
 
+    countFinishedBreak(outcome);
+
+    const isLast = breakQueueIndex >= breakQueue.length - 1;
+
+    if (!isLast) {
+      // La persona acaba de tocar "Siguiente ejercicio": está presente,
+      // así que el siguiente conteo arranca de inmediato.
+      breakQueueIndex += 1;
+      showCurrentBreakItem();
+      startBreakCountdown();
+      saveTimerState();
+      return;
+    }
+
+    resumeWorkAfterBreak();
+  }
+
+  function countFinishedBreak(outcome) {
     breaksCompleted += 1;
 
     if (currentBreakType !== "visual") {
@@ -2165,16 +3756,26 @@
     }
 
     updateStats();
+    recordStreakDay();
+    logBreakOutcome(outcome);
+  }
 
-    const isLast = breakQueueIndex >= breakQueue.length - 1;
+  // Si tras "¡Listo!" nadie toca nada en 2 minutos, la pausa cuenta como
+  // completada y el trabajo se reanuda solo (si no, la app quedaría
+  // detenida el resto del día sin que la persona lo note).
+  function autoResumeAfterDone() {
+    if (!inBreak || !breakDone) return;
 
-    if (!isLast) {
-      breakQueueIndex += 1;
-      showCurrentBreakItem();
-      saveTimerState();
-      return;
-    }
+    clearBreakCountdown();
+    breakDone = false;
+    breakPanel.classList.remove("break-done");
+    countFinishedBreak("completed");
+    resumeWorkAfterBreak();
+  }
 
+  function resumeWorkAfterBreak() {
+    setBreakAway(false);
+    breakStartedAt = 0;
     breakPanel.classList.remove("visible");
     inBreak = false;
     currentBreakType = null;
@@ -2194,21 +3795,38 @@
   function skipBreak() {
     stopAllTimers();
     stopAlarm();
+    logBreakOutcome(breakAway ? "away" : "skipped");
+    resumeWorkAfterBreak();
+  }
 
-    breakPanel.classList.remove("visible");
-    inBreak = false;
-    currentBreakType = null;
-    breakQueue = [];
-    breakQueueIndex = 0;
+  // Registro diario de pausas completadas / cortadas / omitidas /
+  // ausente (la persona no estaba: almuerzo, reunión). Aún no
+  // se muestra en pantalla: queda listo para el futuro panel de empresas.
+  const BREAK_LOG_KEY = "horizonte-break-log";
 
-    workTime = WORK_SECONDS;
-    running = true;
-    paused = false;
+  const BREAK_OUTCOME_TITLES = {
+    completed: "Pausa completada",
+    cut: "Pausa cortada",
+    skipped: "Pausa omitida",
+    away: "Pausa con persona ausente"
+  };
 
-    updateWorkUI();
-    startWorkTimer();
-    saveTimerState();
-    pushScheduleUpdate(workEndAt, "break");
+  function logBreakOutcome(outcome) {
+    track("pausa-" + outcome, BREAK_OUTCOME_TITLES[outcome]);
+
+    try {
+      const raw = window.localStorage.getItem(BREAK_LOG_KEY);
+      const log = raw ? JSON.parse(raw) : {};
+      const today = dateKey(new Date());
+
+      log[today] = log[today] || { completed: 0, cut: 0, skipped: 0, away: 0 };
+      log[today][outcome] = (log[today][outcome] || 0) + 1;
+
+      const days = Object.keys(log).sort();
+      while (days.length > STREAK_MAX_DAYS) delete log[days.shift()];
+
+      window.localStorage.setItem(BREAK_LOG_KEY, JSON.stringify(log));
+    } catch (e) {}
   }
 
   function handleStart() {
@@ -2285,6 +3903,7 @@
         currentBreakType: currentBreakType,
         breakQueue: breakQueue,
         breakQueueIndex: breakQueueIndex,
+        breakStartedAt: breakStartedAt,
         cycle: cycle
       }));
     } catch (e) {}
@@ -2321,11 +3940,13 @@
       }
 
       highlightCycleTypes(breakQueue);
+      breakStartedAt = saved.breakStartedAt || Date.now();
       breakPanel.classList.add("visible");
       updateBreakUI(BREAK_DEFS[currentBreakType]);
       startAlarm();
       notifyBreakStart(BREAK_DEFS[currentBreakType]);
       pushScheduleUpdate(null, null);
+      checkBreakAway();
       return;
     }
 
@@ -2335,7 +3956,9 @@
       if (remaining <= 0) {
         running = true;
         paused = false;
+        workEndAt = saved.workEndAt;
         enterBreak();
+        checkBreakAway();
         return;
       }
 
@@ -2459,7 +4082,7 @@
     }
   });
 
-  startBreakBtn.addEventListener("click", advanceBreakQueue);
+  startBreakBtn.addEventListener("click", handleBreakButton);
 
   skipBreakBtn.addEventListener("click", skipBreak);
 
@@ -2560,6 +4183,7 @@
   restoreTimerState();
   updateWorkUI();
   updateStats();
+  updateStreak();
   updateExercisePickerArrows = attachChipArrows($("exerciseSelectWrap").querySelector(".chip-scroller"));
 
   // Necesario para que Chrome/Edge ofrezcan el botón de "Instalar" (junto
@@ -2567,6 +4191,230 @@
   // requisito técnico.
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js").catch(function () {});
+  }
+
+  // El modo oscuro se quitó: la app es siempre clara. Se limpia la
+  // preferencia vieja por si alguien lo había elegido antes.
+  try {
+    window.localStorage.removeItem("horizonte-theme");
+  } catch (e) {}
+
+  // Tema de color: Aguamarina (por defecto), Salvia, Amanecer o Mar y
+  // menta. También pinta la barra del celular con el color del tema.
+  const PALETTE_KEY = "horizonte-palette";
+  const PALETTE_BAR_COLORS = { aqua: "#12907e", salvia: "#3a7a2e", amanecer: "#1f2f4d", mar: "#12393a" };
+  const paletteButtons = $("paletteSwitch").querySelectorAll("button");
+  const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+
+  function applyPalette(value) {
+    if (!PALETTE_BAR_COLORS[value]) value = "aqua";
+
+    if (value === "aqua") {
+      document.documentElement.removeAttribute("data-palette");
+    } else {
+      document.documentElement.setAttribute("data-palette", value);
+    }
+
+    if (themeColorMeta) themeColorMeta.setAttribute("content", PALETTE_BAR_COLORS[value]);
+
+    paletteButtons.forEach(function (btn) {
+      btn.setAttribute("aria-checked", btn.dataset.paletteValue === value ? "true" : "false");
+    });
+  }
+
+  $("creditLink").addEventListener("click", function () {
+    track("clic-korevux", "Clic en Hecho por Korevux");
+  });
+
+  paletteButtons.forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      applyPalette(btn.dataset.paletteValue);
+      track("tema-" + btn.dataset.paletteValue, "Tema elegido: " + btn.textContent.trim());
+      try {
+        window.localStorage.setItem(PALETTE_KEY, btn.dataset.paletteValue);
+      } catch (e) {}
+    });
+  });
+
+  let savedPaletteValue = "aqua";
+  try {
+    savedPaletteValue = window.localStorage.getItem(PALETTE_KEY) || "aqua";
+  } catch (e) {}
+  applyPalette(savedPaletteValue);
+
+  // Introducción de 3 pasos: aparece sola la primera vez que se abre la
+  // app y se puede repetir desde Ajustes → "Ver cómo funciona".
+  const ONBOARDING_KEY = "horizonte-onboarding-done";
+  const onboarding = $("onboarding");
+  const onboardingSlides = onboarding.querySelectorAll(".onboarding-slide");
+  const onboardingDots = onboarding.querySelectorAll(".onboarding-dots span");
+  const onboardingStep = $("onboardingStep");
+  const onboardingNext = $("onboardingNext");
+  const onboardingLater = $("onboardingLater");
+  const onboardingNotifyStatus = $("onboardingNotifyStatus");
+  let onboardingIndex = 0;
+  let onboardingCanAskNotify = false;
+
+  function showOnboardingSlide(index) {
+    onboardingIndex = index;
+
+    onboardingSlides.forEach(function (slide, i) {
+      slide.hidden = i !== index;
+    });
+    onboardingDots.forEach(function (dot, i) {
+      dot.classList.toggle("active", i === index);
+    });
+
+    const isLast = index === onboardingSlides.length - 1;
+    onboardingStep.textContent = "Paso " + (index + 1) + " de " + onboardingSlides.length;
+
+    if (isLast) {
+      refreshOnboardingNotify();
+    } else {
+      onboardingCanAskNotify = false;
+      onboardingNext.textContent = "Siguiente";
+      onboardingLater.hidden = true;
+    }
+  }
+
+  // Último paso: si se pueden pedir los avisos, el botón principal es
+  // "Activar avisos y empezar" (lo recomendado) y "Ahora no" queda como
+  // opción secundaria. Si no se pueden pedir, es simplemente "Empezar".
+  function refreshOnboardingNotify() {
+    const supported = "Notification" in window;
+    const granted = supported && Notification.permission === "granted" && notifyToggle.checked;
+    const denied = supported && Notification.permission === "denied";
+
+    onboardingCanAskNotify = supported && !granted && !denied;
+
+    onboardingNext.innerHTML = onboardingCanAskNotify
+      ? iconSVG("bell") + " Activar avisos y empezar"
+      : "Empezar";
+    onboardingLater.hidden = !onboardingCanAskNotify;
+
+    if (granted) {
+      onboardingNotifyStatus.textContent = "✓ Avisos activados";
+      onboardingNotifyStatus.hidden = false;
+    } else if (denied) {
+      onboardingNotifyStatus.textContent = "Los avisos están bloqueados en el navegador. Puedes activarlos después desde sus ajustes.";
+      onboardingNotifyStatus.hidden = false;
+    } else {
+      // Ej.: iPhone sin la app instalada, donde el navegador no permite
+      // avisos; ahí no se menciona nada para no confundir.
+      onboardingNotifyStatus.hidden = true;
+    }
+  }
+
+  function openOnboarding() {
+    showOnboardingSlide(0);
+    onboarding.hidden = false;
+    document.body.classList.add("onboarding-open");
+    onboardingNext.focus();
+  }
+
+  function closeOnboarding() {
+    onboarding.hidden = true;
+    document.body.classList.remove("onboarding-open");
+    try {
+      window.localStorage.setItem(ONBOARDING_KEY, "1");
+    } catch (e) {}
+  }
+
+  onboardingNext.addEventListener("click", function () {
+    if (onboardingIndex < onboardingSlides.length - 1) {
+      showOnboardingSlide(onboardingIndex + 1);
+      return;
+    }
+
+    if (onboardingCanAskNotify) {
+      // Reutiliza el interruptor de Ajustes para pedir el permiso, así la
+      // lógica de notificaciones/push vive en un solo lugar.
+      notifyToggle.checked = true;
+      notifyToggle.dispatchEvent(new Event("change"));
+    }
+
+    closeOnboarding();
+  });
+
+  onboardingLater.addEventListener("click", closeOnboarding);
+
+  $("onboardingSkip").addEventListener("click", closeOnboarding);
+
+  $("showIntroBtn").addEventListener("click", openOnboarding);
+
+  let onboardingDone = false;
+  try {
+    onboardingDone = window.localStorage.getItem(ONBOARDING_KEY) === "1";
+  } catch (e) {}
+
+  if (!onboardingDone) openOnboarding();
+
+  // Botón "Instalar app": en Chrome/Edge/Android usa el aviso nativo del
+  // navegador; en iPhone (Safari no lo tiene) muestra cómo hacerlo a mano.
+  // No se muestra si la app ya está instalada o si la persona lo cerró
+  // con la "×" (se recuerda en este navegador).
+  const installWrap = $("installWrap");
+  const installBtn = $("installBtn");
+  const installClose = $("installClose");
+  const installHelp = $("installHelp");
+  const INSTALL_DISMISSED_KEY = "horizonte-install-dismissed";
+  const isStandalone =
+    window.matchMedia("(display-mode: standalone)").matches ||
+    window.navigator.standalone === true;
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  let deferredInstall = null;
+  let installDismissed = false;
+
+  try {
+    installDismissed = localStorage.getItem(INSTALL_DISMISSED_KEY) === "1";
+  } catch (e) {}
+
+  // Cuántas veces se abre desde el ícono instalado: la mejor señal de
+  // que la gente sigue usándola.
+  if (isStandalone) track("abierta-instalada", "Abierta desde la app instalada");
+
+  window.addEventListener("appinstalled", function () {
+    track("app-instalada", "App instalada");
+  });
+
+  function hideInstall() {
+    installWrap.hidden = true;
+    installHelp.hidden = true;
+  }
+
+  if (!isStandalone && !installDismissed) {
+    window.addEventListener("beforeinstallprompt", function (e) {
+      e.preventDefault();
+      deferredInstall = e;
+      installWrap.hidden = false;
+    });
+
+    if (isIOS) {
+      installWrap.hidden = false;
+    }
+
+    installBtn.addEventListener("click", function () {
+      track("instalar-clic", "Clic en Instalar app");
+
+      if (deferredInstall) {
+        deferredInstall.prompt();
+        deferredInstall.userChoice.finally(function () {
+          deferredInstall = null;
+          hideInstall();
+        });
+      } else if (isIOS) {
+        installHelp.hidden = !installHelp.hidden;
+      }
+    });
+
+    installClose.addEventListener("click", function () {
+      hideInstall();
+      try {
+        localStorage.setItem(INSTALL_DISMISSED_KEY, "1");
+      } catch (e) {}
+    });
+
+    window.addEventListener("appinstalled", hideInstall);
   }
 
 })();

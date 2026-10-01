@@ -1,13 +1,15 @@
 {
-  "name": "Horizonte · Bienestar en cada pausa",
+  "name": "Horizonte · Pausas activas",
   "short_name": "Horizonte",
-  "description": "Pequeños descansos para una jornada más activa.",
+  "description": "Pausas activas, ergonomía y salud visual para tu jornada.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#eee9e1",
-  "theme_color": "#171715",
+  "background_color": "#f3f8f7",
+  "theme_color": "#12907e",
   "icons": [
-    { "src": "horizonte-icon-palabra.png", "sizes": "1024x1024", "type": "image/png", "purpose": "any" }
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }
