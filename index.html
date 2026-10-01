@@ -3207,8 +3207,8 @@
     // cuello (comprimen las cervicales).
     visual: [
       { label: "Mirar lejos (20-20-20)", pose: "eye", text: "Aparta la vista de la pantalla y mira algo que esté a unos 6 metros: por una ventana o al fondo de la oficina. Quédate mirando lejos, con la vista relajada, durante 20 segundos. Es la regla 20-20-20: cada 20 minutos, 20 segundos, a 20 pies (6 metros)." },
-      { label: "Parpadear", pose: "blink", text: "Mira a lo lejos y parpadea despacio y por completo, 10 veces. Frente a la pantalla parpadeamos mucho menos; parpadear mantiene los ojos húmedos." },
-      { label: "Palmeado", pose: "palming", text: "Cubre los ojos con las palmas de las manos, sin tocar los párpados y con los ojos abiertos, de modo que no veas ninguna luz. Quédate así 20 segundos, respirando tranquilo." }
+      { label: "Parpadear", pose: "blink", text: "Complemento de la regla 20-20-20: mientras miras a lo lejos, parpadea despacio y por completo, 10 veces. Frente a la pantalla parpadeamos mucho menos; parpadear mantiene los ojos húmedos." },
+      { label: "Palmeado", pose: "palming", text: "Complemento para relajar la vista. Cubre los ojos con las palmas de las manos, sin tocar los párpados y con los ojos abiertos, de modo que no veas ninguna luz. Quédate así 20 segundos, respirando tranquilo." }
     ],
     mobility: [
       { label: "Cuello", pose: "neck", text: "Inclina la cabeza hacia un hombro y sostén 10 segundos; repite al otro lado. Luego lleva el mentón hacia atrás, como haciendo doble mentón, 5 veces. Sin forzar." },
@@ -3930,8 +3930,13 @@
     const options = EXERCISE_OPTIONS[type];
     if (!options) return;
 
+    // El descanso visual siempre propone la regla 20-20-20 (la
+    // recomendación base); parpadear y palmeado son complementos que la
+    // persona puede elegir, no la reemplazan. Los demás tipos rotan.
     const last = loadRotation()[type];
-    const defaultIndex = typeof last === "number" ? (last + 1) % options.length : 0;
+    const defaultIndex = type !== "visual" && typeof last === "number"
+      ? (last + 1) % options.length
+      : 0;
 
     buildChipRow(exerciseChipRow, options, defaultIndex, function (opt) {
       breakExercise.textContent = opt.text;
