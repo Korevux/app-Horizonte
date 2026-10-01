@@ -1643,6 +1643,64 @@
       line-height: 1.45;
     }
 
+    /* Teléfono: pantalla de inicio más compacta, para que el reloj, los
+       botones y el ciclo de pausas completo se vean sin bajar. */
+    @media (max-width: 640px) {
+      .app {
+        padding-top: 16px;
+      }
+
+      header {
+        margin-bottom: 14px;
+      }
+
+      .subtitle {
+        display: none;
+      }
+
+      .timer-card {
+        padding: 18px 18px 18px;
+      }
+
+      .timer-ring {
+        width: min(196px, 100%);
+        margin: 10px auto 8px;
+      }
+
+      .timer-ring .timer {
+        font-size: 54px;
+      }
+
+      .main-actions {
+        margin-top: 14px;
+      }
+
+      .main-actions .btn {
+        white-space: nowrap;
+        padding: 0 12px;
+      }
+
+      .cycle-card {
+        margin-top: 12px;
+        padding: 12px 12px 14px;
+      }
+
+      .cycle-title {
+        margin-bottom: 8px;
+      }
+
+      .cycle-step {
+        padding: 9px 4px 10px;
+        gap: 3px;
+      }
+
+      .cycle-step-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 21px;
+      }
+    }
+
     /* Teléfono: la pausa ocupa toda la pantalla, como un modo enfoque.
        Al llegar el aviso, la persona ve de inmediato el ejercicio y tiene
        "Empezar pausa" siempre a mano, fijo abajo, sin tener que buscarlo
