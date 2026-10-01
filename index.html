@@ -4451,6 +4451,7 @@
   // nacer bloqueado. Por eso se crea y se desbloquea con el primer toque
   // y se reutiliza.
   let sharedAudioCtx = null;
+  let audioOutput = null;
 
   function getAudioContext() {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -4458,6 +4459,20 @@
 
     if (!sharedAudioCtx || sharedAudioCtx.state === "closed") {
       sharedAudioCtx = new AudioContextClass();
+
+      // Compresor de salida: sube el volumen percibido de todos los tonos
+      // (el parlante del celular es pequeño) sin que se distorsionen.
+      audioOutput = sharedAudioCtx.createDynamicsCompressor();
+      audioOutput.threshold.value = -28;
+      audioOutput.knee.value = 20;
+      audioOutput.ratio.value = 12;
+      audioOutput.attack.value = 0.002;
+      audioOutput.release.value = 0.2;
+
+      const makeup = sharedAudioCtx.createGain();
+      makeup.gain.value = 2.2;
+      audioOutput.connect(makeup);
+      makeup.connect(sharedAudioCtx.destination);
     }
     if (sharedAudioCtx.state === "suspended") {
       sharedAudioCtx.resume().catch(function () {});
@@ -4496,7 +4511,7 @@
       );
 
       oscillator.connect(gain);
-      gain.connect(ctx.destination);
+      gain.connect(audioOutput || ctx.destination);
 
       oscillator.start();
       oscillator.stop(ctx.currentTime + duration + 0.05);
@@ -4543,6 +4558,17 @@
 
   const ALARM_SOUND_MS = 60 * 1000;
 
+  // Tres pitidos agudos, como un despertador: los tonos de 2-3 kHz en
+  // onda cuadrada son los que mejor se oyen por el parlante del celular.
+  // force: suena aunque no haya alarma activa (botón "Probar").
+  function playAlarmBurst(force) {
+    [0, 220, 440].forEach(function (delay, i) {
+      setTimeout(function () {
+        if (force || alarmActive) createTone(i === 1 ? 2600 : 2100, 0.15, 0.6, "square");
+      }, delay);
+    });
+  }
+
   function startAlarm() {
     stopAlarm();
     alarmActive = true;
@@ -4565,12 +4591,8 @@
       if (!alarmActive) return;
       if (Date.now() - alarmStartedAt > ALARM_SOUND_MS) return;
 
-      // Doble pitido fuerte: se oye por el parlante del celular.
-      createTone(880, 0.35, 0.45, "triangle");
-      setTimeout(function () {
-        if (alarmActive) createTone(1175, 0.45, 0.45, "triangle");
-      }, 420);
-      alarmTimer = setTimeout(tick, 3000);
+      playAlarmBurst(false);
+      alarmTimer = setTimeout(tick, 2000);
     }
 
     tick();
@@ -5042,7 +5064,14 @@
     });
   });
 
-  testSoundBtn.addEventListener("click", playSelectedSound);
+  // "Probar": el sonido de aviso elegido y, después, la alarma tal como
+  // suena cuando llega la pausa.
+  testSoundBtn.addEventListener("click", function () {
+    playSelectedSound();
+    setTimeout(function () {
+      playAlarmBurst(true);
+    }, 1500);
+  });
 
   soundSelect.addEventListener("change", function () {
     try {
