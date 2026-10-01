@@ -703,15 +703,6 @@
 
     /* --- Ejercicios añadidos (basados en INSST, NHS, CCOHS y AOA) --- */
 
-    /* Parpadeo: el ojo entero se cierra y abre despacio. */
-    @keyframes sfBlinkSlow { 0%, 35%, 100% { transform: scaleY(1); } 55%, 70% { transform: scaleY(.08); } }
-    .pose-blink .sf-eye-all { animation: sfBlinkSlow 2.4s ease-in-out infinite; transform-origin: 40px 30px; }
-
-    /* Palmeado: las palmas cubren los ojos y "respiran" suavemente. */
-    @keyframes sfPalmBreathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
-    .pose-palming .sf-palms { animation: sfPalmBreathe 3.4s ease-in-out infinite; transform-origin: 40px 30px; }
-    .sf-svg .sf-palm { fill: var(--card); stroke: var(--accent-dark); stroke-width: 3; }
-
     /* Juntar omóplatos: manos tras la cabeza, los codos se abren atrás. */
     @keyframes sfElbowsBack { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(1.25); } }
     .pose-scapula .sf-elbows { animation: sfElbowsBack 2.4s ease-in-out infinite; transform-origin: 40px 24px; }
@@ -826,6 +817,16 @@
 
     .exercise-chip:not(.selected) .sf-svg * {
       animation-play-state: paused;
+    }
+
+    /* Un solo ejercicio (descanso visual): sin selector, con el dibujo grande. */
+    .break-panel .exercise-select-wrap.single .exercise-illustration {
+      display: flex;
+    }
+
+    .exercise-select-wrap.single .exercise-select-label,
+    .exercise-select-wrap.single .chip-scroller {
+      display: none;
     }
 
     /* --- Guía rápida interactiva --- */
@@ -1808,11 +1809,13 @@
 
       .break-actions .btn {
         min-height: 54px;
-        font-size: 17px;
+        font-size: 16px;
+        padding: 0 10px;
       }
 
       .break-actions #startBreakBtn {
-        flex: 1.7;
+        flex: 2.6;
+        white-space: nowrap;
       }
     }
 
@@ -2981,7 +2984,7 @@
         </button>
         <p class="guide-text">
           Regla 20-20-20: cada 20 minutos, mira algo a unos 6 metros durante
-          20 segundos. También: parpadear y palmeado.
+          20 segundos mientras parpadeas despacio.
         </p>
         <div class="guide-panel" id="guidePanel-visual" hidden></div>
       </article>
@@ -3038,7 +3041,7 @@
       <ul>
         <li>
           <a href="https://www.insst.es/documents/94886/96076/InstruccionBasicaParaTrabajadorUsuarioPantallas.pdf" target="_blank" rel="noopener">INSST (España) ↗</a>
-          — Instrucción básica para el trabajador usuario de pantallas: pausas, mirar lejos y palmeado.
+          — Instrucción básica para el trabajador usuario de pantallas: pausas y mirar a lo lejos.
         </li>
         <li>
           <a href="https://www.aoa.org/healthy-eyes/eye-and-vision-conditions/computer-vision-syndrome" target="_blank" rel="noopener">Asociación Americana de Optometría ↗</a>
@@ -3205,10 +3208,10 @@
     // CCOHS (Canadá) y AOA (EE. UU.). Pautas comunes: lento, sin rebotes,
     // sin dolor y respirando con normalidad. Sin círculos completos de
     // cuello (comprimen las cervicales).
+    // Visual: siempre la regla 20-20-20 (cada 20 minutos). El parpadeo
+    // se hace a la vez, así que no alarga el descanso.
     visual: [
-      { label: "Mirar lejos (20-20-20)", pose: "eye", text: "Aparta la vista de la pantalla y mira algo que esté a unos 6 metros: por una ventana o al fondo de la oficina. Quédate mirando lejos, con la vista relajada, durante 20 segundos. Es la regla 20-20-20: cada 20 minutos, 20 segundos, a 20 pies (6 metros)." },
-      { label: "Parpadear", pose: "blink", text: "Complemento de la regla 20-20-20: mientras miras a lo lejos, parpadea despacio y por completo, 10 veces. Frente a la pantalla parpadeamos mucho menos; parpadear mantiene los ojos húmedos." },
-      { label: "Palmeado", pose: "palming", text: "Complemento para relajar la vista. Cubre los ojos con las palmas de las manos, sin tocar los párpados y con los ojos abiertos, de modo que no veas ninguna luz. Quédate así 20 segundos, respirando tranquilo." }
+      { label: "Mirar lejos (20-20-20)", pose: "eye", text: "Aparta la vista de la pantalla y mira algo a unos 6 metros: por una ventana o al fondo de la oficina. Mientras miras lejos, parpadea despacio y por completo varias veces." }
     ],
     mobility: [
       { label: "Cuello", pose: "neck", text: "Inclina la cabeza hacia un hombro y sostén 10 segundos; repite al otro lado. Luego lleva el mentón hacia atrás, como haciendo doble mentón, 5 veces. Sin forzar." },
@@ -3293,27 +3296,6 @@
     '<ellipse class="sf-ground" cx="40" cy="96" rx="32" ry="3.5"/>';
 
   // --- Dibujos de los ejercicios añadidos ---
-  const EYE_SHAPES =
-    '<ellipse class="sf-eye-outline" cx="40" cy="30" rx="26" ry="16"/>' +
-    '<g class="sf-eye-pupil">' +
-      '<circle class="sf-eye-iris" cx="40" cy="30" r="10"/>' +
-      '<circle class="sf-eye-center" cx="40" cy="30" r="4.5"/>' +
-      '<circle class="sf-eye-glint" cx="37" cy="27" r="2"/>' +
-    '</g>';
-
-  const BLINK_FIGURE = '<g class="sf-eye-all">' + EYE_SHAPES + '</g>';
-
-  // Cabeza con las dos palmas cubriendo los ojos.
-  const PALMING_FIGURE =
-    '<circle class="sf-head" cx="40" cy="32" r="22"/>' +
-    '<circle class="sf-head-highlight" cx="32" cy="20" r="3"/>' +
-    '<g class="sf-palms">' +
-      '<line x1="10" y1="60" x2="24" y2="36"/>' +
-      '<line x1="70" y1="60" x2="56" y2="36"/>' +
-      '<ellipse class="sf-palm" cx="29" cy="29" rx="12" ry="10"/>' +
-      '<ellipse class="sf-palm" cx="51" cy="29" rx="12" ry="10"/>' +
-    '</g>';
-
   // De pie, manos detrás de la cabeza y codos abiertos.
   const SCAPULA_FIGURE =
     '<g class="sf-body-group">' +
@@ -3387,8 +3369,6 @@
     '<ellipse class="sf-ground" cx="40" cy="97" rx="32" ry="3.5"/>';
 
   const CUSTOM_FIGURES = {
-    "blink": { box: "0 0 80 60", svg: BLINK_FIGURE },
-    "palming": { box: "0 0 80 60", svg: PALMING_FIGURE },
     "scapula": { box: "0 0 80 100", svg: SCAPULA_FIGURE },
     "prayer": { box: "0 0 80 100", svg: PRAYER_FIGURE },
     "wall-pushup": { box: "0 0 80 100", svg: WALL_PUSHUP_FIGURE },
@@ -3930,13 +3910,10 @@
     const options = EXERCISE_OPTIONS[type];
     if (!options) return;
 
-    // El descanso visual siempre propone la regla 20-20-20 (la
-    // recomendación base); parpadear y palmeado son complementos que la
-    // persona puede elegir, no la reemplazan. Los demás tipos rotan.
     const last = loadRotation()[type];
-    const defaultIndex = type !== "visual" && typeof last === "number"
-      ? (last + 1) % options.length
-      : 0;
+    const defaultIndex = typeof last === "number" ? (last + 1) % options.length : 0;
+
+    exerciseSelectWrap.classList.toggle("single", options.length === 1);
 
     buildChipRow(exerciseChipRow, options, defaultIndex, function (opt) {
       breakExercise.textContent = opt.text;
@@ -4005,6 +3982,7 @@
         });
 
         attachChipArrows(panel.querySelector(".chip-scroller"));
+        panel.querySelector(".chip-scroller").hidden = options.length === 1;
       }
     }
   }
