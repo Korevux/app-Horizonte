@@ -1629,6 +1629,96 @@
       50% { opacity: .35; }
     }
 
+    /* Mensaje "¡Hola de nuevo!" dentro de la pausa (en el teléfono el
+       temporizador queda tapado por la pausa a pantalla completa). */
+    .break-away-note {
+      margin: 0 auto 14px;
+      max-width: 340px;
+      padding: 10px 14px;
+      border-radius: 14px;
+      background: var(--tint-amber);
+      color: var(--amber-text);
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.45;
+    }
+
+    /* Teléfono: la pausa ocupa toda la pantalla, como un modo enfoque.
+       Al llegar el aviso, la persona ve de inmediato el ejercicio y tiene
+       "Empezar pausa" siempre a mano, fijo abajo, sin tener que buscarlo
+       bajando por la página. */
+    @media (max-width: 640px) {
+      .break-panel.visible {
+        position: fixed;
+        inset: 0;
+        z-index: 900;
+        margin: 0;
+        border: 0;
+        border-radius: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        padding: max(18px, env(safe-area-inset-top)) 18px 0;
+        background:
+          linear-gradient(180deg, var(--tone-bg, var(--sky)) 0%, var(--card) 46%);
+        display: flex;
+        flex-direction: column;
+      }
+
+      body.break-open {
+        overflow: hidden;
+      }
+
+      .break-panel .break-icon {
+        width: 64px;
+        height: 64px;
+        font-size: 32px;
+        margin-bottom: 12px;
+      }
+
+      .break-panel[data-type] .break-icon {
+        box-shadow:
+          0 0 0 6px color-mix(in srgb, var(--tone) 22%, transparent),
+          0 8px 18px color-mix(in srgb, var(--tone) 28%, transparent);
+      }
+
+      .break-title {
+        font-size: 24px;
+      }
+
+      .break-panel .sf-svg {
+        width: 112px;
+        height: 132px;
+      }
+
+      .break-exercise {
+        margin: 12px 0;
+        font-size: 15px;
+      }
+
+      .break-countdown {
+        font-size: 48px;
+        margin: 6px 0;
+      }
+
+      /* Botones fijos abajo, sobre un degradado para que se lean siempre. */
+      .break-actions {
+        position: sticky;
+        bottom: 0;
+        margin: auto -18px 0;
+        padding: 14px 18px max(16px, env(safe-area-inset-bottom));
+        background: linear-gradient(180deg, transparent, var(--card) 30%);
+      }
+
+      .break-actions .btn {
+        min-height: 54px;
+        font-size: 17px;
+      }
+
+      .break-actions #startBreakBtn {
+        flex: 1.7;
+      }
+    }
+
     @media (max-width: 350px) {
       .app {
         width: min(100% - 20px, 430px);
@@ -2199,6 +2289,10 @@
   </section>
 
   <section class="break-panel" id="breakPanel">
+
+    <div class="break-away-note" id="breakAwayNote" hidden>
+      ¡Hola de nuevo! ¿Hacemos una pausa rápida o sigues trabajando?
+    </div>
 
     <div class="break-progress" id="breakProgress" hidden>
       Pausa 1 de 2 de esta alarma
@@ -2836,6 +2930,7 @@
         renotify: true,
         requireInteraction: true
       });
+      breakNotification = note;
 
       note.onclick = function () {
         window.focus();
@@ -3365,16 +3460,19 @@
     wakeLock = null;
   }
 
-  function startBreakCountdown() {
+  // resumeEndAt: al recargar la app en plena pausa (Android puede cerrarla
+  // en segundo plano) se retoma el mismo conteo, sin volver a sonar.
+  function startBreakCountdown(resumeEndAt) {
     stopAlarm();
+    silenceOtherCopies();
     clearBreakCountdown();
 
     const duration = BREAK_DEFS[currentBreakType].duration;
-    breakCountdownEndAt = Date.now() + duration * 1000;
+    breakCountdownEndAt = resumeEndAt || (Date.now() + duration * 1000);
 
     breakCounting = true;
     breakDone = false;
-    breakTime = duration;
+    breakTime = Math.max(0, Math.ceil((breakCountdownEndAt - Date.now()) / 1000));
     timerDescription.textContent = "Pausa en curso.";
     startBreakBtn.textContent = breakContinueLabel;
     breakCountdown.textContent = formatTime(breakTime);
@@ -3382,6 +3480,9 @@
     requestWakeLock();
 
     breakCountdownTimer = setInterval(tickBreakCountdown, 250);
+    saveTimerState();
+
+    if (breakTime <= 0) finishBreakCountdown();
   }
 
   function tickBreakCountdown() {
@@ -3442,8 +3543,37 @@
   let breakStartedAt = 0;
   let breakAway = false;
 
+  const breakAwayNote = $("breakAwayNote");
+
+  // En el teléfono la pausa se abre a pantalla completa (ver CSS); en el
+  // computador la página baja sola hasta el ejercicio.
+  function showBreakPanel() {
+    breakPanel.classList.add("visible");
+    document.body.classList.add("break-open");
+    breakPanel.scrollTop = 0;
+
+    try {
+      if (!window.matchMedia("(max-width: 640px)").matches) {
+        breakPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    } catch (e) {}
+  }
+
+  // Al terminar, de vuelta arriba al temporizador: así nadie tiene que
+  // subir y bajar buscando los botones.
+  function hideBreakPanel() {
+    const wasOpen = breakPanel.classList.contains("visible");
+    breakPanel.classList.remove("visible");
+    document.body.classList.remove("break-open");
+
+    try {
+      if (wasOpen) window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (e) {}
+  }
+
   function setBreakAway(away) {
     breakAway = away;
+    if (breakAwayNote) breakAwayNote.hidden = !away;
 
     if (away) {
       stopAlarm();
@@ -3558,9 +3688,52 @@
     updateDocumentTitle();
   }
 
+  // Si la app está abierta dos veces (la instalada y una pestaña del
+  // navegador, o dos pestañas), cada copia suena por su cuenta: al tocar
+  // "Empezar pausa" en una, la otra seguía sonando. Este canal le avisa a
+  // las demás copias que se callen.
+  let alarmChannel = null;
+  try {
+    if ("BroadcastChannel" in window) {
+      alarmChannel = new BroadcastChannel("horizonte-alarm");
+      alarmChannel.onmessage = function (event) {
+        if (event.data === "silence") stopAlarm();
+      };
+    }
+  } catch (e) {}
+
+  function silenceOtherCopies() {
+    try {
+      if (alarmChannel) alarmChannel.postMessage("silence");
+    } catch (e) {}
+  }
+
+  // La notificación del sistema queda fija en pantalla (requireInteraction)
+  // y en el celular puede seguir vibrando; se cierra al atender la pausa.
+  let breakNotification = null;
+
+  function closeBreakNotifications() {
+    try {
+      if (breakNotification) breakNotification.close();
+    } catch (e) {}
+    breakNotification = null;
+
+    try {
+      if (navigator.serviceWorker && navigator.serviceWorker.getRegistration) {
+        navigator.serviceWorker.getRegistration().then(function (reg) {
+          if (!reg || !reg.getNotifications) return;
+          return reg.getNotifications({ tag: "horizonte-break" }).then(function (list) {
+            list.forEach(function (n) { n.close(); });
+          });
+        }).catch(function () {});
+      }
+    } catch (e) {}
+  }
+
   function stopAlarm() {
     alarmActive = false;
     stopAttentionEffects();
+    closeBreakNotifications();
 
     if (alarmTimer) {
       clearTimeout(alarmTimer);
@@ -3746,7 +3919,7 @@
     // ejercicio: si se miden con el panel en display:none, scrollWidth y
     // clientWidth dan 0 y las flechitas de desplazamiento quedan
     // deshabilitadas de por vida (el bug que reportaste).
-    breakPanel.classList.add("visible");
+    showBreakPanel();
     showCurrentBreakItem();
 
     playSelectedSound();
@@ -3815,7 +3988,7 @@
   function resumeWorkAfterBreak() {
     setBreakAway(false);
     breakStartedAt = 0;
-    breakPanel.classList.remove("visible");
+    hideBreakPanel();
     inBreak = false;
     currentBreakType = null;
     breakQueue = [];
@@ -3834,6 +4007,7 @@
   function skipBreak() {
     stopAllTimers();
     stopAlarm();
+    silenceOtherCopies();
     logBreakOutcome(breakAway ? "away" : "skipped");
     resumeWorkAfterBreak();
   }
@@ -3919,7 +4093,7 @@
     workTime = WORK_SECONDS;
     breakTime = 0;
 
-    breakPanel.classList.remove("visible");
+    hideBreakPanel();
 
     resetCycleIndicator();
     updateWorkUI();
@@ -3943,6 +4117,7 @@
         breakQueue: breakQueue,
         breakQueueIndex: breakQueueIndex,
         breakStartedAt: breakStartedAt,
+        breakCountdownEndAt: inBreak && breakCounting ? breakCountdownEndAt : 0,
         cycle: cycle
       }));
     } catch (e) {}
@@ -3980,11 +4155,25 @@
 
       highlightCycleTypes(breakQueue);
       breakStartedAt = saved.breakStartedAt || Date.now();
-      breakPanel.classList.add("visible");
+      showBreakPanel();
       updateBreakUI(BREAK_DEFS[currentBreakType]);
+      pushScheduleUpdate(null, null);
+
+      // Si ya estaba haciendo el ejercicio, se retoma el conteo en
+      // silencio: la alarma solo vuelve a sonar si la pausa no se empezó.
+      if (saved.breakCountdownEndAt) {
+        if (Date.now() - saved.breakCountdownEndAt >= BREAK_AUTO_RESUME_MS) {
+          // Terminó hace rato con la app cerrada: cuenta como hecha.
+          countFinishedBreak("completed");
+          resumeWorkAfterBreak();
+          return;
+        }
+        startBreakCountdown(saved.breakCountdownEndAt);
+        return;
+      }
+
       startAlarm();
       notifyBreakStart(BREAK_DEFS[currentBreakType]);
-      pushScheduleUpdate(null, null);
       checkBreakAway();
       return;
     }
