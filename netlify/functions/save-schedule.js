@@ -1,15 +1,37 @@
-// Recibe desde index.html la suscripción push del dispositivo y la hora
-// en que debería avisar (nextFireAt), y las guarda en un único registro
-// de Netlify Blobs. Es una app de una sola usuaria: no hay base de
-// datos, solo un objeto JSON que se sobreescribe.
+// Recibe desde index.html la suscripción push de UN dispositivo y la hora
+// en que debería avisarle (nextFireAt). Cada dispositivo tiene su propio
+// registro en Netlify Blobs (clave "sub/<hash del endpoint>"), así varias
+// personas pueden usar la app sin pisarse los horarios entre sí.
+const crypto = require("crypto");
 const { getStore } = require("@netlify/blobs");
 
 const STORE_NAME = "horizonte";
-const BLOB_KEY = "schedule";
+const SUB_PREFIX = "sub/";
+const MAX_BODY_BYTES = 8 * 1024;
+
+function keyFor(endpoint) {
+  const hash = crypto.createHash("sha256").update(endpoint).digest("hex").slice(0, 40);
+  return SUB_PREFIX + hash;
+}
+
+function isValidSubscription(sub) {
+  return Boolean(
+    sub &&
+    typeof sub.endpoint === "string" &&
+    /^https:\/\//.test(sub.endpoint) &&
+    sub.keys &&
+    typeof sub.keys.p256dh === "string" &&
+    typeof sub.keys.auth === "string"
+  );
+}
 
 exports.handler = async function (event) {
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Method not allowed" };
+  }
+
+  if ((event.body || "").length > MAX_BODY_BYTES) {
+    return { statusCode: 413, body: "Demasiado grande" };
   }
 
   let payload;
@@ -19,37 +41,31 @@ exports.handler = async function (event) {
     return { statusCode: 400, body: "JSON inválido" };
   }
 
+  // Sin una suscripción válida no hay a quién avisar: cada registro
+  // pertenece a un dispositivo concreto.
+  if (!isValidSubscription(payload.subscription)) {
+    return { statusCode: 400, body: "Falta una suscripción válida" };
+  }
+
+  const nextFireAt =
+    typeof payload.nextFireAt === "number" && isFinite(payload.nextFireAt)
+      ? payload.nextFireAt
+      : null;
+
   const store = getStore(STORE_NAME);
-  let record = (await store.get(BLOB_KEY, { type: "json" })) || {
-    subscriptions: [],
-    nextFireAt: null,
-    fireKind: null
-  };
 
-  if (payload.clear) {
-    record.nextFireAt = null;
-    record.fireKind = null;
-    await store.setJSON(BLOB_KEY, record);
-    return { statusCode: 200, body: JSON.stringify({ ok: true }) };
-  }
-
-  if (payload.subscription && payload.subscription.endpoint) {
-    const exists = record.subscriptions.some(
-      (s) => s.endpoint === payload.subscription.endpoint
-    );
-    if (!exists) {
-      record.subscriptions.push(payload.subscription);
-    }
-  }
-
-  if (typeof payload.nextFireAt !== "undefined") {
-    record.nextFireAt = payload.nextFireAt;
-  }
-  if (typeof payload.fireKind !== "undefined") {
-    record.fireKind = payload.fireKind;
-  }
-
-  await store.setJSON(BLOB_KEY, record);
+  await store.setJSON(keyFor(payload.subscription.endpoint), {
+    subscription: {
+      endpoint: payload.subscription.endpoint,
+      keys: {
+        p256dh: payload.subscription.keys.p256dh,
+        auth: payload.subscription.keys.auth
+      }
+    },
+    nextFireAt: nextFireAt,
+    fireKind: nextFireAt ? (payload.fireKind || "break") : null,
+    updatedAt: Date.now()
+  });
 
   return { statusCode: 200, body: JSON.stringify({ ok: true }) };
 };

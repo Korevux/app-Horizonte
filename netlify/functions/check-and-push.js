@@ -1,13 +1,22 @@
-// Función programada (ver netlify.toml, corre cada minuto). Revisa el
-// registro guardado por save-schedule.js; si ya se cumplió la hora
-// guardada (nextFireAt), manda el push real a través del servicio de
-// notificaciones del navegador (funciona aunque la pestaña/app esté
-// cerrada, porque lo entrega el sistema operativo).
+// Función programada (ver netlify.toml, corre cada minuto). Recorre los
+// registros por dispositivo que guarda save-schedule.js ("sub/<hash>") y
+// avisa SOLO a los dispositivos cuya hora (nextFireAt) ya se cumplió. El
+// push lo entrega el sistema operativo, así que llega aunque la app esté
+// cerrada.
 const webpush = require("web-push");
 const { getStore } = require("@netlify/blobs");
 
 const STORE_NAME = "horizonte";
-const BLOB_KEY = "schedule";
+const SUB_PREFIX = "sub/";
+const LEGACY_KEY = "schedule"; // registro único de la versión anterior
+const STALE_MS = 60 * 24 * 60 * 60 * 1000; // 60 días sin usar la app
+
+const MESSAGES = {
+  break: {
+    title: "Horizonte",
+    body: "Tu pausa comenzó. Toca para ver el ejercicio."
+  }
+};
 
 exports.handler = async function () {
   const vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
@@ -22,44 +31,61 @@ exports.handler = async function () {
   webpush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey);
 
   const store = getStore(STORE_NAME);
-  const record = await store.get(BLOB_KEY, { type: "json" });
+  const now = Date.now();
 
-  if (!record || !record.nextFireAt || !record.subscriptions || !record.subscriptions.length) {
-    return { statusCode: 200, body: "nada pendiente" };
-  }
+  // El registro único de la versión anterior mezclaba a todos los
+  // dispositivos. Se borra: cada uno se vuelve a registrar solo al
+  // abrir la app (subscribeToPush en index.html).
+  try {
+    await store.delete(LEGACY_KEY);
+  } catch (e) {}
 
-  if (Date.now() < record.nextFireAt) {
-    return { statusCode: 200, body: "todavía no toca" };
-  }
+  const { blobs } = await store.list({ prefix: SUB_PREFIX });
+  let sent = 0;
 
-  const payload = JSON.stringify({
-    title: "Horizonte",
-    body: "Tu pausa comenzó. Toca para ver el ejercicio."
-  });
-
-  const stillValid = [];
-
-  for (const sub of record.subscriptions) {
+  for (const { key } of blobs) {
+    let record;
     try {
-      await webpush.sendNotification(sub, payload);
-      stillValid.push(sub);
+      record = await store.get(key, { type: "json" });
+    } catch (e) {
+      continue;
+    }
+
+    if (!record || !record.subscription) {
+      await store.delete(key);
+      continue;
+    }
+
+    if (!record.nextFireAt) {
+      if (record.updatedAt && now - record.updatedAt > STALE_MS) {
+        await store.delete(key);
+      }
+      continue;
+    }
+
+    if (now < record.nextFireAt) continue;
+
+    const message = MESSAGES[record.fireKind] || MESSAGES.break;
+
+    try {
+      await webpush.sendNotification(record.subscription, JSON.stringify(message));
+      sent += 1;
     } catch (err) {
       const code = err && err.statusCode;
       if (code === 404 || code === 410) {
-        // Suscripción vencida/eliminada por el navegador: se descarta.
+        // Suscripción vencida o eliminada por el navegador: se descarta.
+        await store.delete(key);
         continue;
       }
-      // Otros errores: se conserva la suscripción para reintentar luego.
+      // Otro error (red, servicio caído): se reintenta el próximo minuto.
       console.error("Error enviando push:", err && err.message);
-      stillValid.push(sub);
+      continue;
     }
+
+    record.nextFireAt = null;
+    record.fireKind = null;
+    await store.setJSON(key, record);
   }
 
-  record.subscriptions = stillValid;
-  record.nextFireAt = null;
-  record.fireKind = null;
-
-  await store.setJSON(BLOB_KEY, record);
-
-  return { statusCode: 200, body: "push enviado" };
+  return { statusCode: 200, body: "avisos enviados: " + sent };
 };
