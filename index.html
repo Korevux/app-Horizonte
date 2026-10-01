@@ -4558,14 +4558,19 @@
 
   const ALARM_SOUND_MS = 60 * 1000;
 
-  // Tres pitidos agudos, como un despertador: los tonos de 2-3 kHz en
-  // onda cuadrada son los que mejor se oyen por el parlante del celular.
+  // Campanita de tres notas ascendentes (Do-Mi-Sol, agudas): agradable
+  // pero bien audible en el parlante del celular. Cada nota lleva un
+  // armónico suave una octava arriba que le da brillo de campana.
   // force: suena aunque no haya alarma activa (botón "Probar").
+  const ALARM_NOTES = [1047, 1319, 1568];
+
   function playAlarmBurst(force) {
-    [0, 220, 440].forEach(function (delay, i) {
+    ALARM_NOTES.forEach(function (frequency, i) {
       setTimeout(function () {
-        if (force || alarmActive) createTone(i === 1 ? 2600 : 2100, 0.15, 0.6, "square");
-      }, delay);
+        if (!force && !alarmActive) return;
+        createTone(frequency, 0.6, 0.75, "triangle");
+        createTone(frequency * 2, 0.35, 0.18, "sine");
+      }, i * 190);
     });
   }
 
@@ -4592,7 +4597,7 @@
       if (Date.now() - alarmStartedAt > ALARM_SOUND_MS) return;
 
       playAlarmBurst(false);
-      alarmTimer = setTimeout(tick, 2000);
+      alarmTimer = setTimeout(tick, 2500);
     }
 
     tick();
