@@ -2502,7 +2502,7 @@
           <li><strong><svg class="ic"><use href="#i-walk"/></svg> Activa</strong> cada 3.º aviso: ponte de pie y camina.</li>
         </ul>
         <p class="onboarding-text onboarding-text-small">
-          Cuando estés listo toca <strong>Empezar pausa</strong>. Te avisamos con
+          Cuando estés listo toca <strong>Empezar</strong>. Te avisamos con
           un tono al terminar.
         </p>
       </section>
@@ -2572,7 +2572,7 @@
     </div>
 
     <div class="alarm-indicator" id="alarmIndicator">
-      Es hora de tu pausa · toca «Empezar pausa» cuando estés listo
+      Es hora de tu pausa · toca «Empezar» cuando estés listo
     </div>
 
     <div class="main-actions">
@@ -2878,7 +2878,7 @@
     </div>
 
     <p class="time-hint" style="margin-top:12px;">
-      El conteo de cada ejercicio empieza cuando tocas «Empezar pausa».
+      El conteo de cada ejercicio empieza cuando tocas «Empezar».
       Al terminar suena un tono; tú decides cuándo continuar.
     </p>
 
@@ -3084,6 +3084,13 @@
   };
 
   const BREAK_LABELS = { visual: "Visual", mobility: "Movilidad", active: "Activa" };
+
+  // El botón dice qué se va a hacer: "pausa" a secas no se entendía.
+  const BREAK_START_LABELS = {
+    visual: "Empezar descanso visual",
+    mobility: "Empezar estiramiento",
+    active: "Empezar pausa activa"
+  };
 
   const EXERCISE_OPTIONS = {
     // Pautas comunes a todos: movimientos lentos, sin rebotes, sin dolor y
@@ -3825,16 +3832,16 @@
       populateExercisePicker(currentBreakType);
     }
 
-    breakContinueLabel = isLast ? "Continuar" : "Siguiente ejercicio →";
+    breakContinueLabel = isLast ? "Continuar trabajando" : "Siguiente ejercicio →";
     startBreakBtn.disabled = false;
-    startBreakBtn.textContent = "▶ Empezar pausa";
+    startBreakBtn.textContent = "▶ " + BREAK_START_LABELS[currentBreakType];
     skipBreakBtn.textContent = total > 1 ? "Omitir esta alarma" : "Omitir pausa";
 
     updateTimerDisplay();
   }
 
   // --- Cuenta regresiva del ejercicio ---
-  // Un solo botón cambia de texto: "Empezar pausa" → "Continuar".
+  // Un solo botón cambia de texto: "Empezar …" → "Continuar trabajando".
   // Al llegar a 0 avisa con un tono suave, pero no avanza sola: la
   // persona decide cuándo seguir.
   const BREAK_AUTO_RESUME_MS = 2 * 60 * 1000;
@@ -3845,7 +3852,7 @@
   let breakDone = false;
   let breakDoneAt = 0;
   let breakAutoResumeTimer = null;
-  let breakContinueLabel = "Continuar";
+  let breakContinueLabel = "Continuar trabajando";
   let wakeLock = null;
 
   function clearBreakCountdown() {
