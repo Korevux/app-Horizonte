@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Horizonte · Pausas activas, ergonomía y salud visual para tu jornada." />
   <title>Horizonte · Pausas activas</title>
-  <link rel="icon" id="appFavicon" href="icons/icon-32.png" type="image/png">
-  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="icon" id="appFavicon" href="./icon-32.png" type="image/png">
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
   <!-- Estadísticas anónimas sin cookies (GoatCounter, cuenta Korevux). -->
   <script data-goatcounter="https://korevux.goatcounter.com/count"
@@ -661,6 +661,17 @@
       animation: sfTorsoTwist 2.4s ease-in-out infinite;
       transform-origin: 40px 34px;
     }
+
+    /* Espalda baja (sentado): el tronco se inclina adelante y atrás
+       desde la cadera. La silla va en gris suave para no competir. */
+    @keyframes sfBackArch { 0%, 100% { transform: rotate(-9deg); } 50% { transform: rotate(9deg); } }
+    .pose-lower-back .sf-upper { animation: sfBackArch 2.6s ease-in-out infinite; transform-origin: 42px 60px; }
+    .sf-svg .sf-chair line { stroke: var(--muted-2); stroke-width: 3.5; opacity: .55; }
+
+    /* Hombros: suben hacia las orejas y bajan. */
+    @keyframes sfShrug { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+    .pose-shoulders .sf-armL,
+    .pose-shoulders .sf-armR { animation: sfShrug 1.6s ease-in-out infinite; }
 
     @keyframes sfLegExtend { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-24deg); } }
     .pose-legs-seated .sf-legR { animation: sfLegExtend 2.2s ease-in-out infinite; transform-origin: 34px 55px; }
@@ -2101,7 +2112,7 @@
 
   <header>
     <div class="brand">
-      <img class="brand-mark" src="icons/horizonte-icon.svg" alt="" width="52" height="52">
+      <img class="brand-mark" src="./horizonte-icon.svg" alt="" width="52" height="52">
       <div class="brand-text">
         <h1>Horizonte</h1>
         <span class="brand-tag">Pausas activas</span>
@@ -2564,10 +2575,10 @@
     // Sin círculos completos de cuello (comprimen las cervicales).
     mobility: [
       { label: "Cuello", pose: "neck", text: "Inclina la cabeza hacia un hombro y sostén 10 segundos; repite al otro lado. Luego lleva el mentón hacia atrás, como haciendo doble mentón, 5 veces. Sin forzar." },
-      { label: "Hombros y pecho", pose: "torso", text: "Sube los hombros hacia las orejas y suéltalos 5 veces; luego gíralos hacia atrás. Entrelaza las manos detrás de la espalda y abre el pecho 10 segundos." },
+      { label: "Hombros y pecho", pose: "shoulders", text: "Sube los hombros hacia las orejas y suéltalos 5 veces; luego gíralos hacia atrás. Entrelaza las manos detrás de la espalda y abre el pecho 10 segundos." },
       { label: "Muñecas y dedos", pose: "wrists", text: "Brazo al frente con la palma hacia arriba: con la otra mano lleva los dedos suavemente hacia ti 10 segundos. Repite con la palma hacia abajo y cambia de mano. Ideal si usas mucho el mouse y el teclado." },
       { label: "Espalda y torso", pose: "torso", text: "Entrelaza las manos sobre la cabeza y inclínate suavemente a cada lado. Luego, sentado, gira el tronco hacia un lado sin mover la cadera y vuelve al centro." },
-      { label: "Espalda baja", pose: "torso", text: "Sentado al borde de la silla, con las manos en la cintura, arquea y redondea la espalda baja con suavidad 5 veces." },
+      { label: "Espalda baja", pose: "lower-back", text: "Sentado al borde de la silla, con las manos en la cintura, arquea y redondea la espalda baja con suavidad 5 veces." },
       { label: "Piernas (sentado)", pose: "legs-seated", text: "Estira una pierna a la vez y lleva la punta del pie hacia ti 5 segundos. Repite con la otra pierna." }
     ],
     active: [
@@ -2619,7 +2630,35 @@
     '</g>' +
     '<circle class="sf-focus-dot" cx="70" cy="30" r="3"/>';
 
+  // Sentado de perfil en una silla, manos en la cintura: la parte de
+  // arriba (sf-upper) se mece desde la cadera para mostrar cómo se
+  // arquea y redondea la espalda baja.
+  const SEATED_BACK_FIGURE =
+    '<g class="sf-chair">' +
+      '<line x1="12" y1="64" x2="50" y2="64"/>' +
+      '<line x1="16" y1="64" x2="16" y2="94"/>' +
+      '<line x1="46" y1="64" x2="46" y2="94"/>' +
+      '<line x1="14" y1="64" x2="11" y2="30"/>' +
+    '</g>' +
+    '<line x1="42" y1="60" x2="62" y2="60"/>' +
+    '<line x1="62" y1="60" x2="62" y2="92"/>' +
+    '<line x1="62" y1="92" x2="70" y2="92"/>' +
+    '<g class="sf-upper">' +
+      '<line class="sf-torso-line" x1="42" y1="60" x2="42" y2="31"/>' +
+      '<circle class="sf-head" cx="42" cy="20" r="9"/>' +
+      '<circle class="sf-head-highlight" cx="45" cy="17" r="2.2"/>' +
+      '<circle class="sf-joint" cx="42" cy="36" r="2.8"/>' +
+      '<line x1="42" y1="36" x2="51" y2="46"/>' +
+      '<line x1="51" y1="46" x2="44" y2="55"/>' +
+    '</g>' +
+    '<circle class="sf-joint" cx="42" cy="60" r="3.2"/>' +
+    '<ellipse class="sf-ground" cx="40" cy="96" rx="32" ry="3.5"/>';
+
   function stickFigureSVG(pose) {
+    if (pose === "lower-back") {
+      return '<svg class="sf-svg pose-lower-back" viewBox="0 0 80 100" aria-hidden="true">' + SEATED_BACK_FIGURE + '</svg>';
+    }
+
     if (pose === "eye") {
       return '<svg class="sf-svg pose-eye" viewBox="0 0 80 60" aria-hidden="true">' + EYE_FIGURE + '</svg>';
     }
@@ -3480,7 +3519,7 @@
   }
 
   // Normal: el logo. En alarma: un punto coral que se nota de reojo.
-  const FAVICON_NORMAL = "icons/icon-32.png";
+  const FAVICON_NORMAL = "./icon-32.png";
   const FAVICON_ALARM = makeDotFavicon("#ee5f3c");
 
   if (appFavicon && FAVICON_NORMAL) {
