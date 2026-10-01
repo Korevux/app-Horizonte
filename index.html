@@ -701,6 +701,57 @@
     .pose-eye .sf-eye-pupil { animation: sfBlink 3.2s ease-in-out infinite; }
     .pose-eye .sf-focus-dot { animation: sfFocusShift 3.2s ease-in-out infinite; }
 
+    /* --- Ejercicios añadidos (basados en INSST, NHS, CCOHS y AOA) --- */
+
+    /* Parpadeo: el ojo entero se cierra y abre despacio. */
+    @keyframes sfBlinkSlow { 0%, 35%, 100% { transform: scaleY(1); } 55%, 70% { transform: scaleY(.08); } }
+    .pose-blink .sf-eye-all { animation: sfBlinkSlow 2.4s ease-in-out infinite; transform-origin: 40px 30px; }
+
+    /* Palmeado: las palmas cubren los ojos y "respiran" suavemente. */
+    @keyframes sfPalmBreathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+    .pose-palming .sf-palms { animation: sfPalmBreathe 3.4s ease-in-out infinite; transform-origin: 40px 30px; }
+    .sf-svg .sf-palm { fill: var(--card); stroke: var(--accent-dark); stroke-width: 3; }
+
+    /* Juntar omóplatos: manos tras la cabeza, los codos se abren atrás. */
+    @keyframes sfElbowsBack { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(1.25); } }
+    .pose-scapula .sf-elbows { animation: sfElbowsBack 2.4s ease-in-out infinite; transform-origin: 40px 24px; }
+
+    /* Manos en oración: las muñecas bajan despacio. */
+    @keyframes sfPrayerDown { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(7px); } }
+    .pose-prayer .sf-prayer-hands { animation: sfPrayerDown 2.4s ease-in-out infinite; }
+
+    /* Giro con pierna cruzada (sentado): el tronco gira y vuelve. */
+    @keyframes sfSeatedTwist { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(.72); } }
+    .pose-hip-twist .sf-upper { animation: sfSeatedTwist 3s ease-in-out infinite; transform-origin: 42px 60px; }
+
+    /* Marcha sentado: una rodilla sube y baja con control. */
+    @keyframes sfKneeLift { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-24deg); } }
+    .pose-seated-march .sf-legR { animation: sfKneeLift 1.6s ease-in-out infinite; transform-origin: 40px 60px; }
+
+    /* Caminar de lado: las piernas se abren y se juntan. */
+    @keyframes sfStepOutL { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(14deg); } }
+    @keyframes sfStepOutR { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-14deg); } }
+    @keyframes sfSlide { 0%, 100% { transform: translateX(-4px); } 50% { transform: translateX(4px); } }
+    .pose-side-step .sf-legL { animation: sfStepOutL 1.4s ease-in-out infinite; transform-origin: 40px 62px; }
+    .pose-side-step .sf-legR { animation: sfStepOutR 1.4s ease-in-out infinite; transform-origin: 40px 62px; }
+    .pose-side-step .sf-body-group { animation: sfSlide 2.8s ease-in-out infinite; }
+
+    /* Flexiones en la pared: el cuerpo se acerca a la pared y vuelve. */
+    @keyframes sfWallPush { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(8deg); } }
+    .pose-wall-pushup .sf-body-incline { animation: sfWallPush 2.2s ease-in-out infinite; transform-origin: 22px 94px; }
+    .sf-svg .sf-wall line { stroke: var(--muted-2); stroke-width: 4; opacity: .55; }
+
+    /* Caminar talón-punta: pasos cortos y lentos. */
+    .pose-heel-toe .sf-legL { animation: sfStepOutR 1.8s ease-in-out infinite; transform-origin: 40px 62px; }
+    .pose-heel-toe .sf-legR { animation: sfStepOutL 1.8s ease-in-out infinite -.9s; transform-origin: 40px 62px; }
+    .pose-heel-toe .sf-armL { transform: rotate(55deg); transform-origin: 40px 34px; }
+    .pose-heel-toe .sf-armR { transform: rotate(-55deg); transform-origin: 40px 34px; }
+
+    /* Equilibrio: un pie levantado y un leve vaivén. */
+    @keyframes sfSway { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+    .pose-balance .sf-legR { transform: scaleY(.6); transform-origin: 40px 62px; }
+    .pose-balance .sf-body-group { animation: sfSway 2.6s ease-in-out infinite; transform-origin: 30px 96px; }
+
     /* --- Chips de selección de ejercicio --- */
     .chip-scroller {
       display: flex;
@@ -2158,6 +2209,52 @@
       box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .6), 0 2px 6px rgba(0, 0, 0, .12);
     }
 
+    /* Fuentes de los ejercicios (al final de la Guía rápida). */
+    .sources {
+      margin-top: 14px;
+      border-top: 1px dashed var(--border);
+      padding-top: 12px;
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--text-soft);
+    }
+
+    .sources summary {
+      cursor: pointer;
+      font-weight: 800;
+      color: var(--accent-dark);
+      list-style: none;
+    }
+
+    .sources summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .sources summary::before {
+      content: "›";
+      display: inline-block;
+      margin-right: 8px;
+      transition: transform .2s ease;
+    }
+
+    .sources[open] summary::before {
+      transform: rotate(90deg);
+    }
+
+    .sources ul {
+      margin: 0 0 10px;
+      padding-left: 18px;
+    }
+
+    .sources li {
+      margin-bottom: 6px;
+    }
+
+    .sources a {
+      color: var(--accent-dark);
+      font-weight: 700;
+    }
+
     /* ---------- Mi horario ---------- */
     .schedule-switch {
       display: flex;
@@ -2906,7 +3003,8 @@
           <span class="guide-chevron">＋</span>
         </button>
         <p class="guide-text">
-          Mira algo a unos 6 metros durante 20 segundos y luego parpadea lento.
+          Regla 20-20-20: cada 20 minutos, mira algo a unos 6 metros durante
+          20 segundos. También: parpadear y palmeado.
         </p>
         <div class="guide-panel" id="guidePanel-visual" hidden></div>
       </article>
@@ -2920,8 +3018,8 @@
           <span class="guide-chevron">＋</span>
         </button>
         <p class="guide-text">
-          Cambia de postura y mueve con suavidad cuello, hombros, muñecas
-          y espalda baja.
+          Cambia de postura y estira con suavidad cuello, hombros, manos,
+          espalda, cadera y piernas.
         </p>
         <div class="guide-panel" id="guidePanel-mobility" hidden></div>
       </article>
@@ -2935,7 +3033,7 @@
           <span class="guide-chevron">＋</span>
         </button>
         <p class="guide-text">
-          Ponte de pie, camina y reactiva la circulación con movimiento suave.
+          Ponte de pie y muévete: caminar, fuerza suave y equilibrio.
         </p>
         <div class="guide-panel" id="guidePanel-active" hidden></div>
       </article>
@@ -2953,6 +3051,39 @@
       </article>
 
     </div>
+
+    <details class="sources">
+      <summary>Fuentes de los ejercicios</summary>
+      <p>
+        Los ejercicios, tiempos y repeticiones se basan en recomendaciones
+        publicadas por organismos oficiales de salud y seguridad laboral:
+      </p>
+      <ul>
+        <li>
+          <a href="https://www.insst.es/documents/94886/96076/InstruccionBasicaParaTrabajadorUsuarioPantallas.pdf" target="_blank" rel="noopener">INSST (España) ↗</a>
+          — Instrucción básica para el trabajador usuario de pantallas: pausas, mirar lejos y palmeado.
+        </li>
+        <li>
+          <a href="https://www.aoa.org/healthy-eyes/eye-and-vision-conditions/computer-vision-syndrome" target="_blank" rel="noopener">Asociación Americana de Optometría ↗</a>
+          — Regla 20-20-20 y parpadeo frente a la pantalla.
+        </li>
+        <li>
+          <a href="https://www.ccohs.ca/oshanswers/ergonomics/office/stretching.html" target="_blank" rel="noopener">CCOHS (Canadá) ↗</a>
+          — Estiramientos en el puesto de trabajo: cuello, hombros, manos, espalda y cadera.
+        </li>
+        <li>
+          <a href="https://www.nhs.uk/live-well/exercise/sitting-exercises/" target="_blank" rel="noopener">NHS (Reino Unido) ↗</a>
+          — Ejercicios sentado, de
+          <a href="https://www.nhs.uk/live-well/exercise/strength-exercises/" target="_blank" rel="noopener">fuerza ↗</a>
+          y de
+          <a href="https://www.nhs.uk/live-well/exercise/balance-exercises/" target="_blank" rel="noopener">equilibrio ↗</a>.
+        </li>
+      </ul>
+      <p>
+        Son ejercicios generales y suaves. Si tienes una lesión o una
+        condición de salud, consulta antes con tu médico o fisioterapeuta.
+      </p>
+    </details>
   </section>
 
   <section class="safety-card">
@@ -3061,7 +3192,7 @@
       icon: "eye",
       type: "Descanso visual",
       title: "Descansa la mirada",
-      description: "Mira un punto lejano y relaja la mirada.",
+      description: "Regla 20-20-20, recomendada por especialistas en salud visual: cada 20 minutos, 20 segundos mirando lejos.",
       exercise: "Regla 20-20-20: enfoca un objeto a unos 6 metros durante 20 segundos. Después parpadea lento 10 veces: frente a la pantalla parpadeamos mucho menos y los ojos se resecan.",
       duration: VISUAL_SECONDS
     },
@@ -3093,22 +3224,36 @@
   };
 
   const EXERCISE_OPTIONS = {
-    // Pautas comunes a todos: movimientos lentos, sin rebotes, sin dolor y
-    // respirando con normalidad. Los estiramientos se sostienen 10-15 s.
-    // Sin círculos completos de cuello (comprimen las cervicales).
+    // Basados en guías oficiales: INSST (España), NHS (Reino Unido),
+    // CCOHS (Canadá) y AOA (EE. UU.). Pautas comunes: lento, sin rebotes,
+    // sin dolor y respirando con normalidad. Sin círculos completos de
+    // cuello (comprimen las cervicales).
+    visual: [
+      { label: "Mirar lejos (20-20-20)", pose: "eye", text: "Regla 20-20-20: cada 20 minutos, mira durante 20 segundos algo que esté a unos 6 metros (20 pies). Por una ventana o al fondo de la oficina." },
+      { label: "Parpadear", pose: "blink", text: "Mira a lo lejos y parpadea despacio y por completo, 10 veces. Frente a la pantalla parpadeamos mucho menos; parpadear mantiene los ojos húmedos." },
+      { label: "Palmeado", pose: "palming", text: "Cubre los ojos con las palmas de las manos, sin tocar los párpados y con los ojos abiertos, de modo que no veas ninguna luz. Quédate así 20 segundos, respirando tranquilo." }
+    ],
     mobility: [
       { label: "Cuello", pose: "neck", text: "Inclina la cabeza hacia un hombro y sostén 10 segundos; repite al otro lado. Luego lleva el mentón hacia atrás, como haciendo doble mentón, 5 veces. Sin forzar." },
-      { label: "Hombros y pecho", pose: "shoulders", text: "Sube los hombros hacia las orejas y suéltalos 5 veces; luego gíralos hacia atrás. Entrelaza las manos detrás de la espalda y abre el pecho 10 segundos." },
+      { label: "Hombros y pecho", pose: "shoulders", text: "Sube los hombros hacia las orejas, sostén 3 segundos y suéltalos; 3 veces. Luego siéntate derecho, lleva los hombros atrás y abajo, abre los brazos a los lados y empuja el pecho suavemente hacia adelante 5 a 10 segundos." },
       { label: "Muñecas y dedos", pose: "wrists", text: "Brazo al frente con la palma hacia arriba: con la otra mano lleva los dedos suavemente hacia ti 10 segundos. Repite con la palma hacia abajo y cambia de mano. Ideal si usas mucho el mouse y el teclado." },
-      { label: "Espalda y torso", pose: "torso", text: "Entrelaza las manos sobre la cabeza y inclínate suavemente a cada lado. Luego, sentado, gira el tronco hacia un lado sin mover la cadera y vuelve al centro." },
+      { label: "Manos en oración", pose: "prayer", text: "Con los codos apoyados en la mesa, junta las palmas frente a ti y baja las muñecas despacio hacia la mesa hasta sentir el estiramiento. Sostén 5 a 7 segundos; 3 veces." },
+      { label: "Juntar omóplatos", pose: "scapula", text: "Pon las manos detrás de la cabeza y lleva los codos hacia atrás, juntando los omóplatos. Sostén 10 segundos y suelta; 3 veces." },
+      { label: "Espalda y torso", pose: "torso", text: "Entrelaza las manos sobre la cabeza y inclínate suavemente a cada lado. Luego, sentado, cruza los brazos sobre el pecho y gira el tronco hacia un lado sin mover la cadera; sostén 5 segundos y cambia de lado." },
+      { label: "Giro con pierna cruzada", pose: "hip-twist", text: "Sentado, cruza una pierna sobre la otra. Apoya el codo contrario por fuera de la rodilla cruzada y gira suavemente el tronco mirando hacia atrás. Sostén 10 segundos y cambia de lado." },
       { label: "Espalda baja", pose: "lower-back", text: "Sentado al borde de la silla, con las manos en la cintura, arquea y redondea la espalda baja con suavidad 5 veces." },
-      { label: "Piernas (sentado)", pose: "legs-seated", text: "Estira una pierna a la vez y lleva la punta del pie hacia ti 5 segundos. Repite con la otra pierna." }
+      { label: "Marcha sentado", pose: "seated-march", text: "Sentado derecho, sin apoyarte en el respaldo y agarrado a los lados de la silla, sube una rodilla doblada lo que te sea cómodo y bájala con control. 5 veces con cada pierna." },
+      { label: "Tobillos (sentado)", pose: "legs-seated", text: "Sentado, estira una pierna con el pie en el aire. Lleva la punta del pie hacia adelante y luego hacia ti, 5 veces. Cambia de pierna. Ayuda a la circulación de las piernas." }
     ],
     active: [
-      { label: "Caminar", pose: "walk", text: "Camina por el espacio disponible durante toda la pausa. Si puedes, ve por agua o a mirar por una ventana." },
-      { label: "Sentarse y pararse", pose: "squat", text: "Párate y siéntate de la silla despacio, sin usar las manos si puedes, 8 a 10 veces. La silla te da seguridad." },
-      { label: "Elevación de talones", pose: "heels", text: "De pie y apoyado en el escritorio, sube y baja los talones despacio 10 veces para activar la circulación. Si te cansas antes, para: con menos también sirve." },
-      { label: "Subir escaleras", pose: "stairs", text: "Si tienes escaleras cerca, sube y baja un tramo a ritmo cómodo, sujetándote del pasamanos." }
+      { label: "Caminar", pose: "walk", text: "Levántate y camina por el espacio disponible durante toda la pausa. Si puedes, ve por agua o a mirar por una ventana." },
+      { label: "Sentarse y pararse", pose: "squat", text: "Siéntate al borde de una silla firme, pies separados al ancho de la cadera. Inclínate un poco adelante y ponte de pie usando las piernas, sin las manos si puedes. Siéntate despacio. 5 veces." },
+      { label: "Elevación de talones", pose: "heels", text: "De pie, con las manos apoyadas en el respaldo de una silla o en el escritorio, sube los talones lo que te sea cómodo y bájalos despacio. 5 a 10 veces. Si te cansas antes, para: con menos también sirve." },
+      { label: "Flexiones en la pared", pose: "wall-pushup", text: "De pie, a un brazo de distancia de la pared, apoya las manos a la altura del pecho. Dobla los brazos despacio con los codos pegados al cuerpo, acercándote a la pared, y vuelve. 5 a 10 veces." },
+      { label: "Caminar de lado", pose: "side-step", text: "De pie, con los pies juntos y las rodillas un poco dobladas, da pasos hacia un lado de forma controlada. 10 pasos hacia cada lado. Si lo necesitas, hazlo cerca de una pared." },
+      { label: "Talón-punta", pose: "heel-toe", text: "Camina en línea recta poniendo el talón justo delante de la punta del otro pie, mirando al frente. Al menos 5 pasos. Apoya los dedos en la pared si lo necesitas." },
+      { label: "Equilibrio en un pie", pose: "balance", text: "De frente a la pared, con las puntas de los dedos apoyadas en ella, levanta un pie y sostén 5 a 10 segundos con la otra rodilla un poco doblada. 3 veces con cada pie." },
+      { label: "Subir escaleras", pose: "stairs", text: "Si tienes escaleras cerca, sube y baja un tramo despacio, sujetándote del pasamanos." }
     ]
   };
 
@@ -3177,7 +3322,138 @@
     '<circle class="sf-joint" cx="42" cy="60" r="3.2"/>' +
     '<ellipse class="sf-ground" cx="40" cy="96" rx="32" ry="3.5"/>';
 
+  // --- Dibujos de los ejercicios añadidos ---
+  const EYE_SHAPES =
+    '<ellipse class="sf-eye-outline" cx="40" cy="30" rx="26" ry="16"/>' +
+    '<g class="sf-eye-pupil">' +
+      '<circle class="sf-eye-iris" cx="40" cy="30" r="10"/>' +
+      '<circle class="sf-eye-center" cx="40" cy="30" r="4.5"/>' +
+      '<circle class="sf-eye-glint" cx="37" cy="27" r="2"/>' +
+    '</g>';
+
+  const BLINK_FIGURE = '<g class="sf-eye-all">' + EYE_SHAPES + '</g>';
+
+  // Cabeza con las dos palmas cubriendo los ojos.
+  const PALMING_FIGURE =
+    '<circle class="sf-head" cx="40" cy="32" r="22"/>' +
+    '<circle class="sf-head-highlight" cx="32" cy="20" r="3"/>' +
+    '<g class="sf-palms">' +
+      '<line x1="10" y1="60" x2="24" y2="36"/>' +
+      '<line x1="70" y1="60" x2="56" y2="36"/>' +
+      '<ellipse class="sf-palm" cx="29" cy="29" rx="12" ry="10"/>' +
+      '<ellipse class="sf-palm" cx="51" cy="29" rx="12" ry="10"/>' +
+    '</g>';
+
+  // De pie, manos detrás de la cabeza y codos abiertos.
+  const SCAPULA_FIGURE =
+    '<g class="sf-body-group">' +
+      '<g class="sf-elbows">' +
+        '<line x1="40" y1="34" x2="22" y2="24"/><line x1="22" y1="24" x2="34" y2="14"/>' +
+        '<line x1="40" y1="34" x2="58" y2="24"/><line x1="58" y1="24" x2="46" y2="14"/>' +
+      '</g>' +
+      '<circle class="sf-head" cx="40" cy="18" r="9"/>' +
+      '<circle class="sf-head-highlight" cx="37" cy="15" r="2.4"/>' +
+      '<line class="sf-torso-line" x1="40" y1="27" x2="40" y2="62"/>' +
+      '<circle class="sf-joint" cx="40" cy="34" r="3.2"/>' +
+      '<circle class="sf-joint" cx="40" cy="62" r="3.2"/>' +
+      '<line x1="40" y1="62" x2="26" y2="96"/>' +
+      '<line x1="40" y1="62" x2="54" y2="96"/>' +
+    '</g>' +
+    '<ellipse class="sf-ground" cx="40" cy="98" rx="26" ry="4"/>';
+
+  // De pie, palmas juntas frente al pecho.
+  const PRAYER_FIGURE =
+    '<g class="sf-body-group">' +
+      '<circle class="sf-head" cx="40" cy="18" r="9"/>' +
+      '<circle class="sf-head-highlight" cx="37" cy="15" r="2.4"/>' +
+      '<line class="sf-torso-line" x1="40" y1="27" x2="40" y2="62"/>' +
+      '<circle class="sf-joint" cx="40" cy="34" r="3.2"/>' +
+      '<line x1="40" y1="34" x2="25" y2="50"/>' +
+      '<line x1="40" y1="34" x2="55" y2="50"/>' +
+      '<g class="sf-prayer-hands">' +
+        '<line x1="25" y1="50" x2="38" y2="42"/>' +
+        '<line x1="55" y1="50" x2="42" y2="42"/>' +
+        '<line x1="40" y1="34" x2="40" y2="44"/>' +
+      '</g>' +
+      '<circle class="sf-joint" cx="40" cy="62" r="3.2"/>' +
+      '<line x1="40" y1="62" x2="26" y2="96"/>' +
+      '<line x1="40" y1="62" x2="54" y2="96"/>' +
+    '</g>' +
+    '<ellipse class="sf-ground" cx="40" cy="98" rx="26" ry="4"/>';
+
+  // Sentado de perfil con una pierna cruzada; el tronco gira.
+  const HIP_TWIST_FIGURE =
+    '<g class="sf-chair">' +
+      '<line x1="12" y1="64" x2="50" y2="64"/>' +
+      '<line x1="16" y1="64" x2="16" y2="94"/>' +
+      '<line x1="46" y1="64" x2="46" y2="94"/>' +
+      '<line x1="14" y1="64" x2="11" y2="30"/>' +
+    '</g>' +
+    '<line x1="42" y1="60" x2="62" y2="60"/>' +
+    '<line x1="62" y1="60" x2="62" y2="92"/>' +
+    '<line x1="62" y1="92" x2="70" y2="92"/>' +
+    '<line x1="42" y1="58" x2="58" y2="48"/>' +
+    '<line x1="58" y1="48" x2="72" y2="58"/>' +
+    '<g class="sf-upper">' +
+      '<line class="sf-torso-line" x1="42" y1="60" x2="42" y2="31"/>' +
+      '<circle class="sf-head" cx="42" cy="20" r="9"/>' +
+      '<circle class="sf-head-highlight" cx="45" cy="17" r="2.2"/>' +
+      '<circle class="sf-joint" cx="42" cy="36" r="2.8"/>' +
+      '<line x1="42" y1="36" x2="56" y2="47"/>' +
+    '</g>' +
+    '<circle class="sf-joint" cx="42" cy="60" r="3.2"/>' +
+    '<ellipse class="sf-ground" cx="40" cy="96" rx="32" ry="3.5"/>';
+
+  // Sentado de perfil, tronco derecho; la rodilla sube y baja.
+  const SEATED_MARCH_FIGURE =
+    '<g class="sf-chair">' +
+      '<line x1="12" y1="64" x2="50" y2="64"/>' +
+      '<line x1="16" y1="64" x2="16" y2="94"/>' +
+      '<line x1="46" y1="64" x2="46" y2="94"/>' +
+      '<line x1="14" y1="64" x2="11" y2="30"/>' +
+    '</g>' +
+    '<line class="sf-torso-line" x1="40" y1="60" x2="40" y2="31"/>' +
+    '<circle class="sf-head" cx="40" cy="20" r="9"/>' +
+    '<circle class="sf-head-highlight" cx="43" cy="17" r="2.2"/>' +
+    '<circle class="sf-joint" cx="40" cy="36" r="2.8"/>' +
+    '<line x1="40" y1="36" x2="44" y2="50"/>' +
+    '<line x1="44" y1="50" x2="44" y2="62"/>' +
+    '<g class="sf-legR">' +
+      '<line x1="40" y1="60" x2="60" y2="60"/>' +
+      '<line x1="60" y1="60" x2="60" y2="92"/>' +
+      '<line x1="60" y1="92" x2="68" y2="92"/>' +
+    '</g>' +
+    '<circle class="sf-joint" cx="40" cy="60" r="3.2"/>' +
+    '<ellipse class="sf-ground" cx="40" cy="96" rx="32" ry="3.5"/>';
+
+  // De perfil, inclinado con las manos en la pared.
+  const WALL_PUSHUP_FIGURE =
+    '<g class="sf-wall"><line x1="70" y1="8" x2="70" y2="96"/></g>' +
+    '<g class="sf-body-incline">' +
+      '<line class="sf-torso-line" x1="22" y1="94" x2="50" y2="38"/>' +
+      '<circle class="sf-head" cx="55" cy="28" r="8"/>' +
+      '<circle class="sf-head-highlight" cx="57" cy="25" r="2"/>' +
+      '<circle class="sf-joint" cx="48" cy="42" r="2.8"/>' +
+      '<line x1="48" y1="42" x2="58" y2="50"/>' +
+      '<line x1="58" y1="50" x2="68" y2="40"/>' +
+    '</g>' +
+    '<ellipse class="sf-ground" cx="40" cy="97" rx="32" ry="3.5"/>';
+
+  const CUSTOM_FIGURES = {
+    "blink": { box: "0 0 80 60", svg: BLINK_FIGURE },
+    "palming": { box: "0 0 80 60", svg: PALMING_FIGURE },
+    "scapula": { box: "0 0 80 100", svg: SCAPULA_FIGURE },
+    "prayer": { box: "0 0 80 100", svg: PRAYER_FIGURE },
+    "hip-twist": { box: "0 0 80 100", svg: HIP_TWIST_FIGURE },
+    "wall-pushup": { box: "0 0 80 100", svg: WALL_PUSHUP_FIGURE },
+    "seated-march": { box: "0 0 80 100", svg: SEATED_MARCH_FIGURE }
+  };
+
   function stickFigureSVG(pose) {
+    if (CUSTOM_FIGURES[pose]) {
+      return '<svg class="sf-svg pose-' + pose + '" viewBox="' + CUSTOM_FIGURES[pose].box + '" aria-hidden="true">' + CUSTOM_FIGURES[pose].svg + '</svg>';
+    }
+
     if (pose === "lower-back") {
       return '<svg class="sf-svg pose-lower-back" viewBox="0 0 80 100" aria-hidden="true">' + SEATED_BACK_FIGURE + '</svg>';
     }
@@ -3684,21 +3960,47 @@
     selectChip(row, options, defaultIndex, onPick);
   }
 
+  // Rotación: cada pausa propone el ejercicio siguiente al de la vez
+  // anterior (se recuerda entre días), para no repetir siempre el mismo.
+  const ROTATION_KEY = "horizonte-exercise-rotation";
+
+  function loadRotation() {
+    try {
+      return JSON.parse(window.localStorage.getItem(ROTATION_KEY) || "{}") || {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function rememberExercise(type, index) {
+    const rotation = loadRotation();
+    rotation[type] = index;
+    try {
+      window.localStorage.setItem(ROTATION_KEY, JSON.stringify(rotation));
+    } catch (e) {}
+  }
+
   function populateExercisePicker(type) {
     const options = EXERCISE_OPTIONS[type];
     if (!options) return;
 
-    const occurrences = type === "mobility" ? mobilityOccurrences : activeOccurrences;
-    const defaultIndex = Math.max(0, occurrences - 1) % options.length;
+    const last = loadRotation()[type];
+    const defaultIndex = typeof last === "number" ? (last + 1) % options.length : 0;
 
     buildChipRow(exerciseChipRow, options, defaultIndex, function (opt) {
       breakExercise.textContent = opt.text;
       exerciseIllustration.innerHTML = stickFigureSVG(opt.pose);
+      rememberExercise(type, options.indexOf(opt));
     });
 
-    if (updateExercisePickerArrows) {
-      updateExercisePickerArrows();
-    }
+    // Deja a la vista la opción propuesta aunque esté al final de la fila.
+    requestAnimationFrame(function () {
+      const chip = exerciseChipRow.children[defaultIndex];
+      if (chip) {
+        exerciseChipRow.scrollLeft = chip.offsetLeft - (exerciseChipRow.clientWidth - chip.offsetWidth) / 2;
+      }
+      if (updateExercisePickerArrows) updateExercisePickerArrows();
+    });
   }
 
   function toggleGuidePanel(item) {
@@ -3731,11 +4033,7 @@
     if (!panel.dataset.built) {
       panel.dataset.built = "true";
 
-      if (type === "visual") {
-        panel.innerHTML =
-          '<div class="exercise-illustration">' + stickFigureSVG(VISUAL_POSE) + '</div>' +
-          '<div class="break-exercise">' + BREAK_DEFS.visual.exercise + '</div>';
-      } else {
+      if (EXERCISE_OPTIONS[type]) {
         const options = EXERCISE_OPTIONS[type];
         panel.innerHTML =
           '<div class="exercise-illustration" id="guideIllustration-' + type + '"></div>' +
@@ -3824,13 +4122,8 @@
     breakPanel.classList.remove("break-done");
     breakCountdown.textContent = formatTime(def.duration);
 
-    if (currentBreakType === "visual") {
-      exerciseSelectWrap.hidden = true;
-      exerciseIllustration.innerHTML = stickFigureSVG(VISUAL_POSE);
-    } else {
-      exerciseSelectWrap.hidden = false;
-      populateExercisePicker(currentBreakType);
-    }
+    exerciseSelectWrap.hidden = false;
+    populateExercisePicker(currentBreakType);
 
     breakContinueLabel = isLast ? "Continuar trabajando" : "Siguiente ejercicio →";
     startBreakBtn.disabled = false;
