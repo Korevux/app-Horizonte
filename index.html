@@ -720,37 +720,14 @@
     @keyframes sfPrayerDown { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(7px); } }
     .pose-prayer .sf-prayer-hands { animation: sfPrayerDown 2.4s ease-in-out infinite; }
 
-    /* Giro con pierna cruzada (sentado): el tronco gira y vuelve. */
-    @keyframes sfSeatedTwist { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(.72); } }
-    .pose-hip-twist .sf-upper { animation: sfSeatedTwist 3s ease-in-out infinite; transform-origin: 42px 60px; }
-
     /* Marcha sentado: una rodilla sube y baja con control. */
     @keyframes sfKneeLift { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-24deg); } }
     .pose-seated-march .sf-legR { animation: sfKneeLift 1.6s ease-in-out infinite; transform-origin: 40px 60px; }
-
-    /* Caminar de lado: las piernas se abren y se juntan. */
-    @keyframes sfStepOutL { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(14deg); } }
-    @keyframes sfStepOutR { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-14deg); } }
-    @keyframes sfSlide { 0%, 100% { transform: translateX(-4px); } 50% { transform: translateX(4px); } }
-    .pose-side-step .sf-legL { animation: sfStepOutL 1.4s ease-in-out infinite; transform-origin: 40px 62px; }
-    .pose-side-step .sf-legR { animation: sfStepOutR 1.4s ease-in-out infinite; transform-origin: 40px 62px; }
-    .pose-side-step .sf-body-group { animation: sfSlide 2.8s ease-in-out infinite; }
 
     /* Flexiones en la pared: el cuerpo se acerca a la pared y vuelve. */
     @keyframes sfWallPush { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(8deg); } }
     .pose-wall-pushup .sf-body-incline { animation: sfWallPush 2.2s ease-in-out infinite; transform-origin: 22px 94px; }
     .sf-svg .sf-wall line { stroke: var(--muted-2); stroke-width: 4; opacity: .55; }
-
-    /* Caminar talón-punta: pasos cortos y lentos. */
-    .pose-heel-toe .sf-legL { animation: sfStepOutR 1.8s ease-in-out infinite; transform-origin: 40px 62px; }
-    .pose-heel-toe .sf-legR { animation: sfStepOutL 1.8s ease-in-out infinite -.9s; transform-origin: 40px 62px; }
-    .pose-heel-toe .sf-armL { transform: rotate(55deg); transform-origin: 40px 34px; }
-    .pose-heel-toe .sf-armR { transform: rotate(-55deg); transform-origin: 40px 34px; }
-
-    /* Equilibrio: un pie levantado y un leve vaivén. */
-    @keyframes sfSway { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
-    .pose-balance .sf-legR { transform: scaleY(.6); transform-origin: 40px 62px; }
-    .pose-balance .sf-body-group { animation: sfSway 2.6s ease-in-out infinite; transform-origin: 30px 96px; }
 
     /* --- Chips de selección de ejercicio --- */
     .chip-scroller {
@@ -3019,7 +2996,7 @@
         </button>
         <p class="guide-text">
           Cambia de postura y estira con suavidad cuello, hombros, manos,
-          espalda, cadera y piernas.
+          espalda y piernas.
         </p>
         <div class="guide-panel" id="guidePanel-mobility" hidden></div>
       </article>
@@ -3033,7 +3010,7 @@
           <span class="guide-chevron">＋</span>
         </button>
         <p class="guide-text">
-          Ponte de pie y muévete: caminar, fuerza suave y equilibrio.
+          Ponte de pie y muévete: caminar y ejercicios suaves con apoyo.
         </p>
         <div class="guide-panel" id="guidePanel-active" hidden></div>
       </article>
@@ -3069,14 +3046,12 @@
         </li>
         <li>
           <a href="https://www.ccohs.ca/oshanswers/ergonomics/office/stretching.html" target="_blank" rel="noopener">CCOHS (Canadá) ↗</a>
-          — Estiramientos en el puesto de trabajo: cuello, hombros, manos, espalda y cadera.
+          — Estiramientos en el puesto de trabajo: cuello, hombros, manos y espalda.
         </li>
         <li>
           <a href="https://www.nhs.uk/live-well/exercise/sitting-exercises/" target="_blank" rel="noopener">NHS (Reino Unido) ↗</a>
-          — Ejercicios sentado, de
-          <a href="https://www.nhs.uk/live-well/exercise/strength-exercises/" target="_blank" rel="noopener">fuerza ↗</a>
-          y de
-          <a href="https://www.nhs.uk/live-well/exercise/balance-exercises/" target="_blank" rel="noopener">equilibrio ↗</a>.
+          — Ejercicios sentado y de
+          <a href="https://www.nhs.uk/live-well/exercise/strength-exercises/" target="_blank" rel="noopener">fuerza ↗</a>.
         </li>
       </ul>
       <p>
@@ -3091,8 +3066,10 @@
 
     <div class="safety-text">
       Realiza los movimientos de forma suave y cómoda. Si algún movimiento
-      causa dolor o molestias, detente. Esta herramienta no sustituye el
-      consejo de un profesional sanitario.
+      causa dolor o molestias, detente. Si tienes movilidad limitada o
+      riesgo de caídas, elige los ejercicios sentado y apóyate siempre en algo
+      firme al estar de pie. Esta herramienta no sustituye el consejo de un
+      profesional sanitario.
     </div>
   </section>
 
@@ -3229,7 +3206,7 @@
     // sin dolor y respirando con normalidad. Sin círculos completos de
     // cuello (comprimen las cervicales).
     visual: [
-      { label: "Mirar lejos (20-20-20)", pose: "eye", text: "Regla 20-20-20: cada 20 minutos, mira durante 20 segundos algo que esté a unos 6 metros (20 pies). Por una ventana o al fondo de la oficina." },
+      { label: "Mirar lejos (20-20-20)", pose: "eye", text: "Aparta la vista de la pantalla y mira algo que esté a unos 6 metros: por una ventana o al fondo de la oficina. Quédate mirando lejos, con la vista relajada, durante 20 segundos. Es la regla 20-20-20: cada 20 minutos, 20 segundos, a 20 pies (6 metros)." },
       { label: "Parpadear", pose: "blink", text: "Mira a lo lejos y parpadea despacio y por completo, 10 veces. Frente a la pantalla parpadeamos mucho menos; parpadear mantiene los ojos húmedos." },
       { label: "Palmeado", pose: "palming", text: "Cubre los ojos con las palmas de las manos, sin tocar los párpados y con los ojos abiertos, de modo que no veas ninguna luz. Quédate así 20 segundos, respirando tranquilo." }
     ],
@@ -3240,20 +3217,13 @@
       { label: "Manos en oración", pose: "prayer", text: "Con los codos apoyados en la mesa, junta las palmas frente a ti y baja las muñecas despacio hacia la mesa hasta sentir el estiramiento. Sostén 5 a 7 segundos; 3 veces." },
       { label: "Juntar omóplatos", pose: "scapula", text: "Pon las manos detrás de la cabeza y lleva los codos hacia atrás, juntando los omóplatos. Sostén 10 segundos y suelta; 3 veces." },
       { label: "Espalda y torso", pose: "torso", text: "Entrelaza las manos sobre la cabeza y inclínate suavemente a cada lado. Luego, sentado, cruza los brazos sobre el pecho y gira el tronco hacia un lado sin mover la cadera; sostén 5 segundos y cambia de lado." },
-      { label: "Giro con pierna cruzada", pose: "hip-twist", text: "Sentado, cruza una pierna sobre la otra. Apoya el codo contrario por fuera de la rodilla cruzada y gira suavemente el tronco mirando hacia atrás. Sostén 10 segundos y cambia de lado." },
-      { label: "Espalda baja", pose: "lower-back", text: "Sentado al borde de la silla, con las manos en la cintura, arquea y redondea la espalda baja con suavidad 5 veces." },
       { label: "Marcha sentado", pose: "seated-march", text: "Sentado derecho, sin apoyarte en el respaldo y agarrado a los lados de la silla, sube una rodilla doblada lo que te sea cómodo y bájala con control. 5 veces con cada pierna." },
       { label: "Tobillos (sentado)", pose: "legs-seated", text: "Sentado, estira una pierna con el pie en el aire. Lleva la punta del pie hacia adelante y luego hacia ti, 5 veces. Cambia de pierna. Ayuda a la circulación de las piernas." }
     ],
     active: [
       { label: "Caminar", pose: "walk", text: "Levántate y camina por el espacio disponible durante toda la pausa. Si puedes, ve por agua o a mirar por una ventana." },
-      { label: "Sentarse y pararse", pose: "squat", text: "Siéntate al borde de una silla firme, pies separados al ancho de la cadera. Inclínate un poco adelante y ponte de pie usando las piernas, sin las manos si puedes. Siéntate despacio. 5 veces." },
-      { label: "Elevación de talones", pose: "heels", text: "De pie, con las manos apoyadas en el respaldo de una silla o en el escritorio, sube los talones lo que te sea cómodo y bájalos despacio. 5 a 10 veces. Si te cansas antes, para: con menos también sirve." },
+      { label: "Elevación de talones", pose: "heels", text: "De pie, con las manos apoyadas en el escritorio o en una pared, sube los talones lo que te sea cómodo y bájalos despacio. 5 a 10 veces. Si te cansas antes, para: con menos también sirve." },
       { label: "Flexiones en la pared", pose: "wall-pushup", text: "De pie, a un brazo de distancia de la pared, apoya las manos a la altura del pecho. Dobla los brazos despacio con los codos pegados al cuerpo, acercándote a la pared, y vuelve. 5 a 10 veces." },
-      { label: "Caminar de lado", pose: "side-step", text: "De pie, con los pies juntos y las rodillas un poco dobladas, da pasos hacia un lado de forma controlada. 10 pasos hacia cada lado. Si lo necesitas, hazlo cerca de una pared." },
-      { label: "Talón-punta", pose: "heel-toe", text: "Camina en línea recta poniendo el talón justo delante de la punta del otro pie, mirando al frente. Al menos 5 pasos. Apoya los dedos en la pared si lo necesitas." },
-      { label: "Equilibrio en un pie", pose: "balance", text: "De frente a la pared, con las puntas de los dedos apoyadas en ella, levanta un pie y sostén 5 a 10 segundos con la otra rodilla un poco doblada. 3 veces con cada pie." },
-      { label: "Subir escaleras", pose: "stairs", text: "Si tienes escaleras cerca, sube y baja un tramo despacio, sujetándote del pasamanos." }
     ]
   };
 
@@ -3381,29 +3351,6 @@
     '</g>' +
     '<ellipse class="sf-ground" cx="40" cy="98" rx="26" ry="4"/>';
 
-  // Sentado de perfil con una pierna cruzada; el tronco gira.
-  const HIP_TWIST_FIGURE =
-    '<g class="sf-chair">' +
-      '<line x1="12" y1="64" x2="50" y2="64"/>' +
-      '<line x1="16" y1="64" x2="16" y2="94"/>' +
-      '<line x1="46" y1="64" x2="46" y2="94"/>' +
-      '<line x1="14" y1="64" x2="11" y2="30"/>' +
-    '</g>' +
-    '<line x1="42" y1="60" x2="62" y2="60"/>' +
-    '<line x1="62" y1="60" x2="62" y2="92"/>' +
-    '<line x1="62" y1="92" x2="70" y2="92"/>' +
-    '<line x1="42" y1="58" x2="58" y2="48"/>' +
-    '<line x1="58" y1="48" x2="72" y2="58"/>' +
-    '<g class="sf-upper">' +
-      '<line class="sf-torso-line" x1="42" y1="60" x2="42" y2="31"/>' +
-      '<circle class="sf-head" cx="42" cy="20" r="9"/>' +
-      '<circle class="sf-head-highlight" cx="45" cy="17" r="2.2"/>' +
-      '<circle class="sf-joint" cx="42" cy="36" r="2.8"/>' +
-      '<line x1="42" y1="36" x2="56" y2="47"/>' +
-    '</g>' +
-    '<circle class="sf-joint" cx="42" cy="60" r="3.2"/>' +
-    '<ellipse class="sf-ground" cx="40" cy="96" rx="32" ry="3.5"/>';
-
   // Sentado de perfil, tronco derecho; la rodilla sube y baja.
   const SEATED_MARCH_FIGURE =
     '<g class="sf-chair">' +
@@ -3444,7 +3391,6 @@
     "palming": { box: "0 0 80 60", svg: PALMING_FIGURE },
     "scapula": { box: "0 0 80 100", svg: SCAPULA_FIGURE },
     "prayer": { box: "0 0 80 100", svg: PRAYER_FIGURE },
-    "hip-twist": { box: "0 0 80 100", svg: HIP_TWIST_FIGURE },
     "wall-pushup": { box: "0 0 80 100", svg: WALL_PUSHUP_FIGURE },
     "seated-march": { box: "0 0 80 100", svg: SEATED_MARCH_FIGURE }
   };
