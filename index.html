@@ -4200,9 +4200,9 @@
 
     // Tono de fin: dos notas ascendentes, distinto de la alarma, para
     // saberlo sin mirar la pantalla (en la pausa visual se mira lejos).
-    createTone(660, 0.3, 0.09, "sine");
+    createTone(660, 0.3, 0.35, "sine");
     setTimeout(function () {
-      createTone(880, 0.45, 0.09, "sine");
+      createTone(880, 0.45, 0.35, "sine");
     }, 260);
 
     try {
@@ -4445,16 +4445,38 @@
     alarmIndicator.classList.remove("show");
   }
 
+  // Un solo "parlante" (AudioContext) para toda la app. Los celulares
+  // solo dejan sonar a una página después de que la persona la toca, y
+  // un AudioContext nuevo creado más tarde (cuando llega la alarma) puede
+  // nacer bloqueado. Por eso se crea y se desbloquea con el primer toque
+  // y se reutiliza.
+  let sharedAudioCtx = null;
+
+  function getAudioContext() {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return null;
+
+    if (!sharedAudioCtx || sharedAudioCtx.state === "closed") {
+      sharedAudioCtx = new AudioContextClass();
+    }
+    if (sharedAudioCtx.state === "suspended") {
+      sharedAudioCtx.resume().catch(function () {});
+    }
+    return sharedAudioCtx;
+  }
+
+  ["pointerdown", "touchstart", "keydown"].forEach(function (eventName) {
+    document.addEventListener(eventName, function () {
+      try {
+        getAudioContext();
+      } catch (e) {}
+    }, { passive: true });
+  });
+
   function createTone(frequency, duration, volume, type) {
     try {
-      const AudioContextClass =
-        window.AudioContext || window.webkitAudioContext;
-
-      if (!AudioContextClass) {
-        return;
-      }
-
-      const ctx = new AudioContextClass();
+      const ctx = getAudioContext();
+      if (!ctx) return;
 
       const oscillator = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -4479,12 +4501,6 @@
       oscillator.start();
       oscillator.stop(ctx.currentTime + duration + 0.05);
 
-      setTimeout(function () {
-        try {
-          ctx.close();
-        } catch (e) {}
-      }, (duration + 0.3) * 1000);
-
       alarmAudio = oscillator;
 
     } catch (error) {
@@ -4496,32 +4512,32 @@
     const selected = soundSelect.value;
 
     if (selected === "bell") {
-      createTone(660, 1.15, 0.12, "sine");
+      createTone(660, 1.15, 0.4, "sine");
 
       setTimeout(function () {
-        createTone(880, 1.2, 0.09, "sine");
+        createTone(880, 1.2, 0.32, "sine");
       }, 180);
 
     } else if (selected === "chime") {
-      createTone(740, 0.75, 0.10, "sine");
+      createTone(740, 0.75, 0.38, "sine");
 
       setTimeout(function () {
-        createTone(988, 0.9, 0.08, "sine");
+        createTone(988, 0.9, 0.3, "sine");
       }, 120);
 
     } else if (selected === "digital") {
-      createTone(520, 0.18, 0.10, "square");
+      createTone(520, 0.18, 0.22, "square");
 
       setTimeout(function () {
-        createTone(740, 0.22, 0.08, "square");
+        createTone(740, 0.22, 0.2, "square");
       }, 180);
 
       setTimeout(function () {
-        createTone(980, 0.28, 0.07, "square");
+        createTone(980, 0.28, 0.18, "square");
       }, 390);
 
     } else {
-      createTone(440, 1.4, 0.07, "sine");
+      createTone(440, 1.4, 0.3, "sine");
     }
   }
 
@@ -4549,8 +4565,12 @@
       if (!alarmActive) return;
       if (Date.now() - alarmStartedAt > ALARM_SOUND_MS) return;
 
-      createTone(880, 0.3, 0.07, "sine");
-      alarmTimer = setTimeout(tick, 4000);
+      // Doble pitido fuerte: se oye por el parlante del celular.
+      createTone(880, 0.35, 0.45, "triangle");
+      setTimeout(function () {
+        if (alarmActive) createTone(1175, 0.45, 0.45, "triangle");
+      }, 420);
+      alarmTimer = setTimeout(tick, 3000);
     }
 
     tick();
@@ -4632,7 +4652,7 @@
     breakDone = false;
     breakPanel.classList.remove("break-done");
     stopAlarm();
-    createTone(720, 0.5, 0.08, "sine");
+    createTone(720, 0.5, 0.25, "sine");
 
     countFinishedBreak(outcome);
 
