@@ -789,6 +789,17 @@
       color: var(--on-accent);
     }
 
+    /* En la pausa, el dibujo grande repetía al de la opción elegida y
+       empujaba hacia abajo las instrucciones y el tiempo. Ahora solo se
+       ven las opciones, y únicamente la elegida se mueve. */
+    .break-panel .exercise-illustration {
+      display: none;
+    }
+
+    .exercise-chip:not(.selected) .sf-svg * {
+      animation-play-state: paused;
+    }
+
     /* --- Guía rápida interactiva --- */
     .guide-item {
       border: 1px solid var(--border);
@@ -2146,6 +2157,264 @@
       background: linear-gradient(135deg, var(--c1) 50%, var(--c2) 50%);
       box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .6), 0 2px 6px rgba(0, 0, 0, .12);
     }
+
+    /* ---------- Mi horario ---------- */
+    .schedule-switch {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .schedule-switch input {
+      width: 22px;
+      height: 22px;
+      flex: 0 0 auto;
+      accent-color: var(--accent-dark);
+    }
+
+    .schedule-body {
+      margin-top: 14px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .schedule-body[hidden] {
+      display: none;
+    }
+
+    .schedule-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--muted);
+      margin-bottom: 7px;
+    }
+
+    .schedule-days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+    }
+
+    .schedule-days button {
+      min-height: 42px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface-3);
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 800;
+      padding: 0;
+    }
+
+    .schedule-days button[aria-pressed="true"] {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--on-accent);
+    }
+
+    .schedule-times {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .schedule-times label {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-soft);
+    }
+
+    .schedule-times input[type="time"] {
+      min-height: 46px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface-3);
+      color: var(--text);
+      font: inherit;
+      font-size: 17px;
+      font-weight: 800;
+      padding: 0 10px;
+      width: 100%;
+    }
+
+    .schedule-times[aria-disabled="true"] {
+      opacity: .45;
+      pointer-events: none;
+    }
+
+    .schedule-lunch {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      cursor: pointer;
+    }
+
+    .schedule-lunch input {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--accent-dark);
+    }
+
+    .schedule-status {
+      margin: 0;
+      padding: 11px 13px;
+      border-radius: 14px;
+      background: color-mix(in srgb, var(--accent) 12%, var(--card));
+      color: var(--accent-dark);
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.45;
+    }
+
+    .schedule-status.is-warning {
+      background: var(--tint-amber);
+      color: var(--amber-text);
+    }
+
+    /* Guía "que se abra sola al encender el computador". */
+    .autostart-help {
+      margin-top: 4px;
+      border-top: 1px dashed var(--border);
+      padding-top: 12px;
+    }
+
+    .autostart-help summary {
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--accent-dark);
+      list-style: none;
+    }
+
+    .autostart-help summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .autostart-help summary::before {
+      content: "›";
+      display: inline-block;
+      margin-right: 8px;
+      transition: transform .2s ease;
+    }
+
+    .autostart-help[open] summary::before {
+      transform: rotate(90deg);
+    }
+
+    .autostart-help h3 {
+      margin: 14px 0 6px;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .autostart-help ol {
+      margin: 0;
+      padding-left: 20px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text-soft);
+    }
+
+    .autostart-help kbd {
+      display: inline-block;
+      padding: 1px 6px;
+      border: 1px solid var(--border);
+      border-bottom-width: 2px;
+      border-radius: 6px;
+      background: var(--card);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    /* Resumen al terminar la jornada. */
+    .day-summary {
+      position: fixed;
+      inset: 0;
+      z-index: 950;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: rgba(18, 40, 38, .45);
+    }
+
+    .day-summary[hidden] {
+      display: none;
+    }
+
+    .day-summary-card {
+      width: min(100%, 380px);
+      background: var(--card);
+      border-radius: 26px;
+      padding: 26px 22px 20px;
+      text-align: center;
+      box-shadow: var(--shadow-pop);
+      animation: appear .25s ease;
+    }
+
+    .day-summary-sun {
+      display: block;
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 12px;
+      border-radius: 20px;
+      box-shadow: 0 8px 20px color-mix(in srgb, var(--accent-dark) 25%, transparent);
+    }
+
+    .day-summary-card h2 {
+      margin: 0 0 6px;
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: 26px;
+    }
+
+    .day-summary-card p {
+      margin: 0 0 16px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .day-summary-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .day-summary-stats div {
+      padding: 12px 6px;
+      border-radius: 16px;
+      background: color-mix(in srgb, var(--accent) 14%, var(--card));
+    }
+
+    .day-summary-stats strong {
+      display: block;
+      font-size: 28px;
+      color: var(--accent-dark);
+    }
+
+    .day-summary-stats span {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .day-summary-card .btn {
+      width: 100%;
+      min-height: 50px;
+    }
   </style>
 </head>
 
@@ -2437,10 +2706,92 @@
     <span class="settings-summary-icon" aria-hidden="true"><svg class="ic"><use href="#i-sliders"/></svg></span>
     <span class="settings-summary-text">
       <strong>Ajustes</strong>
-      <span>Sonido, notificaciones y duración</span>
+      <span>Mi horario, colores, sonido y avisos</span>
     </span>
     <span class="settings-summary-chevron" aria-hidden="true">›</span>
   </summary>
+
+  <section class="settings-card" id="scheduleCard">
+    <h2 class="section-title">Mi horario</h2>
+    <p class="time-hint">
+      La app arranca sola al empezar tu jornada, descansa en el almuerzo y
+      se detiene al salir. Fuera de tu horario no te molesta.
+    </p>
+
+    <label class="schedule-switch">
+      <input type="checkbox" id="scheduleToggle">
+      Usar mi horario
+    </label>
+
+    <div class="schedule-body" id="scheduleBody" hidden>
+      <div>
+        <span class="schedule-label">Días de trabajo</span>
+        <div class="schedule-days" id="scheduleDays" role="group" aria-label="Días de trabajo">
+          <button type="button" data-day="1" aria-label="Lunes">L</button>
+          <button type="button" data-day="2" aria-label="Martes">M</button>
+          <button type="button" data-day="3" aria-label="Miércoles">X</button>
+          <button type="button" data-day="4" aria-label="Jueves">J</button>
+          <button type="button" data-day="5" aria-label="Viernes">V</button>
+          <button type="button" data-day="6" aria-label="Sábado">S</button>
+          <button type="button" data-day="0" aria-label="Domingo">D</button>
+        </div>
+      </div>
+
+      <div>
+        <span class="schedule-label">Jornada</span>
+        <div class="schedule-times">
+          <label>Entrada <input type="time" id="scheduleStart" value="08:00"></label>
+          <label>Salida <input type="time" id="scheduleEnd" value="17:00"></label>
+        </div>
+      </div>
+
+      <div>
+        <label class="schedule-lunch">
+          <input type="checkbox" id="scheduleLunchToggle" checked>
+          Tengo hora de almuerzo
+        </label>
+        <div class="schedule-times" id="scheduleLunchTimes">
+          <label>Desde <input type="time" id="scheduleLunchStart" value="12:30"></label>
+          <label>Hasta <input type="time" id="scheduleLunchEnd" value="13:30"></label>
+        </div>
+      </div>
+
+      <p class="schedule-status" id="scheduleStatus" aria-live="polite"></p>
+
+      <details class="autostart-help">
+        <summary>Que se abra sola al prender el computador</summary>
+
+        <p class="time-hint" style="margin:10px 0 0;">
+          Primero instala la app en el computador (botón «Instalar app» o
+          el ícono ⊕ en la barra de direcciones de Chrome o Edge).
+        </p>
+
+        <h3>Windows (funciona con Chrome y Edge)</h3>
+        <ol>
+          <li>Presiona <kbd>Windows</kbd> + <kbd>R</kbd>.</li>
+          <li>Escribe <strong>shell:startup</strong> y presiona <kbd>Enter</kbd>. Se abre una carpeta.</li>
+          <li>Busca el ícono de <strong>Horizonte</strong> en tu escritorio, haz clic derecho → <strong>Copiar</strong>.</li>
+          <li>En la carpeta que se abrió, clic derecho → <strong>Pegar</strong>.</li>
+        </ol>
+        <p class="time-hint" style="margin:8px 0 0;">
+          Listo: cada vez que enciendas el computador, Horizonte se abre y
+          arranca sola a tu hora de entrada.
+        </p>
+
+        <h3>Mac</h3>
+        <ol>
+          <li>Abre la app Horizonte.</li>
+          <li>En el Dock, clic derecho en su ícono → <strong>Opciones</strong> → <strong>Abrir al iniciar sesión</strong>.</li>
+        </ol>
+
+        <h3>En el teléfono</h3>
+        <p class="time-hint" style="margin:0;">
+          El teléfono no permite que una app se abra sola. Ábrela al llegar
+          al trabajo y arrancará sin que toques nada.
+        </p>
+      </details>
+    </div>
+  </section>
 
   <section class="settings-card">
     <h2 class="section-title">Colores</h2>
@@ -2660,6 +3011,19 @@
 
 </main>
 
+<div class="day-summary" id="daySummary" role="dialog" aria-modal="true" aria-labelledby="daySummaryTitle" hidden>
+  <div class="day-summary-card">
+    <img class="day-summary-sun" src="./horizonte-icon.svg" alt="" aria-hidden="true">
+    <h2 id="daySummaryTitle">¡Jornada terminada!</h2>
+    <p id="daySummaryText">Buen trabajo hoy. Desconecta y descansa.</p>
+    <div class="day-summary-stats">
+      <div><strong id="daySummaryBreaks">0</strong><span>pausas hechas</span></div>
+      <div><strong id="daySummaryStreak">0</strong><span id="daySummaryStreakUnit">días seguidos</span></div>
+    </div>
+    <button class="btn btn-primary" id="daySummaryClose" type="button">Hasta mañana</button>
+  </div>
+</div>
+
 <script>
 (function () {
   "use strict";
@@ -2736,7 +3100,7 @@
     active: [
       { label: "Caminar", pose: "walk", text: "Camina por el espacio disponible durante toda la pausa. Si puedes, ve por agua o a mirar por una ventana." },
       { label: "Sentarse y pararse", pose: "squat", text: "Párate y siéntate de la silla despacio, sin usar las manos si puedes, 8 a 10 veces. La silla te da seguridad." },
-      { label: "Elevación de talones", pose: "heels", text: "De pie y apoyado en el escritorio, sube y baja los talones despacio 15 veces para activar la circulación." },
+      { label: "Elevación de talones", pose: "heels", text: "De pie y apoyado en el escritorio, sube y baja los talones despacio 10 veces para activar la circulación. Si te cansas antes, para: con menos también sirve." },
       { label: "Subir escaleras", pose: "stairs", text: "Si tienes escaleras cerca, sube y baja un tramo a ritmo cómodo, sujetándote del pasamanos." }
     ]
   };
@@ -3412,6 +3776,12 @@
     pauseBtn.disabled = !running;
 
     alarmIndicator.classList.remove("show");
+
+    // Mensajes de "Mi horario" (almuerzo, fin de jornada…). Puede
+    // llamarse antes de que ese módulo esté listo al cargar la página.
+    try {
+      applyScheduleIdleText();
+    } catch (e) {}
   }
 
   function updateBreakUI(def) {
@@ -4292,6 +4662,14 @@
     if (!subscribed) return;
     if (!("serviceWorker" in navigator)) return;
 
+    // Sin avisos push en el almuerzo ni fuera de "Mi horario".
+    try {
+      if (nextFireAt && !scheduleAllowsAt(nextFireAt)) {
+        nextFireAt = null;
+        fireKind = null;
+      }
+    } catch (e) {}
+
     navigator.serviceWorker.ready.then(function (registration) {
       return registration.pushManager.getSubscription();
     }).then(function (subscription) {
@@ -4345,9 +4723,9 @@
     });
   }
 
-  startBtn.addEventListener("click", handleStart);
+  startBtn.addEventListener("click", handleStartClick);
   pauseBtn.addEventListener("click", handlePauseToggle);
-  resetBtn.addEventListener("click", handleReset);
+  resetBtn.addEventListener("click", handleResetClick);
 
   // Si la pestaña estuvo en segundo plano y el navegador retrasó los
   // ticks del setInterval, esto refresca el conteo de inmediato al volver
@@ -4465,12 +4843,386 @@
 
   refreshTimeInputs();
 
+  // ------------------------------------------------------------------
+  // Mi horario: arranca sola al empezar la jornada, se detiene en el
+  // almuerzo y al salir, y fuera del horario no suena. Todo queda en
+  // este dispositivo (localStorage), como el resto de la app.
+  // ------------------------------------------------------------------
+  const SCHEDULE_KEY = "horizonte-schedule";
+  const SCHEDULE_STATE_KEY = "horizonte-schedule-state";
+  const SCHEDULE_DEFAULTS = {
+    enabled: false,
+    days: [1, 2, 3, 4, 5],
+    start: "08:00",
+    end: "17:00",
+    lunch: true,
+    lunchStart: "12:30",
+    lunchEnd: "13:30"
+  };
+  const DAY_NAMES = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+  const DAY_SHORT = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+
+  const scheduleToggle = $("scheduleToggle");
+  const scheduleBody = $("scheduleBody");
+  const scheduleDays = $("scheduleDays");
+  const scheduleStart = $("scheduleStart");
+  const scheduleEnd = $("scheduleEnd");
+  const scheduleLunchToggle = $("scheduleLunchToggle");
+  const scheduleLunchTimes = $("scheduleLunchTimes");
+  const scheduleLunchStart = $("scheduleLunchStart");
+  const scheduleLunchEnd = $("scheduleLunchEnd");
+  const scheduleStatusEl = $("scheduleStatus");
+  const daySummary = $("daySummary");
+
+  function toMinutes(hhmm) {
+    const match = /^(\d{1,2}):(\d{2})/.exec(hhmm || "");
+    if (!match) return null;
+    return parseInt(match[1], 10) * 60 + parseInt(match[2], 10);
+  }
+
+  // "08:00" → "8:00"
+  function prettyHour(hhmm) {
+    const minutes = toMinutes(hhmm);
+    if (minutes === null) return hhmm;
+    return Math.floor(minutes / 60) + ":" + String(minutes % 60).padStart(2, "0");
+  }
+
+  function loadSchedule() {
+    let saved = {};
+    try {
+      saved = JSON.parse(window.localStorage.getItem(SCHEDULE_KEY) || "{}") || {};
+    } catch (e) {}
+
+    const s = Object.assign({}, SCHEDULE_DEFAULTS, saved);
+    s.days = Array.isArray(s.days)
+      ? s.days.filter(function (d) { return d >= 0 && d <= 6; })
+      : SCHEDULE_DEFAULTS.days.slice();
+    return s;
+  }
+
+  let schedule = loadSchedule();
+
+  function saveSchedule() {
+    try {
+      window.localStorage.setItem(SCHEDULE_KEY, JSON.stringify(schedule));
+    } catch (e) {}
+  }
+
+  // manualStopBlock: la persona detuvo el reloj en este tramo de la
+  //   jornada ("2026-10-01-am"); no se vuelve a arrancar sola hasta el
+  //   siguiente tramo (después del almuerzo o al otro día).
+  // manualRunOutside: la persona inició a mano fuera de su horario (por
+  //   ejemplo, un sábado); se respeta y no se detiene.
+  // summaryDay: día en que ya se mostró el resumen de fin de jornada.
+  let scheduleState = { manualStopBlock: "", manualRunOutside: false, summaryDay: "" };
+  try {
+    scheduleState = Object.assign(scheduleState, JSON.parse(window.localStorage.getItem(SCHEDULE_STATE_KEY) || "{}"));
+  } catch (e) {}
+
+  function saveScheduleState() {
+    try {
+      window.localStorage.setItem(SCHEDULE_STATE_KEY, JSON.stringify(scheduleState));
+    } catch (e) {}
+  }
+
+  function scheduleProblem() {
+    if (!schedule.days.length) return "Elige al menos un día de trabajo.";
+
+    const start = toMinutes(schedule.start);
+    const end = toMinutes(schedule.end);
+    if (start === null || end === null || end <= start) {
+      return "La hora de salida debe ser después de la de entrada.";
+    }
+    return "";
+  }
+
+  // El almuerzo solo cuenta si es válido y cae dentro de la jornada.
+  function lunchRange() {
+    if (!schedule.lunch) return null;
+
+    const ls = toMinutes(schedule.lunchStart);
+    const le = toMinutes(schedule.lunchEnd);
+    const start = toMinutes(schedule.start);
+    const end = toMinutes(schedule.end);
+    if (ls === null || le === null || le <= ls || ls < start || le > end) return null;
+    return { start: ls, end: le };
+  }
+
+  // "off" | "work" | "lunch" | "before" | "after" | "dayoff"
+  function scheduleStatusAt(date) {
+    if (!schedule.enabled || scheduleProblem()) return "off";
+    if (schedule.days.indexOf(date.getDay()) === -1) return "dayoff";
+
+    const m = date.getHours() * 60 + date.getMinutes();
+    const lunch = lunchRange();
+
+    if (m < toMinutes(schedule.start)) return "before";
+    if (m >= toMinutes(schedule.end)) return "after";
+    if (lunch && m >= lunch.start && m < lunch.end) return "lunch";
+    return "work";
+  }
+
+  function scheduleBlockId(date) {
+    const lunch = lunchRange();
+    const m = date.getHours() * 60 + date.getMinutes();
+    return dateKey(date) + (lunch && m >= lunch.end ? "-pm" : "-am");
+  }
+
+  // Próximo día laboral (mañana o el que siga), para los mensajes.
+  function nextWorkdayText(date) {
+    const cursor = new Date(date);
+    for (let i = 1; i <= 7; i++) {
+      cursor.setDate(cursor.getDate() + 1);
+      if (schedule.days.indexOf(cursor.getDay()) !== -1) {
+        const when = i === 1 ? "mañana" : "el " + DAY_NAMES[cursor.getDay()];
+        return when + " a las " + prettyHour(schedule.start);
+      }
+    }
+    return "";
+  }
+
+  function daysText() {
+    const sorted = schedule.days.slice().sort(function (a, b) {
+      return ((a + 6) % 7) - ((b + 6) % 7); // lunes primero
+    });
+    const key = sorted.join(",");
+    if (key === "1,2,3,4,5") return "Lunes a viernes";
+    if (key === "1,2,3,4,5,6") return "Lunes a sábado";
+    if (sorted.length === 7) return "Todos los días";
+    return sorted.map(function (d) { return DAY_SHORT[d]; }).join(", ");
+  }
+
+  // ¿Se puede avisar a esta hora? Evita que el servidor mande un push
+  // en pleno almuerzo o después de la salida si la app quedó cerrada.
+  function scheduleAllowsAt(timestamp) {
+    if (scheduleState.manualRunOutside) return true;
+    const status = scheduleStatusAt(new Date(timestamp));
+    return status === "off" || status === "work";
+  }
+
+  // Texto del reloj cuando está detenido según el horario.
+  function applyScheduleIdleText() {
+    if (running || inBreak) return;
+
+    const now = new Date();
+    const status = scheduleStatusAt(now);
+    let label = "";
+    let text = "";
+
+    if (status === "before") {
+      label = "Antes de tu jornada";
+      text = "Arranco sola a las " + prettyHour(schedule.start) + ".";
+    } else if (status === "lunch") {
+      label = "Almuerzo";
+      text = "Buen provecho. Sigo sola a las " + prettyHour(schedule.lunchEnd) + ".";
+    } else if (status === "after") {
+      label = "Jornada terminada";
+      text = "Nos vemos " + nextWorkdayText(now) + ".";
+    } else if (status === "dayoff") {
+      label = "Día libre";
+      text = "Hoy no trabajas. Nos vemos " + nextWorkdayText(now) + ".";
+    } else if (status === "work" && scheduleState.manualStopBlock === scheduleBlockId(now)) {
+      text = "Detenida por ti. Toca «Iniciar» cuando quieras seguir.";
+    }
+
+    if (label) timerLabel.textContent = label;
+    if (text) timerDescription.textContent = text;
+    nextBreakHint.hidden = Boolean(label);
+  }
+
+  function refreshScheduleUI() {
+    scheduleToggle.checked = schedule.enabled;
+    scheduleBody.hidden = !schedule.enabled;
+
+    Array.prototype.forEach.call(scheduleDays.querySelectorAll("button"), function (btn) {
+      const day = parseInt(btn.getAttribute("data-day"), 10);
+      btn.setAttribute("aria-pressed", schedule.days.indexOf(day) !== -1 ? "true" : "false");
+    });
+
+    scheduleStart.value = schedule.start;
+    scheduleEnd.value = schedule.end;
+    scheduleLunchToggle.checked = schedule.lunch;
+    scheduleLunchTimes.setAttribute("aria-disabled", schedule.lunch ? "false" : "true");
+    scheduleLunchStart.value = schedule.lunchStart;
+    scheduleLunchEnd.value = schedule.lunchEnd;
+
+    const problem = scheduleProblem();
+    scheduleStatusEl.classList.toggle("is-warning", Boolean(problem));
+
+    if (problem) {
+      scheduleStatusEl.textContent = problem;
+      return;
+    }
+
+    let summary = daysText() + ", de " + prettyHour(schedule.start) + " a " + prettyHour(schedule.end);
+    if (schedule.lunch && lunchRange()) {
+      summary += " · almuerzo " + prettyHour(schedule.lunchStart) + "–" + prettyHour(schedule.lunchEnd);
+    } else if (schedule.lunch) {
+      summary += " · el almuerzo debe quedar dentro de la jornada";
+    }
+    scheduleStatusEl.textContent = summary + ".";
+  }
+
+  function todayBreaksDone() {
+    try {
+      const log = JSON.parse(window.localStorage.getItem(BREAK_LOG_KEY) || "{}");
+      const today = log[dateKey(new Date())] || {};
+      return (today.completed || 0) + (today.cut || 0);
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  function showDaySummary() {
+    const now = new Date();
+    const today = dateKey(now);
+    if (scheduleState.summaryDay === today) return;
+
+    scheduleState.summaryDay = today;
+    saveScheduleState();
+
+    const breaks = todayBreaksDone();
+    const streak = countStreak(new Set(loadStreakDays()));
+
+    $("daySummaryBreaks").textContent = breaks;
+    $("daySummaryStreak").textContent = streak;
+    $("daySummaryStreakUnit").textContent = streak === 1 ? "día seguido" : "días seguidos";
+    $("daySummaryText").textContent = (breaks > 0
+      ? "Buen trabajo: hoy te cuidaste. "
+      : "Hoy no hubo pausas; mañana es otra oportunidad. ") +
+      "Nos vemos " + nextWorkdayText(now) + ".";
+
+    daySummary.hidden = false;
+    $("daySummaryClose").focus();
+    track("fin-jornada", "Fin de jornada por horario");
+  }
+
+  $("daySummaryClose").addEventListener("click", function () {
+    daySummary.hidden = true;
+  });
+
+  // Se revisa cada 20 segundos y al volver a la app.
+  function scheduleTick() {
+    const now = new Date();
+    const status = scheduleStatusAt(now);
+
+    if (status === "off") return;
+
+    if (status === "work") {
+      if (scheduleState.manualRunOutside) {
+        scheduleState.manualRunOutside = false;
+        saveScheduleState();
+      }
+
+      if (!running && !inBreak && scheduleState.manualStopBlock !== scheduleBlockId(now)) {
+        handleStart();
+        track("inicio-automatico", "Inicio automático por horario");
+      }
+      return;
+    }
+
+    // Almuerzo, antes/después de la jornada o día libre: si el reloj
+    // corre solo por el horario, se detiene (una pausa en curso se deja
+    // terminar). Si la persona lo inició a mano fuera de horario, se
+    // respeta.
+    if (running && !inBreak && !scheduleState.manualRunOutside) {
+      handleReset();
+      if (status === "after") showDaySummary();
+    } else if (!running && !inBreak) {
+      applyScheduleIdleText();
+    }
+  }
+
+  function onScheduleChanged() {
+    saveSchedule();
+    refreshScheduleUI();
+    updateWorkUI();
+    scheduleTick();
+  }
+
+  scheduleToggle.addEventListener("change", function () {
+    schedule.enabled = scheduleToggle.checked;
+    if (schedule.enabled) track("horario-activado", "Activó Mi horario");
+    onScheduleChanged();
+  });
+
+  Array.prototype.forEach.call(scheduleDays.querySelectorAll("button"), function (btn) {
+    btn.addEventListener("click", function () {
+      const day = parseInt(btn.getAttribute("data-day"), 10);
+      const i = schedule.days.indexOf(day);
+      if (i === -1) schedule.days.push(day); else schedule.days.splice(i, 1);
+      onScheduleChanged();
+    });
+  });
+
+  [
+    [scheduleStart, "start"],
+    [scheduleEnd, "end"],
+    [scheduleLunchStart, "lunchStart"],
+    [scheduleLunchEnd, "lunchEnd"]
+  ].forEach(function (pair) {
+    pair[0].addEventListener("change", function () {
+      if (toMinutes(pair[0].value) === null) return;
+      schedule[pair[1]] = pair[0].value;
+      onScheduleChanged();
+    });
+  });
+
+  scheduleLunchToggle.addEventListener("change", function () {
+    schedule.lunch = scheduleLunchToggle.checked;
+    onScheduleChanged();
+  });
+
+  // Botones del reloj: recordar si la persona decidió por su cuenta.
+  function handleStartClick() {
+    const status = scheduleStatusAt(new Date());
+    if (status !== "off" && status !== "work") {
+      scheduleState.manualRunOutside = true;
+    }
+    scheduleState.manualStopBlock = "";
+    saveScheduleState();
+    handleStart();
+  }
+
+  function handleResetClick() {
+    const now = new Date();
+    if (scheduleStatusAt(now) === "work") {
+      scheduleState.manualStopBlock = scheduleBlockId(now);
+    }
+    scheduleState.manualRunOutside = false;
+    saveScheduleState();
+    handleReset();
+  }
+
+  // Si la app se abre fuera del horario con un reloj guardado que corría
+  // solo por el horario, no se retoma (evita que suene una pausa en el
+  // almuerzo o en la noche).
+  function scheduleBlocksRestore() {
+    const status = scheduleStatusAt(new Date());
+    return status !== "off" && status !== "work" && !scheduleState.manualRunOutside;
+  }
+
+  refreshScheduleUI();
+
   resetCycleIndicator();
+  if (scheduleBlocksRestore()) {
+    try {
+      window.localStorage.removeItem(TIMER_STATE_KEY);
+    } catch (e) {}
+  }
   restoreTimerState();
   updateWorkUI();
   updateStats();
   updateStreak();
   updateExercisePickerArrows = attachChipArrows($("exerciseSelectWrap").querySelector(".chip-scroller"));
+
+  // Mi horario: primera revisión cuando todo está cargado, luego cada
+  // 20 segundos y cada vez que se vuelve a la app.
+  setTimeout(scheduleTick, 0);
+  setInterval(scheduleTick, 20000);
+  document.addEventListener("visibilitychange", function () {
+    if (!document.hidden) scheduleTick();
+  });
 
   // Necesario para que Chrome/Edge ofrezcan el botón de "Instalar" (junto
   // con el manifest.webmanifest). No cachea nada, solo cumple el
