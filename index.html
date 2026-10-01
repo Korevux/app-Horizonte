@@ -2900,10 +2900,11 @@
 
     <div class="sound-row">
       <select id="soundSelect" aria-label="Seleccionar sonido">
-        <option value="bell">Campana suave</option>
-        <option value="chime">Chime</option>
-        <option value="digital">Digital</option>
-        <option value="soft">Suave</option>
+        <option value="campanita">Campanita</option>
+        <option value="timbre">Timbre ding-dong</option>
+        <option value="marimba">Marimba</option>
+        <option value="arpa">Arpa</option>
+        <option value="cristal">Cristal</option>
       </select>
 
       <button class="sound-test" id="testSoundBtn" type="button">
@@ -4523,56 +4524,41 @@
     }
   }
 
-  function playSelectedSound() {
-    const selected = soundSelect.value;
+  // Melodías de la alarma: agradables pero bien audibles en el parlante
+  // del celular (notas agudas, onda triangular con un armónico suave de
+  // campana). Cada nota: [frecuencia en Hz, momento en ms, duración en s].
+  const ALARM_MELODIES = {
+    campanita: [[1047, 0, 0.6], [1319, 190, 0.6], [1568, 380, 0.7]],
+    timbre: [[1319, 0, 0.9], [1047, 450, 1.1]],
+    marimba: [[1568, 0, 0.25], [1319, 140, 0.25], [1568, 280, 0.25], [2093, 420, 0.45]],
+    arpa: [[1047, 0, 0.5], [1175, 110, 0.5], [1319, 220, 0.5], [1568, 330, 0.5], [1760, 440, 0.7]],
+    cristal: [[2093, 0, 1.0], [2637, 0, 1.0], [2093, 600, 1.0], [2637, 600, 1.0]]
+  };
+  const DEFAULT_MELODY = "campanita";
 
-    if (selected === "bell") {
-      createTone(660, 1.15, 0.4, "sine");
-
-      setTimeout(function () {
-        createTone(880, 1.2, 0.32, "sine");
-      }, 180);
-
-    } else if (selected === "chime") {
-      createTone(740, 0.75, 0.38, "sine");
-
-      setTimeout(function () {
-        createTone(988, 0.9, 0.3, "sine");
-      }, 120);
-
-    } else if (selected === "digital") {
-      createTone(520, 0.18, 0.22, "square");
-
-      setTimeout(function () {
-        createTone(740, 0.22, 0.2, "square");
-      }, 180);
-
-      setTimeout(function () {
-        createTone(980, 0.28, 0.18, "square");
-      }, 390);
-
-    } else {
-      createTone(440, 1.4, 0.3, "sine");
-    }
+  function selectedMelody() {
+    return ALARM_MELODIES[soundSelect.value] ? soundSelect.value : DEFAULT_MELODY;
   }
+
+  // force: suena aunque no haya alarma activa (botón "Probar").
+  function playAlarmBurst(force) {
+    ALARM_MELODIES[selectedMelody()].forEach(function (note) {
+      setTimeout(function () {
+        if (!force && !alarmActive) return;
+        createTone(note[0], note[2], 0.75, "triangle");
+        createTone(note[0] * 2, note[2] * 0.6, 0.18, "sine");
+      }, note[1]);
+    });
+  }
+
+  function playSelectedSound() {
+    playAlarmBurst(true);
+  }
+
 
   const ALARM_SOUND_MS = 60 * 1000;
 
-  // Campanita de tres notas ascendentes (Do-Mi-Sol, agudas): agradable
-  // pero bien audible en el parlante del celular. Cada nota lleva un
-  // armónico suave una octava arriba que le da brillo de campana.
-  // force: suena aunque no haya alarma activa (botón "Probar").
-  const ALARM_NOTES = [1047, 1319, 1568];
 
-  function playAlarmBurst(force) {
-    ALARM_NOTES.forEach(function (frequency, i) {
-      setTimeout(function () {
-        if (!force && !alarmActive) return;
-        createTone(frequency, 0.6, 0.75, "triangle");
-        createTone(frequency * 2, 0.35, 0.18, "sine");
-      }, i * 190);
-    });
-  }
 
   function startAlarm() {
     stopAlarm();
@@ -4661,7 +4647,6 @@
     showBreakPanel();
     showCurrentBreakItem();
 
-    playSelectedSound();
     startAlarm();
     notifyBreakStart(BREAK_DEFS[currentBreakType]);
     saveTimerState();
@@ -5069,14 +5054,8 @@
     });
   });
 
-  // "Probar": el sonido de aviso elegido y, después, la alarma tal como
-  // suena cuando llega la pausa.
-  testSoundBtn.addEventListener("click", function () {
-    playSelectedSound();
-    setTimeout(function () {
-      playAlarmBurst(true);
-    }, 1500);
-  });
+  // "Probar": la melodía elegida, tal como suena cuando llega la pausa.
+  testSoundBtn.addEventListener("click", playSelectedSound);
 
   soundSelect.addEventListener("change", function () {
     try {
@@ -5086,7 +5065,7 @@
 
   try {
     const savedSound = window.localStorage.getItem(SOUND_KEY);
-    if (savedSound) {
+    if (savedSound && ALARM_MELODIES[savedSound]) {
       soundSelect.value = savedSound;
     }
   } catch (e) {}
