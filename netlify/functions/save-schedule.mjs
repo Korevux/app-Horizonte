@@ -2,8 +2,13 @@
 // en que debería avisarle (nextFireAt). Cada dispositivo tiene su propio
 // registro en Netlify Blobs (clave "sub/<hash del endpoint>"), así varias
 // personas pueden usar la app sin pisarse los horarios entre sí.
-const crypto = require("crypto");
-const { getStore } = require("@netlify/blobs");
+//
+// Formato moderno de Netlify Functions (export default): así Netlify
+// Blobs queda conectado solo. Con el formato antiguo (exports.handler)
+// getStore() fallaba siempre con MissingBlobsEnvironmentError, nada se
+// guardaba y por eso los avisos fuera de la app nunca llegaban.
+import crypto from "node:crypto";
+import { getStore } from "@netlify/blobs";
 
 const STORE_NAME = "horizonte";
 const SUB_PREFIX = "sub/";
@@ -25,26 +30,31 @@ function isValidSubscription(sub) {
   );
 }
 
-exports.handler = async function (event) {
-  if (event.httpMethod !== "POST") {
-    return { statusCode: 405, body: "Method not allowed" };
+function reply(status, body) {
+  return new Response(body, { status: status });
+}
+
+export default async function (req) {
+  if (req.method !== "POST") {
+    return reply(405, "Method not allowed");
   }
 
-  if ((event.body || "").length > MAX_BODY_BYTES) {
-    return { statusCode: 413, body: "Demasiado grande" };
+  const rawBody = await req.text();
+  if (rawBody.length > MAX_BODY_BYTES) {
+    return reply(413, "Demasiado grande");
   }
 
   let payload;
   try {
-    payload = JSON.parse(event.body || "{}");
+    payload = JSON.parse(rawBody || "{}");
   } catch (e) {
-    return { statusCode: 400, body: "JSON inválido" };
+    return reply(400, "JSON inválido");
   }
 
   // Sin una suscripción válida no hay a quién avisar: cada registro
   // pertenece a un dispositivo concreto.
   if (!isValidSubscription(payload.subscription)) {
-    return { statusCode: 400, body: "Falta una suscripción válida" };
+    return reply(400, "Falta una suscripción válida");
   }
 
   const nextFireAt =
@@ -93,5 +103,5 @@ exports.handler = async function (event) {
     result.vapidMatch = payload.applicationServerKey === serverPublicKey;
   }
 
-  return { statusCode: 200, body: JSON.stringify(result) };
-};
+  return Response.json(result);
+}
