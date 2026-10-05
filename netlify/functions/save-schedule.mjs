@@ -9,6 +9,7 @@
 // guardaba y por eso los avisos fuera de la app nunca llegaban.
 import crypto from "node:crypto";
 import { getStore } from "@netlify/blobs";
+import { getVapidKeys } from "../lib/vapid.mjs";
 
 const STORE_NAME = "horizonte";
 const SUB_PREFIX = "sub/";
@@ -94,10 +95,14 @@ export default async function (req) {
 
   // Diagnóstico para la prueba: si faltan las claves VAPID o no coinciden
   // con la de la app, los avisos nunca van a llegar. No revela claves.
-  const serverPublicKey = process.env.VAPID_PUBLIC_KEY || "";
+  let serverPublicKey = "";
+  try {
+    const keys = await getVapidKeys();
+    serverPublicKey = (keys && keys.publicKey) || "";
+  } catch (e) {}
   const result = {
     ok: true,
-    pushReady: Boolean(serverPublicKey && process.env.VAPID_PRIVATE_KEY)
+    pushReady: Boolean(serverPublicKey)
   };
   if (typeof payload.applicationServerKey === "string" && serverPublicKey) {
     result.vapidMatch = payload.applicationServerKey === serverPublicKey;

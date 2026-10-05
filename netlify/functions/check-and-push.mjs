@@ -9,6 +9,7 @@
 // fallaba en cada ejecución sin enviar nada.
 import webpush from "web-push";
 import { getStore } from "@netlify/blobs";
+import { getVapidKeys } from "../lib/vapid.mjs";
 
 export const config = { schedule: "* * * * *" };
 
@@ -39,16 +40,15 @@ async function send(subscription, message) {
 }
 
 export default async function () {
-  const vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
-  const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
   const vapidSubject = process.env.VAPID_SUBJECT || "mailto:noel.duran.chile@gmail.com";
+  const keys = await getVapidKeys();
 
-  if (!vapidPublicKey || !vapidPrivateKey) {
-    console.error("Faltan las variables de entorno VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY.");
-    return new Response("sin claves VAPID configuradas");
+  if (!keys || !keys.publicKey || !keys.privateKey) {
+    console.error("No hay claves VAPID disponibles.");
+    return new Response("sin claves VAPID");
   }
 
-  webpush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey);
+  webpush.setVapidDetails(vapidSubject, keys.publicKey, keys.privateKey);
 
   const store = getStore(STORE_NAME);
   const now = Date.now();
@@ -82,7 +82,7 @@ export default async function () {
         sent += 1;
       } catch (err) {
         const code = err && err.statusCode;
-        if (code === 404 || code === 410) {
+        if (code === 403 || code === 404 || code === 410) {
           await store.delete(key);
           continue;
         }
@@ -108,8 +108,9 @@ export default async function () {
       sent += 1;
     } catch (err) {
       const code = err && err.statusCode;
-      if (code === 404 || code === 410) {
-        // Suscripción vencida o eliminada por el navegador: se descarta.
+      if (code === 403 || code === 404 || code === 410) {
+        // Suscripción vencida, eliminada o creada con otras claves VAPID
+        // (403): ya no sirve, se descarta. La app se vuelve a suscribir.
         await store.delete(key);
         continue;
       }
