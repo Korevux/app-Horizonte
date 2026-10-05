@@ -2924,7 +2924,7 @@
     </div>
 
     <p class="time-hint" id="notifyStatus" style="margin-top:10px; margin-bottom:0;"></p>
-    <p class="time-hint" style="margin-top:6px; margin-bottom:0;">El sonido solo se escucha con la app abierta en pantalla. Si estás en otra app, te avisa la notificación.</p>
+    <p class="time-hint" style="margin-top:6px; margin-bottom:0;">El sonido de la alarma solo se escucha con la app abierta en pantalla. En el celular, si estás en otra pestaña o app, te avisa una notificación con el sonido de notificaciones del teléfono (revisa que no esté en silencio ni en "No molestar"). En iPhone, primero agrega Horizonte a la pantalla de inicio.</p>
   </section>
 
   <section class="settings-card">
@@ -3588,20 +3588,42 @@
     if (Notification.permission !== "granted") return;
     if (!loadNotifySetting()) return;
 
-    try {
-      const note = new Notification("Horizonte · " + def.type, {
-        body: def.title + " — " + def.description,
-        tag: "horizonte-break",
-        renotify: true,
-        requireInteraction: true
-      });
-      breakNotification = note;
+    const title = "Horizonte · " + def.type;
+    const options = {
+      body: def.title + " — " + def.description,
+      tag: "horizonte-break",
+      renotify: true,
+      requireInteraction: true,
+      silent: false,
+      vibrate: [400, 150, 400, 150, 400]
+    };
 
-      note.onclick = function () {
-        window.focus();
-        note.close();
-      };
-    } catch (e) {}
+    // En el celular (Chrome Android) "new Notification()" no existe para
+    // páginas: lanza error y el aviso nunca aparecía. La notificación
+    // tiene que salir del service worker; esa sí suena y vibra con el
+    // sonido de notificaciones del teléfono aunque estés en otra app.
+    function showFromPage() {
+      try {
+        const note = new Notification(title, options);
+        breakNotification = note;
+
+        note.onclick = function () {
+          window.focus();
+          note.close();
+        };
+      } catch (e) {}
+    }
+
+    if (navigator.serviceWorker && navigator.serviceWorker.getRegistration) {
+      navigator.serviceWorker.getRegistration().then(function (reg) {
+        if (reg && reg.showNotification) {
+          return reg.showNotification(title, options);
+        }
+        showFromPage();
+      }).catch(showFromPage);
+    } else {
+      showFromPage();
+    }
   }
 
   function formatTime(seconds) {
@@ -4218,6 +4240,9 @@
   document.addEventListener("visibilitychange", function () {
     if (document.hidden || !inBreak) return;
 
+    // Ya está mirando la pausa: el aviso push de respaldo sobra.
+    pushScheduleUpdate(null, null);
+
     if (breakCounting) {
       requestWakeLock();
       tickBreakCountdown();
@@ -4650,7 +4675,14 @@
     startAlarm();
     notifyBreakStart(BREAK_DEFS[currentBreakType]);
     saveTimerState();
-    pushScheduleUpdate(null, null);
+
+    // Con la app en otra pestaña o app, el celular puede congelar esta
+    // página en cualquier momento (incluso antes de que salga la
+    // notificación) y el sonido de la página no se oye. Por eso el aviso
+    // push del servidor queda como respaldo: solo se cancela si la
+    // persona está mirando la app. Si llega igual, reemplaza en silencio
+    // la notificación que ya está (ver sw.js), sin avisar dos veces.
+    if (!document.hidden) pushScheduleUpdate(null, null);
   }
 
   // Se llama al presionar "Continuar" (o "Siguiente ejercicio").
