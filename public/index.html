@@ -3546,7 +3546,7 @@
 
   function getVapidPublicKey() {
     if (!vapidPublicKeyPromise) {
-      vapidPublicKeyPromise = fetch("/.netlify/functions/push-key", { cache: "no-store" })
+      vapidPublicKeyPromise = fetch("/api/push-key", { cache: "no-store" })
         .then(function (response) {
           if (!response.ok) throw new Error("push-key " + response.status);
           return response.json();
@@ -5000,7 +5000,7 @@
   // ------------------------------------------------------------------
   // Notificaciones push reales (avisan aunque el celular haya cerrado
   // la app por completo en segundo plano). Requieren estar servidas por
-  // HTTPS (Netlify), no funcionan abriendo el archivo local.
+  // HTTPS (Cloudflare), no funcionan abriendo el archivo local.
   // ------------------------------------------------------------------
 
   function urlBase64ToUint8Array(base64String) {
@@ -5039,7 +5039,7 @@
     }).then(function (subscription) {
       if (!subscription) return;
 
-      fetch("/.netlify/functions/save-schedule", {
+      fetch("/api/save-schedule", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -5106,7 +5106,7 @@
         window.localStorage.setItem(PUSH_SUBSCRIBED_KEY, "1");
       } catch (e) {}
 
-      fetch("/.netlify/functions/save-schedule", {
+      fetch("/api/save-schedule", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -5164,7 +5164,7 @@
         window.localStorage.setItem(PUSH_SUBSCRIBED_KEY, "1");
       } catch (e) {}
 
-      return fetch("/.netlify/functions/save-schedule", {
+      return fetch("/api/save-schedule", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
