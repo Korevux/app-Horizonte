@@ -5183,7 +5183,7 @@
           throw { userMessage: "El servidor respondió con un error (" + response.status + "). Los avisos fuera de la app no van a llegar hasta arreglarlo." };
         }
         if (data.pushReady === false) {
-          throw { userMessage: "El servidor no pudo preparar las claves de avisos (VAPID). Vuelve a probar en un minuto." };
+          throw { userMessage: "El servidor no pudo preparar las claves de avisos (VAPID" + (data.keysError ? ": " + data.keysError : "") + "). Vuelve a probar en un minuto." };
         }
         if (data.vapidMatch === false) {
           throw { userMessage: "La clave de avisos de la app no coincide con la del servidor (VAPID). Los avisos fuera de la app no pueden llegar hasta corregirla." };
