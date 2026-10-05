@@ -4,6 +4,3 @@
 
 [functions]
   node_bundler = "esbuild"
-
-[functions."check-and-push"]
-  schedule = "* * * * *"

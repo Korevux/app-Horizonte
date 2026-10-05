@@ -1,10 +1,16 @@
-// Función programada (ver netlify.toml, corre cada minuto). Recorre los
-// registros por dispositivo que guarda save-schedule.js ("sub/<hash>") y
+// Función programada (corre cada minuto, ver config más abajo). Recorre los
+// registros por dispositivo que guarda save-schedule.mjs ("sub/<hash>") y
 // avisa SOLO a los dispositivos cuya hora (nextFireAt) ya se cumplió. El
 // push lo entrega el sistema operativo, así que llega aunque la app esté
 // cerrada.
-const webpush = require("web-push");
-const { getStore } = require("@netlify/blobs");
+//
+// Formato moderno de Netlify Functions (ver save-schedule.mjs): con el
+// formato antiguo Netlify Blobs no quedaba conectado y esta función
+// fallaba en cada ejecución sin enviar nada.
+import webpush from "web-push";
+import { getStore } from "@netlify/blobs";
+
+export const config = { schedule: "* * * * *" };
 
 const STORE_NAME = "horizonte";
 const SUB_PREFIX = "sub/";
@@ -32,14 +38,14 @@ async function send(subscription, message) {
   await webpush.sendNotification(subscription, JSON.stringify(message), PUSH_OPTIONS);
 }
 
-exports.handler = async function () {
+export default async function () {
   const vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
   const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
   const vapidSubject = process.env.VAPID_SUBJECT || "mailto:noel.duran.chile@gmail.com";
 
   if (!vapidPublicKey || !vapidPrivateKey) {
     console.error("Faltan las variables de entorno VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY.");
-    return { statusCode: 200, body: "sin claves VAPID configuradas" };
+    return new Response("sin claves VAPID configuradas");
   }
 
   webpush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey);
@@ -117,5 +123,6 @@ exports.handler = async function () {
     await store.setJSON(key, record);
   }
 
-  return { statusCode: 200, body: "avisos enviados: " + sent };
-};
+  console.log("avisos enviados: " + sent);
+  return new Response("avisos enviados: " + sent);
+}
