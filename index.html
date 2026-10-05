@@ -2498,6 +2498,10 @@
       width: 100%;
       min-height: 50px;
     }
+
+    .day-summary-card .btn + .btn {
+      margin-top: 8px;
+    }
   </style>
 </head>
 
@@ -3133,13 +3137,14 @@
 <div class="day-summary" id="daySummary" role="dialog" aria-modal="true" aria-labelledby="daySummaryTitle" hidden>
   <div class="day-summary-card">
     <img class="day-summary-sun" src="./horizonte-icon.svg" alt="" aria-hidden="true">
-    <h2 id="daySummaryTitle">¡Jornada terminada!</h2>
+    <h2 id="daySummaryTitle">Terminó tu horario</h2>
     <p id="daySummaryText">Buen trabajo hoy. Desconecta y descansa.</p>
     <div class="day-summary-stats">
       <div><strong id="daySummaryBreaks">0</strong><span>pausas hechas</span></div>
       <div><strong id="daySummaryStreak">0</strong><span id="daySummaryStreakUnit">días seguidos</span></div>
     </div>
-    <button class="btn btn-primary" id="daySummaryClose" type="button">Hasta mañana</button>
+    <button class="btn btn-primary" id="daySummaryClose" type="button">Terminé, hasta mañana</button>
+    <button class="btn btn-secondary" id="daySummaryKeepWorking" type="button">Sigo trabajando</button>
   </div>
 </div>
 
@@ -5315,8 +5320,9 @@
       label = "Almuerzo";
       text = "Buen provecho. Sigo sola a las " + prettyHour(schedule.lunchEnd) + ".";
     } else if (status === "after") {
-      label = "Jornada terminada";
-      text = "Nos vemos " + nextWorkdayText(now) + ".";
+      label = "Fuera de tu horario";
+      text = "Tu horario terminó a las " + prettyHour(schedule.end) +
+        ". Nos vemos " + nextWorkdayText(now) + ".";
     } else if (status === "dayoff") {
       label = "Día libre";
       text = "Hoy no trabajas. Nos vemos " + nextWorkdayText(now) + ".";
@@ -5386,10 +5392,11 @@
     $("daySummaryBreaks").textContent = breaks;
     $("daySummaryStreak").textContent = streak;
     $("daySummaryStreakUnit").textContent = streak === 1 ? "día seguido" : "días seguidos";
-    $("daySummaryText").textContent = (breaks > 0
-      ? "Buen trabajo: hoy te cuidaste. "
-      : "Hoy no hubo pausas; mañana es otra oportunidad. ") +
-      "Nos vemos " + nextWorkdayText(now) + ".";
+    $("daySummaryText").textContent = "Ya pasó tu hora de salida (" +
+      prettyHour(schedule.end) + "). " + (breaks > 0
+      ? "Hoy te cuidaste. "
+      : "Hoy no hubo pausas. ") +
+      "Si aún no terminas, sigo contigo.";
 
     daySummary.hidden = false;
     $("daySummaryClose").focus();
@@ -5398,6 +5405,15 @@
 
   $("daySummaryClose").addEventListener("click", function () {
     daySummary.hidden = true;
+  });
+
+  // La hora de salida no significa que la persona ya cerró su jornada:
+  // si sigue trabajando, el reloj vuelve a correr como inicio manual
+  // fuera de horario (no se detiene ni se bloquean los avisos).
+  $("daySummaryKeepWorking").addEventListener("click", function () {
+    daySummary.hidden = true;
+    handleStartClick();
+    track("sigue-trabajando", "Siguió trabajando tras la hora de salida");
   });
 
   // Se revisa cada 20 segundos y al volver a la app.
