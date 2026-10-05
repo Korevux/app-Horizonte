@@ -17,10 +17,25 @@ self.addEventListener("push", function (event) {
     tag: "horizonte-break",
     renotify: true,
     requireInteraction: true,
-    vibrate: [200, 100, 200]
+    silent: false,
+    vibrate: [400, 150, 400, 150, 400]
   };
 
-  event.waitUntil(self.registration.showNotification(title, options));
+  // Si la página alcanzó a mostrar el aviso de esta pausa, el push de
+  // respaldo lo reemplaza sin volver a sonar (no avisa dos veces).
+  event.waitUntil(
+    self.registration.getNotifications({ tag: "horizonte-break" }).then(function (existing) {
+      if (existing.length) {
+        options.renotify = false;
+        options.silent = true;
+        options.body = existing[0].body || options.body;
+        return self.registration.showNotification(existing[0].title || title, options);
+      }
+      return self.registration.showNotification(title, options);
+    }).catch(function () {
+      return self.registration.showNotification(title, options);
+    })
+  );
 });
 
 self.addEventListener("notificationclick", function (event) {
