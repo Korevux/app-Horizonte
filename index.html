@@ -3558,9 +3558,19 @@
     } catch (e) {}
   }
 
+  // iPhone/iPad (incluye iPad que se presenta como Mac). En iOS los
+  // avisos push solo existen para la app agregada a la pantalla de inicio.
+  function isAppleMobile() {
+    const ua = navigator.userAgent || "";
+    return /iPhone|iPad|iPod/.test(ua) ||
+      (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  }
+
   function refreshNotifyStatus() {
     if (!("Notification" in window)) {
-      notifyStatus.textContent = "Tu navegador no soporta notificaciones del sistema.";
+      notifyStatus.textContent = isAppleMobile()
+        ? "En iPhone, los avisos solo funcionan con Horizonte instalada: toca Compartir › «Agregar a pantalla de inicio» y ábrela desde ese ícono."
+        : "Tu navegador no soporta notificaciones del sistema.";
       notifyToggle.disabled = true;
       return;
     }
@@ -5100,7 +5110,9 @@
 
   function runPushTest() {
     if (!("Notification" in window) || !("serviceWorker" in navigator) || !("PushManager" in window)) {
-      setPushTestStatus("Este navegador no puede recibir avisos con la app cerrada. En iPhone, agrega Horizonte a la pantalla de inicio y ábrela desde ahí.");
+      setPushTestStatus(isAppleMobile()
+        ? "En iPhone, primero instala Horizonte: toca Compartir › «Agregar a pantalla de inicio», ábrela desde ese ícono y vuelve a probar."
+        : "Este navegador no puede recibir avisos con la app cerrada. Prueba con Chrome, Edge, Firefox o Safari actualizados.");
       return;
     }
 
@@ -5116,7 +5128,7 @@
       refreshNotifyStatus();
 
       return ensurePushSubscription().catch(function () {
-        throw { userMessage: "El celular no dejó registrar los avisos. Revisa que tengas internet y que Chrome esté actualizado." };
+        throw { userMessage: "El dispositivo no dejó registrar los avisos. Revisa que tengas internet y que el navegador esté actualizado." };
       });
     }).then(function (subscription) {
       try {
@@ -5147,7 +5159,7 @@
         if (data.vapidMatch === false) {
           throw { userMessage: "La clave de avisos de la app no coincide con la del servidor (VAPID). Los avisos fuera de la app no pueden llegar hasta corregirla." };
         }
-        setPushTestStatus("Listo. Sal de la app ahora: en 1 a 2 minutos debería sonar una notificación de prueba. Si no llega, revisa que el celular no esté en silencio, en «No molestar» ni con ahorro de batería para Chrome.");
+        setPushTestStatus("Listo. Sal de la app ahora: en 1 a 2 minutos debería sonar una notificación de prueba. Si no llega, revisa que el dispositivo no esté en silencio, en «No molestar» o «Concentración», ni con ahorro de batería.");
       });
     }).catch(function (err) {
       setPushTestStatus((err && err.userMessage) || "No se pudo preparar la prueba.");
