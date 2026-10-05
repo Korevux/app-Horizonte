@@ -53,8 +53,22 @@ exports.handler = async function (event) {
       : null;
 
   const store = getStore(STORE_NAME);
+  const key = keyFor(payload.subscription.endpoint);
 
-  await store.setJSON(keyFor(payload.subscription.endpoint), {
+  // El aviso de prueba ("Probar aviso fuera de la app") va aparte del de
+  // la pausa, para no pisarlo. Se conserva si llega otra actualización
+  // antes de que salga.
+  let testAt = null;
+  if (payload.test === true) {
+    testAt = Date.now() + 60 * 1000;
+  } else {
+    try {
+      const existing = await store.get(key, { type: "json" });
+      if (existing && typeof existing.testAt === "number") testAt = existing.testAt;
+    } catch (e) {}
+  }
+
+  await store.setJSON(key, {
     subscription: {
       endpoint: payload.subscription.endpoint,
       keys: {
@@ -64,8 +78,20 @@ exports.handler = async function (event) {
     },
     nextFireAt: nextFireAt,
     fireKind: nextFireAt ? (payload.fireKind || "break") : null,
+    testAt: testAt,
     updatedAt: Date.now()
   });
 
-  return { statusCode: 200, body: JSON.stringify({ ok: true }) };
+  // Diagnóstico para la prueba: si faltan las claves VAPID o no coinciden
+  // con la de la app, los avisos nunca van a llegar. No revela claves.
+  const serverPublicKey = process.env.VAPID_PUBLIC_KEY || "";
+  const result = {
+    ok: true,
+    pushReady: Boolean(serverPublicKey && process.env.VAPID_PRIVATE_KEY)
+  };
+  if (typeof payload.applicationServerKey === "string" && serverPublicKey) {
+    result.vapidMatch = payload.applicationServerKey === serverPublicKey;
+  }
+
+  return { statusCode: 200, body: JSON.stringify(result) };
 };

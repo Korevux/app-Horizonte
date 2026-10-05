@@ -15,8 +15,22 @@ const MESSAGES = {
   break: {
     title: "Horizonte",
     body: "Tu pausa comenzó. Toca para ver el ejercicio."
+  },
+  test: {
+    title: "Horizonte · Prueba",
+    body: "¡Funciona! Así te avisaré cuando llegue tu pausa.",
+    tag: "horizonte-test"
   }
 };
+
+// "high": sin esto, Android puede guardar el aviso hasta que el celular
+// salga del reposo (Doze) y llegar con varios minutos de atraso. TTL:
+// un aviso de pausa que llega 10 minutos tarde ya no sirve.
+const PUSH_OPTIONS = { urgency: "high", TTL: 10 * 60 };
+
+async function send(subscription, message) {
+  await webpush.sendNotification(subscription, JSON.stringify(message), PUSH_OPTIONS);
+}
 
 exports.handler = async function () {
   const vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
@@ -56,6 +70,22 @@ exports.handler = async function () {
       continue;
     }
 
+    if (record.testAt && now >= record.testAt) {
+      try {
+        await send(record.subscription, MESSAGES.test);
+        sent += 1;
+      } catch (err) {
+        const code = err && err.statusCode;
+        if (code === 404 || code === 410) {
+          await store.delete(key);
+          continue;
+        }
+        console.error("Error enviando push de prueba:", code, err && err.body);
+      }
+      record.testAt = null;
+      await store.setJSON(key, record);
+    }
+
     if (!record.nextFireAt) {
       if (record.updatedAt && now - record.updatedAt > STALE_MS) {
         await store.delete(key);
@@ -68,7 +98,7 @@ exports.handler = async function () {
     const message = MESSAGES[record.fireKind] || MESSAGES.break;
 
     try {
-      await webpush.sendNotification(record.subscription, JSON.stringify(message));
+      await send(record.subscription, message);
       sent += 1;
     } catch (err) {
       const code = err && err.statusCode;
@@ -78,7 +108,7 @@ exports.handler = async function () {
         continue;
       }
       // Otro error (red, servicio caído): se reintenta el próximo minuto.
-      console.error("Error enviando push:", err && err.message);
+      console.error("Error enviando push:", code, err && err.body);
       continue;
     }
 
