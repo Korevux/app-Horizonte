@@ -16,7 +16,9 @@ export async function getVapidKeys() {
     };
   }
 
-  const store = getStore({ name: "horizonte", consistency: "strong" });
+  // Sin consistency "strong": exige uncachedEdgeURL en el entorno y, si
+  // falta, cada lectura falla y los avisos nunca salen.
+  const store = getStore("horizonte");
   const saved = await store.get(KEYS_BLOB, { type: "json" });
   if (saved && saved.publicKey && saved.privateKey) return saved;
 

@@ -96,14 +96,19 @@ export default async function (req) {
   // Diagnóstico para la prueba: si faltan las claves VAPID o no coinciden
   // con la de la app, los avisos nunca van a llegar. No revela claves.
   let serverPublicKey = "";
+  let keysError = null;
   try {
     const keys = await getVapidKeys();
     serverPublicKey = (keys && keys.publicKey) || "";
-  } catch (e) {}
+  } catch (e) {
+    keysError = (e && e.name) || "Error";
+    console.error("No se pudieron obtener las claves VAPID:", e);
+  }
   const result = {
     ok: true,
     pushReady: Boolean(serverPublicKey)
   };
+  if (keysError) result.keysError = keysError;
   if (typeof payload.applicationServerKey === "string" && serverPublicKey) {
     result.vapidMatch = payload.applicationServerKey === serverPublicKey;
   }
