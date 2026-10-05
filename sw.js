@@ -12,9 +12,10 @@ self.addEventListener("push", function (event) {
   } catch (e) {}
 
   const title = data.title || "Horizonte";
+  const tag = data.tag || "horizonte-break";
   const options = {
     body: data.body || "Tu pausa comenzó.",
-    tag: "horizonte-break",
+    tag: tag,
     renotify: true,
     requireInteraction: true,
     silent: false,
@@ -24,8 +25,8 @@ self.addEventListener("push", function (event) {
   // Si la página alcanzó a mostrar el aviso de esta pausa, el push de
   // respaldo lo reemplaza sin volver a sonar (no avisa dos veces).
   event.waitUntil(
-    self.registration.getNotifications({ tag: "horizonte-break" }).then(function (existing) {
-      if (existing.length) {
+    self.registration.getNotifications({ tag: tag }).then(function (existing) {
+      if (existing.length && tag === "horizonte-break") {
         options.renotify = false;
         options.silent = true;
         options.body = existing[0].body || options.body;

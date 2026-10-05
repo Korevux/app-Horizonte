@@ -2924,7 +2924,12 @@
     </div>
 
     <p class="time-hint" id="notifyStatus" style="margin-top:10px; margin-bottom:0;"></p>
-    <p class="time-hint" style="margin-top:6px; margin-bottom:0;">El sonido de la alarma solo se escucha con la app abierta en pantalla. En el celular, si estás en otra pestaña o app, te avisa una notificación con el sonido de notificaciones del teléfono (revisa que no esté en silencio ni en "No molestar"). En iPhone, primero agrega Horizonte a la pantalla de inicio.</p>
+    <div class="sound-row" style="margin-top:12px;">
+      <button class="sound-test" id="pushTestBtn" type="button">
+        ▶ Probar aviso fuera de la app
+      </button>
+    </div>
+    <p class="time-hint" id="pushTestStatus" style="margin-top:8px; margin-bottom:0;"></p>
   </section>
 
   <section class="settings-card">
@@ -5020,19 +5025,49 @@
   // Se llama cuando la persona activa el check de notificaciones y ya
   // se le concedió el permiso del navegador. Crea la suscripción push
   // (una sola vez por dispositivo) y la manda al servidor.
-  function subscribeToPush() {
-    if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+  // Hora del próximo aviso push de pausa (o null si no corresponde).
+  function nextBreakPushAt() {
+    if (!running || paused || inBreak || !workEndAt) return null;
+    try {
+      if (!scheduleAllowsAt(workEndAt)) return null;
+    } catch (e) {}
+    return workEndAt;
+  }
 
-    navigator.serviceWorker.ready.then(function (registration) {
-      return registration.pushManager.getSubscription().then(function (existing) {
-        if (existing) return existing;
-
+  // Devuelve la suscripción push de este dispositivo, creándola si falta.
+  // Si existe una creada con otra clave VAPID (una versión anterior de la
+  // app), el servidor no puede usarla: se reemplaza por una nueva.
+  function ensurePushSubscription() {
+    return navigator.serviceWorker.ready.then(function (registration) {
+      function subscribeNew() {
         return registration.pushManager.subscribe({
           userVisibleOnly: true,
           applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
         });
+      }
+
+      return registration.pushManager.getSubscription().then(function (existing) {
+        if (!existing) return subscribeNew();
+
+        const key = existing.options && existing.options.applicationServerKey;
+        if (key) {
+          const current = new Uint8Array(key);
+          const expected = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
+          const same = current.length === expected.length &&
+            current.every(function (b, i) { return b === expected[i]; });
+          if (!same) {
+            return existing.unsubscribe().then(subscribeNew, subscribeNew);
+          }
+        }
+        return existing;
       });
-    }).then(function (subscription) {
+    });
+  }
+
+  function subscribeToPush() {
+    if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+
+    ensurePushSubscription().then(function (subscription) {
       if (!subscription) return;
 
       try {
@@ -5044,14 +5079,82 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           subscription: subscription.toJSON(),
-          nextFireAt: running && !paused ? workEndAt : null,
-          fireKind: running && !paused ? "break" : null
+          nextFireAt: nextBreakPushAt(),
+          fireKind: nextBreakPushAt() ? "break" : null
         })
       }).catch(function () {});
     }).catch(function (err) {
       console.warn("No se pudo suscribir a notificaciones push.", err);
     });
   }
+
+  // "Probar aviso fuera de la app": pide al servidor un aviso de prueba
+  // en 1 minuto y dice exactamente qué falla si algo no está bien, para
+  // no tener que esperar una pausa entera para saber si funciona.
+  const pushTestBtn = $("pushTestBtn");
+  const pushTestStatus = $("pushTestStatus");
+
+  function setPushTestStatus(text) {
+    pushTestStatus.textContent = text;
+  }
+
+  function runPushTest() {
+    if (!("Notification" in window) || !("serviceWorker" in navigator) || !("PushManager" in window)) {
+      setPushTestStatus("Este navegador no puede recibir avisos con la app cerrada. En iPhone, agrega Horizonte a la pantalla de inicio y ábrela desde ahí.");
+      return;
+    }
+
+    setPushTestStatus("Preparando la prueba…");
+
+    Notification.requestPermission().then(function (permission) {
+      if (permission !== "granted") {
+        throw { userMessage: "El permiso de notificaciones está bloqueado. Actívalo en los ajustes del celular para Horizonte (o para el navegador) y vuelve a probar." };
+      }
+
+      notifyToggle.checked = true;
+      saveNotifySetting(true);
+      refreshNotifyStatus();
+
+      return ensurePushSubscription().catch(function () {
+        throw { userMessage: "El celular no dejó registrar los avisos. Revisa que tengas internet y que Chrome esté actualizado." };
+      });
+    }).then(function (subscription) {
+      try {
+        window.localStorage.setItem(PUSH_SUBSCRIBED_KEY, "1");
+      } catch (e) {}
+
+      return fetch("/.netlify/functions/save-schedule", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          subscription: subscription.toJSON(),
+          nextFireAt: nextBreakPushAt(),
+          fireKind: nextBreakPushAt() ? "break" : null,
+          test: true,
+          applicationServerKey: VAPID_PUBLIC_KEY
+        })
+      }).catch(function () {
+        throw { userMessage: "No pude hablar con el servidor. Revisa tu conexión a internet." };
+      });
+    }).then(function (response) {
+      return response.json().catch(function () { return {}; }).then(function (data) {
+        if (!response.ok) {
+          throw { userMessage: "El servidor respondió con un error (" + response.status + "). Los avisos fuera de la app no van a llegar hasta arreglarlo." };
+        }
+        if (data.pushReady === false) {
+          throw { userMessage: "El servidor no tiene configuradas las claves de avisos (VAPID). Los avisos fuera de la app no pueden llegar hasta configurarlas en Netlify." };
+        }
+        if (data.vapidMatch === false) {
+          throw { userMessage: "La clave de avisos de la app no coincide con la del servidor (VAPID). Los avisos fuera de la app no pueden llegar hasta corregirla." };
+        }
+        setPushTestStatus("Listo. Sal de la app ahora: en 1 a 2 minutos debería sonar una notificación de prueba. Si no llega, revisa que el celular no esté en silencio, en «No molestar» ni con ahorro de batería para Chrome.");
+      });
+    }).catch(function (err) {
+      setPushTestStatus((err && err.userMessage) || "No se pudo preparar la prueba.");
+    });
+  }
+
+  pushTestBtn.addEventListener("click", runPushTest);
 
   startBtn.addEventListener("click", handleStartClick);
   pauseBtn.addEventListener("click", handlePauseToggle);
