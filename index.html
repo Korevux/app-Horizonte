@@ -3540,9 +3540,28 @@
   const PUSH_SUBSCRIBED_KEY = "horizonte_bienestar_pushsubscribed";
   // Clave pública VAPID: no es secreta, así es como funciona el estándar
   // Web Push (el navegador la usa para verificar que el push viene de
-  // este servidor). La clave privada vive solo en el servidor (variable
-  // de entorno de Netlify), nunca aquí.
-  const VAPID_PUBLIC_KEY = "BOwaNxos2KHMWmbrJkFDL5FVeJrnDFW8hHhCrxC7xDcrx7Dy9w5rnphmmnUCy-yDWCkW8gTQWeFlKY2Obdn1BGw";
+  // este servidor). Se pide al servidor (push-key), que la crea y guarda
+  // la primera vez; la privada nunca sale de ahí.
+  let vapidPublicKeyPromise = null;
+
+  function getVapidPublicKey() {
+    if (!vapidPublicKeyPromise) {
+      vapidPublicKeyPromise = fetch("/.netlify/functions/push-key", { cache: "no-store" })
+        .then(function (response) {
+          if (!response.ok) throw new Error("push-key " + response.status);
+          return response.json();
+        })
+        .then(function (data) {
+          if (!data || !data.publicKey) throw new Error("push-key sin clave");
+          return data.publicKey;
+        })
+        .catch(function (err) {
+          vapidPublicKeyPromise = null;
+          throw err;
+        });
+    }
+    return vapidPublicKeyPromise;
+  }
 
   function loadNotifySetting() {
     try {
@@ -5048,11 +5067,14 @@
   // Si existe una creada con otra clave VAPID (una versión anterior de la
   // app), el servidor no puede usarla: se reemplaza por una nueva.
   function ensurePushSubscription() {
-    return navigator.serviceWorker.ready.then(function (registration) {
+    return Promise.all([navigator.serviceWorker.ready, getVapidPublicKey()]).then(function (results) {
+      const registration = results[0];
+      const vapidPublicKey = results[1];
+
       function subscribeNew() {
         return registration.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+          applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
         });
       }
 
@@ -5062,7 +5084,7 @@
         const key = existing.options && existing.options.applicationServerKey;
         if (key) {
           const current = new Uint8Array(key);
-          const expected = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
+          const expected = urlBase64ToUint8Array(vapidPublicKey);
           const same = current.length === expected.length &&
             current.every(function (b, i) { return b === expected[i]; });
           if (!same) {
@@ -5127,10 +5149,17 @@
       saveNotifySetting(true);
       refreshNotifyStatus();
 
-      return ensurePushSubscription().catch(function () {
-        throw { userMessage: "El dispositivo no dejó registrar los avisos. Revisa que tengas internet y que el navegador esté actualizado." };
+      return getVapidPublicKey().catch(function () {
+        throw { userMessage: "No pude obtener la clave de avisos del servidor. Revisa tu conexión a internet y vuelve a probar." };
+      }).then(function (key) {
+        return ensurePushSubscription().then(function (subscription) {
+          return { subscription: subscription, key: key };
+        }, function () {
+          throw { userMessage: "El dispositivo no dejó registrar los avisos. Revisa que tengas internet y que el navegador esté actualizado." };
+        });
       });
-    }).then(function (subscription) {
+    }).then(function (result) {
+      const subscription = result.subscription;
       try {
         window.localStorage.setItem(PUSH_SUBSCRIBED_KEY, "1");
       } catch (e) {}
@@ -5143,7 +5172,7 @@
           nextFireAt: nextBreakPushAt(),
           fireKind: nextBreakPushAt() ? "break" : null,
           test: true,
-          applicationServerKey: VAPID_PUBLIC_KEY
+          applicationServerKey: result.key
         })
       }).catch(function () {
         throw { userMessage: "No pude hablar con el servidor. Revisa tu conexión a internet." };
@@ -5154,7 +5183,7 @@
           throw { userMessage: "El servidor respondió con un error (" + response.status + "). Los avisos fuera de la app no van a llegar hasta arreglarlo." };
         }
         if (data.pushReady === false) {
-          throw { userMessage: "El servidor no tiene configuradas las claves de avisos (VAPID). Los avisos fuera de la app no pueden llegar hasta configurarlas en Netlify." };
+          throw { userMessage: "El servidor no pudo preparar las claves de avisos (VAPID). Vuelve a probar en un minuto." };
         }
         if (data.vapidMatch === false) {
           throw { userMessage: "La clave de avisos de la app no coincide con la del servidor (VAPID). Los avisos fuera de la app no pueden llegar hasta corregirla." };
