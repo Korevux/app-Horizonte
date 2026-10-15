@@ -2741,7 +2741,7 @@
     </div>
 
     <div class="visual-note" id="visualNote">
-      Te avisamos con un tono al terminar. Puedes continuar antes si quieres.
+      El tiempo es solo una guía: tú decides cuándo empezar y cuándo terminar. Te avisamos con un tono al cumplirse.
     </div>
 
     <div class="break-actions">
@@ -4266,7 +4266,15 @@
       if (navigator.vibrate) navigator.vibrate([300, 120, 300]);
     } catch (e) {}
 
-    breakAutoResumeTimer = setTimeout(autoResumeAfterDone, BREAK_AUTO_RESUME_MS);
+    // Solo en el último ejercicio: si quedan otros, la app espera a que
+    // la persona toque "Siguiente ejercicio" (nunca se los salta).
+    if (isLastBreakItem()) {
+      breakAutoResumeTimer = setTimeout(autoResumeAfterDone, BREAK_AUTO_RESUME_MS);
+    }
+  }
+
+  function isLastBreakItem() {
+    return breakQueueIndex >= breakQueue.length - 1;
   }
 
   // Al volver a la app: retomar el conteo (y la pantalla encendida) o, si
@@ -4280,7 +4288,7 @@
     if (breakCounting) {
       requestWakeLock();
       tickBreakCountdown();
-    } else if (breakDone && Date.now() - breakDoneAt >= BREAK_AUTO_RESUME_MS) {
+    } else if (breakDone && isLastBreakItem() && Date.now() - breakDoneAt >= BREAK_AUTO_RESUME_MS) {
       autoResumeAfterDone();
     }
   });
@@ -4737,11 +4745,10 @@
     const isLast = breakQueueIndex >= breakQueue.length - 1;
 
     if (!isLast) {
-      // La persona acaba de tocar "Siguiente ejercicio": está presente,
-      // así que el siguiente conteo arranca de inmediato.
+      // El siguiente ejercicio NO arranca solo: cada persona termina el
+      // anterior a su ritmo y toca "Empezar …" cuando está lista.
       breakQueueIndex += 1;
       showCurrentBreakItem();
-      startBreakCountdown();
       saveTimerState();
       return;
     }
@@ -4762,11 +4769,11 @@
     logBreakOutcome(outcome);
   }
 
-  // Si tras "¡Listo!" nadie toca nada en 2 minutos, la pausa cuenta como
+  // Si tras el "¡Listo!" del último ejercicio nadie toca nada en 2 minutos, la pausa cuenta como
   // completada y el trabajo se reanuda solo (si no, la app quedaría
   // detenida el resto del día sin que la persona lo note).
   function autoResumeAfterDone() {
-    if (!inBreak || !breakDone) return;
+    if (!inBreak || !breakDone || !isLastBreakItem()) return;
 
     clearBreakCountdown();
     breakDone = false;
@@ -4954,7 +4961,7 @@
       // Si ya estaba haciendo el ejercicio, se retoma el conteo en
       // silencio: la alarma solo vuelve a sonar si la pausa no se empezó.
       if (saved.breakCountdownEndAt) {
-        if (Date.now() - saved.breakCountdownEndAt >= BREAK_AUTO_RESUME_MS) {
+        if (isLastBreakItem() && Date.now() - saved.breakCountdownEndAt >= BREAK_AUTO_RESUME_MS) {
           // Terminó hace rato con la app cerrada: cuenta como hecha.
           countFinishedBreak("completed");
           resumeWorkAfterBreak();
@@ -4964,8 +4971,12 @@
         return;
       }
 
-      startAlarm();
-      notifyBreakStart(BREAK_DEFS[currentBreakType]);
+      // Si ya pasó al ejercicio siguiente, la persona estaba presente: se
+      // espera a que toque "Empezar", sin volver a sonar la alarma.
+      if (breakQueueIndex === 0) {
+        startAlarm();
+        notifyBreakStart(BREAK_DEFS[currentBreakType]);
+      }
       checkBreakAway();
       return;
     }
